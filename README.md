@@ -30,6 +30,16 @@ Migrations run automatically (`migrate` service) before the API and worker start
 
 Stop with `docker compose down` (data volumes are kept; add `--volumes` to erase local data).
 
+## Adopt the Qur'an text (Constitutional Authority)
+
+The product ships with no Qur'anic text and never generates it (ADR-009). To adopt a published dataset, for example the King Fahd Glorious Qur'an Printing Complex (KFGQPC) Warsh narration:
+
+1. Get the publisher's file: `git clone https://github.com/thetruetruth/quran-data-kfgqpc.git`, then use `quran-data-kfgqpc/warsh/data/warshData_v10.json`. That repository is a mirror of the KFGQPC developer data (https://qurancomplex.gov.sa/en/techquran/dev/), so compare the SHA-256 the app shows with the file from KFGQPC if you need that assurance.
+2. In the app, open **Library → Foundational library (Qur'an text)**. Under **Import a Qur'an text dataset**, set the edition (e.g. `KFGQPC Uthmanic Warsh v10 (2021-08-05)`), choose the JSON file, and import. The text is **staged**; nothing is served yet.
+3. Check the staged entry: 114 surahs, 6214 ayat for Warsh, the format `kfgqpc-json`, and its SHA-256 (`f05d0dc6…3872f` for `warshData_v10.json`).
+4. Enter a reason and **Approve**. From then on, every exact Qur'an quotation in the product comes from this text. Approving another dataset later retires this one.
+5. Optional, for publisher-faithful display: copy the KFGQPC font for the same narration (e.g. `warsh/font/warsh.10.woff2`) to `apps/web/public/fonts/quran/quran.woff2` and rebuild the web app. It is not committed, so check its licence yourself. Without it, the bundled Amiri Quran font (OFL) is used.
+
 ## Develop
 
 ```bash

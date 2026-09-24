@@ -31,3 +31,7 @@ test-results/
 data/
 *.log
 .DS_Store
+
+# Locally supplied Qur'an publisher font (licence checked by the owner, not committed)
+apps/web/public/fonts/quran/*.woff2
+apps/web/public/fonts/quran/*.ttf

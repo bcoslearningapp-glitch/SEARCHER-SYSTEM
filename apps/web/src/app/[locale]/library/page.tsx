@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AppShell } from "@/components/AppShell";
 import { CatalogForm } from "@/components/CatalogForm";
 import { Card, Empty, TextInput } from "@/components/fields";
@@ -28,6 +30,11 @@ export default async function LibraryPage(props: Props) {
       <div className="space-y-6">
         <h1 className="text-2xl font-semibold">{dict.spaces.library}</h1>
         <p className="text-[var(--color-muted)]">{dict.spaceDescriptions.library}</p>
+        <p>
+          <Link href={`/${locale}/library/foundational`} className="text-sm underline">
+            {dict.foundational.link}
+          </Link>
+        </p>
         <Card title={ui.search} testId="search">
           <form method="get" className="flex flex-wrap gap-2" role="search">
             <div className="grow">

@@ -328,3 +328,25 @@ export type SourceLead = {
   title: string | null;
   search_record_id: string | null;
 };
+
+export type FoundationalSource = {
+  id: string;
+  work_id: string;
+  authority_layer: string;
+  edition_version: string;
+  status: "STAGED" | "APPROVED" | "RETIRED";
+  sha256: string;
+  dataset_summary: { surahs?: number; ayat?: number; format?: string };
+  approved_by: { kind: string; id: string } | null;
+  approved_at: string | null;
+};
+
+export type Ayah = {
+  surah_number: number;
+  surah_name: string;
+  ayah_number: number;
+  text: string;
+  source_id: string;
+  source_version: string;
+  source_sha256: string;
+};

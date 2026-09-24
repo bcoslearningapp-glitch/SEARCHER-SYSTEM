@@ -25,3 +25,20 @@ body {
   color: var(--color-text);
   font-family: ui-sans-serif, system-ui, "Noto Sans", "Noto Naskh Arabic", "Segoe UI", sans-serif;
 }
+
+/*
+ * Qur'anic text needs a font with the Qur'anic Unicode marks (small high meem, rounded stops, ...).
+ * A publisher font for the approved narration (e.g. KFGQPC Warsh) may be placed locally at
+ * public/fonts/quran/quran.woff2 (not committed: check its licence); otherwise Amiri Quran (OFL) is used.
+ */
+@font-face {
+  font-family: "Quran Publisher";
+  src: url("/fonts/quran/quran.woff2") format("woff2");
+  font-display: swap;
+}
+
+.quran-text {
+  font-family: "Quran Publisher", "Amiri Quran", serif;
+  font-size: 1.6rem;
+  line-height: 2.4;
+}

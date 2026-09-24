@@ -9,6 +9,7 @@ Decision:
 Foundational library
 - `foundational_sources` records authority layer, edition/version, sha256, status (STAGED → APPROVED → RETIRED) and approver. Only the Constitutional Authority can stage or approve; approval is a human-only action (ADR-006). At most one APPROVED Qur'an text exists (partial unique index); approving a new one retires the previous one.
 - Qur'an text is imported from a UTF-8 dataset (Tanzil-compatible `surah|ayah|text` lines plus `@surah|n|name` lines). Validation is structural only (numbering 1-114, contiguous ayat, uniqueness, non-empty text, names present). Text is stored byte-for-byte: no trimming, normalization or re-encoding. Rows are append-only (trigger). Staged text is never served.
+- The KFGQPC developer JSON (a list of `sura_no`, `aya_no`, `aya_text`, `sura_name_ar` records) is also accepted and imported as published. The recorded sha256 is therefore the publisher's file, and validation works for any narration's numbering (Hafs 6236, Warsh 6214 ayat).
 - Retrieval (`GET /api/v1/reference/quran/{surah}/{ayah}`) returns surah number and name, ayah number, exact text and source id/version/sha256 from the approved dataset only.
 - Hadith records belong to an APPROVED Sunnah/foundational source; each record is one narration; numbers are unique per (source, numbering scheme), so different editions keep their own numbering. Records are append-only.
 
