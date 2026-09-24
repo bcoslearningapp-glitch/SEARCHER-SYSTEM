@@ -9,3 +9,11 @@ export async function resolveLocale({ params }: LocaleParams): Promise<Locale> {
   if (!isLocale(locale)) notFound();
   return locale;
 }
+
+export type ProjectParams = { params: Promise<{ locale: string; projectId: string }> };
+
+export async function resolveProjectParams({ params }: ProjectParams): Promise<{ locale: Locale; projectId: string }> {
+  const { locale, projectId } = await params;
+  if (!isLocale(locale) || !/^[0-9a-f-]{36}$/i.test(projectId)) notFound();
+  return { locale, projectId };
+}

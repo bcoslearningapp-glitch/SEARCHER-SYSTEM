@@ -28,3 +28,14 @@ describe("i18n", () => {
     expect(isLocale("ar")).toBe(true);
   });
 });
+
+describe("workflow UI strings", () => {
+  it("translates every Arabic workflow string rather than falling back to English", () => {
+    const en = getDictionary("en").ui;
+    const ar = getDictionary("ar").ui;
+    const untranslated = (Object.keys(en) as (keyof typeof en)[]).filter(
+      (key) => typeof en[key] === "string" && en[key] === ar[key] && key !== "page",
+    );
+    expect(untranslated).toEqual([]);
+  });
+});
