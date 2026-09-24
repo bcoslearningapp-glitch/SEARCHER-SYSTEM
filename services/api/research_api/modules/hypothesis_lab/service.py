@@ -54,6 +54,7 @@ from research_api.modules.hypothesis_lab.schemas import (
     VersionOut,
 )
 from research_api.modules.project_workflow import service as projects
+from research_api.modules.reference_governance import service as reference
 from research_api.platform.errors import ConflictError, NotFoundError, RuleViolationError
 
 H = HypothesisEpistemicState
@@ -310,11 +311,15 @@ def transition(
     if not lifecycle.can_transition(current, data.target):
         raise ConflictError(f"illegal hypothesis transition {current} -> {data.target}")
     content = _latest_content(session, hypothesis)
+    reference_result = QualityGateResult.PASS
+    if lifecycle.reaches(data.target, HypothesisLifecycleState.ELIGIBLE_FOR_DESIGN):
+        reference_result = reference.reference_standing(session, project_id, T, hypothesis.id, record=True).result
     result, findings = lifecycle.gate(
         data.target,
         content,
         H(hypothesis.epistemic_state),
         evidence.counter_evidence_complete(session, T, hypothesis.id),
+        reference_result,
     )
     gate_eval = governance.record_gate_evaluation(
         session,

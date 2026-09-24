@@ -88,6 +88,18 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("hypothesis.link", A.ACT_AND_NOTIFY),
         _p("mechanism.create", A.ACT_AND_NOTIFY),
         _p("mechanism.update", A.REQUEST_APPROVAL),
+        # Foundational library and reference review (PRD §18-21). AI never adopts or judges.
+        _p("reference.stage_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY})),
+        _p("reference.approve_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),
+        _p(
+            "reference.enter_hadith", A.FORBIDDEN, frozenset({R.RESEARCHER, R.PROJECT_LEAD, R.CONSTITUTIONAL_AUTHORITY})
+        ),
+        _p("reference.review_create", A.ACT_AND_NOTIFY),
+        _p("reference.entry_add", A.ACT_AND_NOTIFY),
+        _p("reference.judge", A.FORBIDDEN, approval=True),
+        # Operational reality (PRD §5.3)
+        _p("operational.constraint_add", A.ACT_AND_NOTIFY),
+        _p("operational.constraint_resolve", A.REQUEST_APPROVAL),
         # Sources
         _p("source.catalog", A.ACT_AND_NOTIFY),
         _p("source.catalog_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),

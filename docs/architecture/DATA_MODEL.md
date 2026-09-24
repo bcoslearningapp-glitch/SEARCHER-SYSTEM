@@ -63,3 +63,15 @@ Migration `0006` (Phase 2, issues #14/#15):
 | `mechanisms`, `hypothesis_mechanisms`, `hypothesis_competitions` | First-class mechanisms; links; competing hypotheses | |
 
 Evidence aggregation rules live in `claims_evidence/aggregation.py` (pure, unit-tested): single origin caps at PROMISING; CONTESTED only for meaningful conflict; accepted evidence can downgrade a hypothesis automatically, upgrades need a human.
+
+Migration `0007` (Phase 2, issues #12/#13, ADR-009):
+
+| Table | Purpose | Notes |
+|---|---|---|
+| `foundational_sources` | Foundational library entries | STAGED → APPROVED → RETIRED; CHECK approved ⇒ human approver; one approved Qur'an text |
+| `quran_surahs`, `quran_ayat` | Imported approved Qur'an dataset | byte-exact text; append-only |
+| `hadith_records` | One narration per row | unique per (source, numbering scheme, number); append-only |
+| `reference_reviews` | Review of a target under an analytical category | |
+| `reference_entries` | Source text / approved interpretation / system synthesis / practical judgment | append-only; CHECK AI ⇒ SYSTEM_SYNTHESIS; CHECK source text is sourced |
+| `reference_judgments` | Human judgments with directness, reservations, divergence | append-only; CHECK human judge; CHECK reservation iff RESERVED |
+| `operational_constraints` | Law/regulation/contract/license/policy constraints | separate from reference judgments; resolvable |

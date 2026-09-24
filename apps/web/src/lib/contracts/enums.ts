@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.4.0";
+export const CONTRACT_SCHEMA_VERSION = "0.5.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -251,3 +251,11 @@ export type EvidenceStatus = (typeof EvidenceStatusValues)[number];
 /** What evidence can bear on (FR-EVID-001). */
 export const EvidenceTargetTypeValues = ["CLAIM", "HYPOTHESIS", "MECHANISM"] as const;
 export type EvidenceTargetType = (typeof EvidenceTargetTypeValues)[number];
+
+/** Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003). */
+export const FoundationalSourceStatusValues = ["STAGED", "APPROVED", "RETIRED"] as const;
+export type FoundationalSourceStatus = (typeof FoundationalSourceStatusValues)[number];
+
+/** Kind of human-made operational constraint (Core §5, PRD §5.3). */
+export const ConstraintKindValues = ["LAW", "REGULATION", "CONTRACT", "LICENSE", "INSTITUTIONAL_POLICY", "AUTHORIZATION", "OTHER"] as const;
+export type ConstraintKind = (typeof ConstraintKindValues)[number];

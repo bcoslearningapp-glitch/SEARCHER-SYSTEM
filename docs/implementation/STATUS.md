@@ -10,7 +10,9 @@
 
 ## Phase 2 progress
 - #11 — #17: claims, assumptions (AI-inferred labeled until human review), open questions, capture from notes.
-- #14, #15 (this PR): evidence pipeline (candidate → human assessment → evidence), exact quotes copied from verified page spans, lineage-based independence, counter-evidence tracks, hypotheses with immutable versions / Hypothesis Gate / automatic downgrade on new evidence, mechanisms.
+- #14, #15 — #18: evidence pipeline (candidate → human assessment → evidence), exact quotes copied from verified page spans, lineage-based independence, counter-evidence tracks, hypotheses with immutable versions / Hypothesis Gate / automatic downgrade on new evidence, mechanisms.
+
+- #12, #13 (this PR): foundational library with human-approved Qur'an dataset import (no bundled text), exact ayah retrieval, Hadith records with edition numbering, layered reference review, human judgments with blocking reservations → blocking decisions, risk-aware Reference Gate wired into design eligibility, operational constraints kept separate (Scenarios E and F).
 
 ## M1 exit criteria (PRD §76 Phase 1)
 - [x] full create → frame → approve flow (E2E 1)
@@ -19,6 +21,8 @@
 - [x] audit state changes (integration tests assert audit/research events)
 
 ## Blocked (needs a human)
+- Tag `v0.2.0` on `5b7e7a2` (M1, green on `main`): this session can only push its working branch.
+- Import and approve the Qur'an text dataset (Constitutional Authority) — see ADR-009.
 - P0-12 protect `main` with required checks (repository admin settings).
 
 ## Next

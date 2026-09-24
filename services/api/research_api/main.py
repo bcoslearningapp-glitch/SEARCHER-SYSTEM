@@ -12,8 +12,11 @@ from research_api.modules.claims_evidence.router import router as claims_router
 from research_api.modules.governance_audit.decisions_router import router as decisions_router
 from research_api.modules.governance_audit.router import router as audit_router
 from research_api.modules.hypothesis_lab.router import router as hypotheses_router
+from research_api.modules.operational_constraints.router import router as constraints_router
 from research_api.modules.project_workflow.attention import router as attention_router
 from research_api.modules.project_workflow.router import router as projects_router
+from research_api.modules.reference_governance.router import library as reference_router
+from research_api.modules.reference_governance.router import reviews as reference_reviews_router
 from research_api.modules.sources_library.router import library as sources_router
 from research_api.modules.sources_library.router import project_sources as project_sources_router
 from research_api.platform import health, system_router
@@ -40,6 +43,9 @@ def create_app() -> FastAPI:
     app.include_router(claims_router)
     app.include_router(lineage_router)
     app.include_router(hypotheses_router)
+    app.include_router(reference_router)
+    app.include_router(reference_reviews_router)
+    app.include_router(constraints_router)
     app.include_router(sources_router)
     app.include_router(project_sources_router)
     install_error_handlers(app)

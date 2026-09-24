@@ -53,6 +53,7 @@ def gate(
     content: dict[str, object],
     epistemic: E,
     counter_evidence_complete: bool,
+    reference_result: G = G.PASS,
 ) -> tuple[G, list[GateFinding]]:
     """Hypothesis Gate for a proposed lifecycle transition."""
     findings: list[GateFinding] = []
@@ -86,6 +87,23 @@ def gate(
                     code="counter_evidence.missing",
                     severity=G.BLOCKED,
                     message="Challenge and alternative-explanation searches are not complete.",
+                )
+            )
+        # Effectiveness does not override a governing reference rejection (Core §74.8).
+        if reference_result in {G.BLOCKED, G.NEEDS_HUMAN_DECISION}:
+            findings.append(
+                GateFinding(
+                    code="reference.not_cleared",
+                    severity=G.BLOCKED,
+                    message=f"Reference Gate is {reference_result.value}.",
+                )
+            )
+        elif reference_result is G.PASS_WITH_RESERVATIONS:
+            findings.append(
+                GateFinding(
+                    code="reference.reservations",
+                    severity=G.PASS_WITH_RESERVATIONS,
+                    message="Reference review has reservations or has not been done.",
                 )
             )
     for severity in (G.BLOCKED, G.NEEDS_HUMAN_DECISION, G.PASS_WITH_RESERVATIONS):

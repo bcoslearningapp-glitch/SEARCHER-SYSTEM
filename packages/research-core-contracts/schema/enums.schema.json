@@ -692,6 +692,28 @@
         "HYPOTHESIS",
         "MECHANISM"
       ]
+    },
+    "FoundationalSourceStatus": {
+      "description": "Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003).",
+      "type": "string",
+      "enum": [
+        "STAGED",
+        "APPROVED",
+        "RETIRED"
+      ]
+    },
+    "ConstraintKind": {
+      "description": "Kind of human-made operational constraint (Core §5, PRD §5.3).",
+      "type": "string",
+      "enum": [
+        "LAW",
+        "REGULATION",
+        "CONTRACT",
+        "LICENSE",
+        "INSTITUTIONAL_POLICY",
+        "AUTHORIZATION",
+        "OTHER"
+      ]
     }
   }
 }
