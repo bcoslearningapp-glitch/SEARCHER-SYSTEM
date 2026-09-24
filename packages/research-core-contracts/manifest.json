@@ -1,7 +1,7 @@
 {
   "name": "research-core-contracts",
   "research_core_version": "1.0.0",
-  "schema_version": "0.7.0",
+  "schema_version": "0.8.0",
   "description": "Provider-neutral canonical Research Core contracts shared by Product A, B and C. Contains no AI-provider-specific structures (PRD \u00a759).",
   "schemas": [
     "schema/enums.schema.json",
@@ -16,6 +16,7 @@
     "schema/reference.schema.json",
     "schema/research.schema.json",
     "schema/design.schema.json",
+    "schema/experiment.schema.json",
     "schema/package-manifest.schema.json"
   ]
 }

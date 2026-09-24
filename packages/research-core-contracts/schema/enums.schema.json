@@ -699,7 +699,8 @@
         "CLAIM",
         "HYPOTHESIS",
         "MECHANISM",
-        "DESIGN_CONCEPT"
+        "DESIGN_CONCEPT",
+        "DESIGN_HYPOTHESIS"
       ]
     },
     "DesignRequirementBasis": {
@@ -731,6 +732,21 @@
       "description": "Why a design was rejected; REFERENCE rejections keep reusable mechanisms visible (FR-DESIGN-005).",
       "type": "string",
       "enum": ["REFERENCE", "EVIDENCE", "OPERATIONAL", "FEASIBILITY", "OTHER"]
+    },
+    "HumanImpactDimension": {
+      "description": "What a human-impact review inspects when people are affected (Core §51, FR-HUMAN-001). Distinct from the reference judgment (FR-HUMAN-002).",
+      "type": "string",
+      "enum": ["PRIVACY", "CONSENT", "HARM", "AUTHORITY", "LAW_AND_POLICY", "DATA_HANDLING", "INSTITUTIONAL_APPROVAL", "REVERSIBILITY"]
+    },
+    "HumanImpactFinding": {
+      "description": "Outcome of one human-impact dimension; REQUIRES_EXTERNAL_APPROVAL becomes an unresolved operational requirement (FR-HUMAN-003).",
+      "type": "string",
+      "enum": ["NOT_APPLICABLE", "ADDRESSED", "CONCERN", "REQUIRES_EXTERNAL_APPROVAL"]
+    },
+    "InterpretationOutcome": {
+      "description": "What a human interpretation concludes about the design hypothesis from analysed results (FR-EXP-003).",
+      "type": "string",
+      "enum": ["SUPPORTS", "CONTRADICTS", "INCONCLUSIVE", "QUALIFIES"]
     },
     "FoundationalSourceStatus": {
       "description": "Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003).",

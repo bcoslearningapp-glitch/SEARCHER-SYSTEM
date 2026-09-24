@@ -71,7 +71,7 @@ OPEN = frozenset({CS.PROPOSED.value, CS.UNDER_REVIEW.value})
 CURRENT = frozenset({RS.PROPOSED.value, RS.ACTIVE.value})
 
 
-def _provenance(auth: Authorized) -> dict[str, Any]:
+def provenance(auth: Authorized) -> dict[str, Any]:
     kind = ProvenanceKind.AI_GENERATED if auth.principal.kind is ActorKind.AI else ProvenanceKind.HUMAN_INPUT
     data: dict[str, Any] = {"kind": kind.value, "actor": auth.actor.model_dump(mode="json", exclude_none=True)}
     if auth.ai_action is not None:
@@ -79,7 +79,7 @@ def _provenance(auth: Authorized) -> dict[str, Any]:
     return data
 
 
-def _record(
+def record(
     session: Session,
     auth: Authorized,
     action: str,
@@ -158,11 +158,11 @@ def create_requirement(
         priority=data.priority.value,
         traces=_check_traces(session, project_id, data.traces),
         status=status.value,
-        provenance=_provenance(auth),
+        provenance=provenance(auth),
     )
     session.add(row)
     session.flush()
-    _record(
+    record(
         session,
         auth,
         "design_requirement.create",
@@ -195,11 +195,11 @@ def revise_requirement(
         traces=_check_traces(session, project_id, data.traces),
         status=RS.ACTIVE.value,
         change_reason=data.change_reason,
-        provenance=_provenance(auth),
+        provenance=provenance(auth),
     )
     session.add(row)
     session.flush()
-    _record(
+    record(
         session,
         auth,
         "design_requirement.revise",
@@ -232,7 +232,7 @@ def _set_requirement_status(
     previous = row.status
     row.status = target.value
     session.flush()
-    _record(
+    record(
         session,
         auth,
         action,
@@ -372,11 +372,11 @@ def create_concept(
         hypothesis_ids=[str(i) for i in data.hypothesis_ids],
         mechanism_ids=[str(i) for i in data.mechanism_ids],
         derived_from_concept_ids=[str(i) for i in data.derived_from_concept_ids],
-        provenance=_provenance(auth),
+        provenance=provenance(auth),
     )
     session.add(concept)
     session.flush()
-    _record(
+    record(
         session,
         auth,
         "design_concept.create",
@@ -421,7 +421,7 @@ def set_coverage(
     row.coverage = data.coverage.value
     row.note = data.note
     session.flush()
-    _record(
+    record(
         session,
         auth,
         "design_concept.coverage",
@@ -448,7 +448,7 @@ def set_status(
     previous = concept.status
     concept.status = data.target
     session.flush()
-    _record(
+    record(
         session,
         auth,
         action,
@@ -559,7 +559,7 @@ def select_concept(
         "methodology_path": path.value,
     }
     session.flush()
-    _record(
+    record(
         session,
         auth,
         "design_concept.select",
@@ -605,7 +605,7 @@ def reject_concept(
         "approval_id": str(approval.id),
     }
     session.flush()
-    _record(
+    record(
         session,
         auth,
         "design_concept.reject",

@@ -1,0 +1,14 @@
+{
+  "id": "3c4d5e6f-7a8b-4c9d-8e0f-1a2b3c4d5e67",
+  "experiment_id": "8d9e0f1a-2b3c-4d4e-9f5a-6b7c8d9e0f12",
+  "result_ids": [
+    "2b3c4d5e-6f7a-4b8c-9d9e-0f1a2b3c4d56"
+  ],
+  "outcome": "INCONCLUSIVE",
+  "statement": "One week is too short to judge",
+  "limitations": "Single site",
+  "interpreted_by": {
+    "kind": "AI",
+    "id": "orchestrator"
+  }
+}

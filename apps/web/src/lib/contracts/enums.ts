@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.7.0";
+export const CONTRACT_SCHEMA_VERSION = "0.8.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -253,7 +253,7 @@ export const EvidenceStatusValues = ["CANDIDATE", "ACCEPTED", "REJECTED"] as con
 export type EvidenceStatus = (typeof EvidenceStatusValues)[number];
 
 /** What evidence can bear on (FR-EVID-001). */
-export const EvidenceTargetTypeValues = ["CLAIM", "HYPOTHESIS", "MECHANISM", "DESIGN_CONCEPT"] as const;
+export const EvidenceTargetTypeValues = ["CLAIM", "HYPOTHESIS", "MECHANISM", "DESIGN_CONCEPT", "DESIGN_HYPOTHESIS"] as const;
 export type EvidenceTargetType = (typeof EvidenceTargetTypeValues)[number];
 
 /** What a design requirement is derived from (FR-DESIGN-002, Core §47). */
@@ -279,6 +279,18 @@ export type RequirementCoverage = (typeof RequirementCoverageValues)[number];
 /** Why a design was rejected; REFERENCE rejections keep reusable mechanisms visible (FR-DESIGN-005). */
 export const RejectionGroundValues = ["REFERENCE", "EVIDENCE", "OPERATIONAL", "FEASIBILITY", "OTHER"] as const;
 export type RejectionGround = (typeof RejectionGroundValues)[number];
+
+/** What a human-impact review inspects when people are affected (Core §51, FR-HUMAN-001). Distinct from the reference judgment (FR-HUMAN-002). */
+export const HumanImpactDimensionValues = ["PRIVACY", "CONSENT", "HARM", "AUTHORITY", "LAW_AND_POLICY", "DATA_HANDLING", "INSTITUTIONAL_APPROVAL", "REVERSIBILITY"] as const;
+export type HumanImpactDimension = (typeof HumanImpactDimensionValues)[number];
+
+/** Outcome of one human-impact dimension; REQUIRES_EXTERNAL_APPROVAL becomes an unresolved operational requirement (FR-HUMAN-003). */
+export const HumanImpactFindingValues = ["NOT_APPLICABLE", "ADDRESSED", "CONCERN", "REQUIRES_EXTERNAL_APPROVAL"] as const;
+export type HumanImpactFinding = (typeof HumanImpactFindingValues)[number];
+
+/** What a human interpretation concludes about the design hypothesis from analysed results (FR-EXP-003). */
+export const InterpretationOutcomeValues = ["SUPPORTS", "CONTRADICTS", "INCONCLUSIVE", "QUALIFIES"] as const;
+export type InterpretationOutcome = (typeof InterpretationOutcomeValues)[number];
 
 /** Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003). */
 export const FoundationalSourceStatusValues = ["STAGED", "APPROVED", "RETIRED"] as const;

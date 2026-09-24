@@ -482,3 +482,102 @@ export async function rejectDesignConcept(_: ActionResult, form: FormData): Prom
     }),
   );
 }
+
+// --- Design hypotheses and experiments (PRD §33-34) ---
+
+const CONTENT_TEXT = ["intervention", "target_population", "context", "mechanism", "expected_outcome", "measurement_plan"] as const;
+const CONTENT_LISTS = ["failure_conditions", "side_effects", "stop_conditions"] as const;
+const PROTOCOL = ["method", "sample", "duration", "data_collected", "analysis_plan", "success_criteria"] as const;
+const X = (form: FormData) => `${P(form)}/experiments/${text(form, "experiment_id")}`;
+
+export async function createDesignHypothesis(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/design-hypotheses`, {
+      concept_id: text(form, "concept_id"),
+      affects_people: form.get("affects_people") === "on",
+      content: {
+        ...Object.fromEntries(CONTENT_TEXT.map((k) => [k, text(form, k)])),
+        ...Object.fromEntries(CONTENT_LISTS.map((k) => [k, listField(form, k)])),
+      },
+    }),
+  );
+}
+
+export async function assessDesignHypothesis(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/design-hypotheses/${text(form, "design_hypothesis_id")}/assess`, {
+      epistemic_state: text(form, "epistemic_state"),
+      reason: text(form, "reason"),
+    }),
+  );
+}
+
+function protocolFromForm(form: FormData) {
+  return Object.fromEntries(PROTOCOL.map((k) => [k, text(form, k)]));
+}
+
+export async function createExperiment(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/experiments`, {
+      design_hypothesis_id: text(form, "design_hypothesis_id"),
+      title: text(form, "title"),
+      protocol: protocolFromForm(form),
+    }),
+  );
+}
+
+export async function updateProtocol(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("PUT", `${X(form)}/protocol`, { protocol: protocolFromForm(form), reason: text(form, "reason") || "Protocol updated" }));
+}
+
+export async function transitionExperiment(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${X(form)}/transition`, {
+      target: text(form, "target"),
+      reason: optionalText(form, "reason"),
+      acknowledge_reservations: form.get("acknowledge_reservations") === "on",
+    }),
+  );
+}
+
+export async function assessHumanImpact(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${X(form)}/human-impact`, {
+      dimension: text(form, "dimension"),
+      finding: text(form, "finding"),
+      note: text(form, "note"),
+      external_authority: optionalText(form, "external_authority"),
+    }),
+  );
+}
+
+export async function recordObservation(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const observed = text(form, "observed_at");
+  return run(() =>
+    apiSend("POST", `${X(form)}/observations`, {
+      description: text(form, "description"),
+      observed_at: observed ? new Date(observed).toISOString() : new Date().toISOString(),
+    }),
+  );
+}
+
+export async function recordResult(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${X(form)}/results`, {
+      observation_ids: form.getAll("observation_ids").map(String),
+      method: text(form, "method"),
+      summary: text(form, "summary"),
+    }),
+  );
+}
+
+export async function recordInterpretation(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${X(form)}/interpretations`, {
+      result_ids: form.getAll("result_ids").map(String),
+      outcome: text(form, "outcome"),
+      statement: text(form, "statement"),
+      limitations: optionalText(form, "limitations"),
+    }),
+  );
+}
