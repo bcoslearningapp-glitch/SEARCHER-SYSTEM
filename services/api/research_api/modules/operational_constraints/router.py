@@ -6,17 +6,16 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
 
 from research_api.contracts.enums import EvidenceTargetType
 from research_api.modules.governance_audit.principal import Principal, current_principal
 from research_api.modules.operational_constraints import service
 from research_api.modules.operational_constraints.schemas import ConstraintIn, ConstraintOut, ResolveIn, TargetStanding
-from research_api.platform.db import get_session
+from research_api.platform.db import DBSession
 
 router = APIRouter(prefix="/api/v1/projects/{project_id}", tags=["operational constraints"])
 
-DB = Annotated[Session, Depends(get_session)]
+DB = DBSession
 Who = Annotated[Principal, Depends(current_principal)]
 
 

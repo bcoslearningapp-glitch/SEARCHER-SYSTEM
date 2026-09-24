@@ -6,7 +6,6 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
 
 from research_api.modules.governance_audit.principal import Principal, current_principal
 from research_api.modules.governance_audit.schemas import ApprovalOut, GateEvaluationOut
@@ -31,11 +30,11 @@ from research_api.modules.project_workflow.schemas import (
     ResearchStateUpdate,
     TransitionRequest,
 )
-from research_api.platform.db import get_session
+from research_api.platform.db import DBSession
 
 router = APIRouter(prefix="/api/v1/projects", tags=["projects"])
 
-DB = Annotated[Session, Depends(get_session)]
+DB = DBSession
 Who = Annotated[Principal, Depends(current_principal)]
 
 

@@ -7,17 +7,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 
 from research_api.contracts.enums import DecisionStatus
 from research_api.modules.governance_audit import service
 from research_api.modules.governance_audit.principal import Principal, current_principal
 from research_api.modules.governance_audit.schemas import DecisionCreate, DecisionOut, DecisionResolve
-from research_api.platform.db import get_session
+from research_api.platform.db import DBSession
 
 router = APIRouter(prefix="/api/v1/projects/{project_id}/decisions", tags=["decisions"])
 
-DB = Annotated[Session, Depends(get_session)]
+DB = DBSession
 Who = Annotated[Principal, Depends(current_principal)]
 
 

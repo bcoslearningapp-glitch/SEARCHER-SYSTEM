@@ -14,12 +14,11 @@ import redis
 from fastapi import APIRouter, Depends, Response, status
 from pydantic import BaseModel
 from sqlalchemy import text
-from sqlalchemy.orm import Session
 
 from research_api import __version__
 from research_api.config import Settings, get_settings
 from research_api.contracts.enums import CONTRACT_SCHEMA_VERSION, RESEARCH_CORE_VERSION
-from research_api.platform.db import get_session
+from research_api.platform.db import DBSession
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["health"])
@@ -49,7 +48,7 @@ def live() -> Liveness:
 @router.get("/health/ready", response_model=Readiness)
 def ready(
     response: Response,
-    session: Annotated[Session, Depends(get_session)],
+    session: DBSession,
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> Readiness:
     database: ComponentStatus = "ok"
