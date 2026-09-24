@@ -19,6 +19,7 @@ from research_api.modules.project_workflow.router import router as projects_rout
 from research_api.modules.reference_governance.router import library as reference_router
 from research_api.modules.reference_governance.router import reviews as reference_reviews_router
 from research_api.modules.research_orchestrator.router import router as orchestrator_router
+from research_api.modules.research_planning.router import router as planning_router
 from research_api.modules.sources_library.router import library as sources_router
 from research_api.modules.sources_library.router import project_sources as project_sources_router
 from research_api.platform import health, system_router
@@ -52,6 +53,7 @@ def create_app() -> FastAPI:
     app.include_router(project_sources_router)
     app.include_router(ai_router)
     app.include_router(orchestrator_router)
+    app.include_router(planning_router)
     install_error_handlers(app)
     return app
 

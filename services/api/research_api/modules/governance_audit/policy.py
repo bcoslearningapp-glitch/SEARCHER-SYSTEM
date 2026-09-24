@@ -104,6 +104,11 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("ai_policy.update", A.FORBIDDEN),
         # Research Orchestrator: humans launch AI tasks; AI never launches or chains them itself
         _p("ai_task.launch", A.FORBIDDEN),
+        # Research planning (PRD §22, §24, §31): humans own plans and sufficiency; AI may record searches it ran
+        _p("research_plan.create", A.FORBIDDEN),
+        _p("research_plan.revise", A.FORBIDDEN),
+        _p("search.record", A.ACT_AND_NOTIFY, system=True),
+        _p("sufficiency.assess", A.FORBIDDEN, approval=True),
         # Sources
         _p("source.catalog", A.ACT_AND_NOTIFY),
         _p("source.catalog_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),

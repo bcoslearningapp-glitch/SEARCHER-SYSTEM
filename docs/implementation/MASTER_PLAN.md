@@ -96,6 +96,6 @@ Full E2E suite, security review, AI evaluation suite (`docs/evaluation/QUALITY_G
 | ~~PDF text extraction / OCR stack~~ — ADR-008 (OCR itself still open) | P1-10 |
 | ~~Policy Engine implementation approach~~ — ADR-006 | P1-02 |
 | Default multilingual embedding model (benchmarked) | Phase 3 retrieval |
-| Web search provider order | Phase 3 |
+| ~~Web search provider order~~ — ADR-012 (local library first, then provider-native web search) | Phase 3 |
 | Concrete cloud workspace provider | Phase 5 |
 | PDF/DOCX renderer | Phase 5 |

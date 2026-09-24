@@ -40,6 +40,7 @@ from research_api.modules.reference_governance.models import (
     ReferenceJudgmentRecord,
     ReferenceReview,
 )
+from research_api.modules.research_planning.models import ResearchPlan, SearchRecord, SufficiencyAssessment
 from research_api.modules.sources_library.models import (
     ProjectSource,
     SourceAccessRequest,
@@ -85,9 +86,11 @@ __all__ = [
     "ReferenceJudgmentRecord",
     "ReferenceReview",
     "ResearchEventRecord",
+    "ResearchPlan",
     "ResearchState",
     "ResearchTrackRun",
     "ScratchNote",
+    "SearchRecord",
     "SourceAccessRequest",
     "SourceAsset",
     "SourceChunk",
@@ -97,4 +100,5 @@ __all__ = [
     "SourceLineage",
     "SourcePage",
     "SourceWork",
+    "SufficiencyAssessment",
 ]

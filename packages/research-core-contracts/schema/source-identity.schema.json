@@ -317,6 +317,20 @@
         "suspected_work_id": {
           "$ref": "common.schema.json#/$defs/EntityId"
         },
+        "origin": {
+          "$ref": "enums.schema.json#/$defs/SourceLeadOrigin"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Where a web lead was found. Untrusted until the source is catalogued and verified."
+        },
+        "title": {
+          "type": "string"
+        },
+        "search_record_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
         "verified_by_excerpt_id": {
           "$ref": "common.schema.json#/$defs/EntityId"
         },

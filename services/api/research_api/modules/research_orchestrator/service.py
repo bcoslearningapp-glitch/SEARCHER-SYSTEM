@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -33,7 +33,7 @@ from research_api.contracts.enums import (
 )
 from research_api.modules import targets
 from research_api.modules.ai_gateway import service as gateway
-from research_api.modules.ai_gateway.base import ProviderOutputError, Section, StructuredRequest
+from research_api.modules.ai_gateway.base import ProviderOutputError, Section, StructuredRequest, WebSearchRequest
 from research_api.modules.claims_evidence import service as claims
 from research_api.modules.claims_evidence.schemas import AssumptionIn, EvidenceIn, TrackRunIn
 from research_api.modules.governance_audit.context import authorized
@@ -45,6 +45,7 @@ from research_api.modules.project_workflow import service as projects
 from research_api.modules.project_workflow.schemas import ProblemFrameContent
 from research_api.modules.research_orchestrator import templates
 from research_api.modules.research_orchestrator.templates import Template
+from research_api.modules.research_planning import service as planning
 from research_api.modules.sources_library import service as sources
 from research_api.modules.sources_library.schemas import PageExcerptIn, SearchHit
 from research_api.platform import jobs
@@ -57,7 +58,7 @@ KIND_PREFIX = "orchestrator."
 AI = ai_principal("research_orchestrator")
 SYSTEM = system_principal("research_orchestrator")
 
-TaskName = Literal["draft_problem_frame", "detect_assumptions", "challenge"]
+TaskName = Literal["draft_problem_frame", "detect_assumptions", "challenge", "web_search"]
 CHALLENGEABLE = frozenset({EvidenceTargetType.CLAIM, EvidenceTargetType.HYPOTHESIS})
 MAX_ASSUMPTIONS = 8
 MAX_CHALLENGE_QUERIES = 4
@@ -67,6 +68,7 @@ HITS_PER_QUERY = 5
 MAX_PASSAGES = 12
 PASSAGE_CHARS = 2000
 MAX_COMPETING = 3
+MAX_WEB_QUERIES = 8
 COUNTER_TRACKS = (ResearchTrack.CHALLENGE, ResearchTrack.ALTERNATIVE_EXPLANATION)
 _CHALLENGING_ROLES = frozenset({EvidenceRole.CONTRADICTS, EvidenceRole.LIMITS, EvidenceRole.QUALIFIES})
 
@@ -76,14 +78,26 @@ class AITaskIn(BaseModel):
     target_type: EvidenceTargetType | None = None
     target_id: UUID | None = None
     profile: str | None = None
+    # web_search
+    plan_id: UUID | None = None
+    track: ResearchTrack | None = None
+    question: str | None = None
+    queries: list[str] = Field(default_factory=list, max_length=MAX_WEB_QUERIES)
+    languages: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
-    def _target_for_challenge(self) -> AITaskIn:
+    def _task_inputs(self) -> AITaskIn:
         if self.task == "challenge":
             if self.target_type is None or self.target_id is None:
                 raise ValueError("challenge needs target_type and target_id")
             if self.target_type not in CHALLENGEABLE:
                 raise ValueError("challenge supports claims and hypotheses")
+        if self.task == "web_search":
+            self.queries = [q.strip() for q in self.queries if q.strip()]
+            if not self.queries:
+                raise ValueError("web_search needs at least one query")
+            if self.plan_id is None and not (self.question or "").strip():
+                raise ValueError("web_search needs a plan_id or a question")
         return self
 
 
@@ -103,6 +117,16 @@ def launch(session: Session, principal: Principal, project_id: UUID, data: AITas
         "target_type": data.target_type.value if data.target_type else None,
         "target_id": str(data.target_id) if data.target_id else None,
     }
+    if data.task == "web_search":
+        # Resolve the question now so the audit record always states what was being researched.
+        question = planning.question_for(session, project_id, data.plan_id, data.question)
+        params |= {
+            "plan_id": str(data.plan_id) if data.plan_id else None,
+            "track": data.track.value if data.track else None,
+            "question": question,
+            "queries": data.queries,
+            "languages": data.languages,
+        }
     return jobs.create_job(session, KIND_PREFIX + data.task, params=params, project_id=project_id)
 
 
@@ -131,14 +155,19 @@ def run(session: Session, job: jobs.BackgroundJob) -> dict[str, Any]:
 
 
 def on_failure(session: Session, job: jobs.BackgroundJob) -> None:
-    """A failed or stopped challenge is recorded as such: failure is never 'no evidence' (Core §72)."""
-    if job.params.get("task") != "challenge" or job.project_id is None:
+    """A failed or stopped search is recorded as such: failure is never 'no evidence' (Core §72)."""
+    if job.project_id is None:
         return
     outcome = (
         ResearchOutcomeKind.STOPPED_RESOURCE_CONSTRAINT
         if job.failure_kind == jobs.JobFailureKind.STOPPED_RESOURCE_CONSTRAINT.value
         else ResearchOutcomeKind.RESEARCH_EXECUTION_FAILURE
     )
+    if job.params.get("task") == "web_search":
+        _record_web(session, SYSTEM, job, outcome, 0, f"web search (job {job.id}) did not complete: {job.error}")
+        return
+    if job.params.get("task") != "challenge":
+        return
     target_type = EvidenceTargetType(job.params["target_type"])
     target_id = UUID(job.params["target_id"])
     for track in COUNTER_TRACKS:
@@ -502,8 +531,86 @@ def _excerpt(session: Session, passage: SearchHit, assessment: gateway.AIOutcome
     return excerpt.id
 
 
+# -- web search ---------------------------------------------------------------------------
+
+
+def _record_web(
+    session: Session,
+    principal: Principal,
+    job: jobs.BackgroundJob,
+    outcome: ResearchOutcomeKind,
+    count: int,
+    scope: str,
+    outcome_ids: tuple[UUID, AIActionRecord] | None = None,
+) -> UUID:
+    params = job.params
+    assert job.project_id is not None  # noqa: S101 - orchestrator jobs always carry a project
+    record = planning.record_search(
+        session,
+        principal,
+        job.project_id,
+        provider=planning.WEB,
+        question=params["question"],
+        queries=params["queries"],
+        outcome=outcome,
+        result_count=count,
+        scope=scope,
+        plan_id=UUID(params["plan_id"]) if params.get("plan_id") else None,
+        track=ResearchTrack(params["track"]) if params.get("track") else None,
+        languages=params.get("languages") or [],
+        ai_request_id=outcome_ids[0] if outcome_ids else None,
+        ai_action=outcome_ids[1] if outcome_ids else None,
+    )
+    return record.id
+
+
+def _web_search(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> dict[str, Any]:
+    """External search after the local library (FR-RET-001). Results become source leads only (FR-WEB-003)."""
+    params = job.params
+    queries: list[str] = params["queries"]
+    if params.get("plan_id"):
+        remaining = planning.web_budget_remaining(session, project_id, UUID(params["plan_id"]))
+        if remaining is not None:
+            if remaining == 0:
+                raise gateway.ResourceConstraintError("the plan's web search budget is used up")
+            queries = queries[:remaining]
+    ctx = _context(session, job, project_id, [UUID(params["plan_id"])] if params.get("plan_id") else [project_id])
+    request = WebSearchRequest(queries=queries, max_searches=len(queries), languages=params.get("languages") or [])
+    outcome = gateway.run_web_search(session, ctx, request, profile_name=params.get("profile"))
+    jobs.raise_if_cancelled(session, job)
+    result = outcome.result
+    unique = {r.url: r for r in result.results}
+    if unique:
+        kind = ResearchOutcomeKind.RESULTS_FOUND
+    elif result.failed_queries:
+        kind = ResearchOutcomeKind.INSUFFICIENT_SEARCH_COVERAGE
+    else:
+        kind = ResearchOutcomeKind.NO_RELEVANT_EVIDENCE_FOUND
+    job.params = {**params, "queries": queries}
+    scope = f"web search via {result.provider}: {len(result.queries_run)} query(ies) run"
+    if result.failed_queries:
+        scope += f", {len(result.failed_queries)} failed"
+    record_id = _record_web(session, AI, job, kind, len(unique), scope, (outcome.request_record_id, outcome.ai_action))
+    leads = []
+    for item in unique.values():
+        lead = sources.create_web_lead(
+            session,
+            AI,
+            project_id,
+            url=item.url,
+            title=item.title,
+            query=item.query,
+            search_record_id=record_id,
+            ai_action=outcome.ai_action,
+        )
+        if lead is not None:
+            leads.append(str(lead.id))
+    return {"search_record_id": str(record_id), "outcome": kind.value, "results": len(unique), "lead_ids": leads}
+
+
 _TASKS = {
     "draft_problem_frame": _draft_problem_frame,
     "detect_assumptions": _detect_assumptions,
     "challenge": _challenge,
+    "web_search": _web_search,
 }

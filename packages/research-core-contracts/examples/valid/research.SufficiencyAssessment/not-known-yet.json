@@ -1,0 +1,27 @@
+{
+  "id": "3c4d5e6f-7a8b-4c3d-8e4f-5a6b7c8d9e0f",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "plan_id": "1a2b3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+  "decision_served": "Whether to fund a second-year mentoring programme",
+  "result": "INSUFFICIENT_EVIDENCE",
+  "considerations": {
+    "support_evidence": "Recorded.",
+    "counter_evidence": "Recorded.",
+    "alternative_explanations": "Recorded.",
+    "independence": "Recorded.",
+    "diversity": "Recorded.",
+    "context_fit": "Recorded.",
+    "critical_unknowns": "Recorded.",
+    "impact": "Recorded.",
+    "reversibility": "Recorded.",
+    "remaining_uncertainty": "Recorded."
+  },
+  "rationale": "Single origin for the main driver; not known yet.",
+  "recommend_experiment": true,
+  "assessed_by": {
+    "kind": "HUMAN",
+    "id": "local-owner",
+    "role": "RESEARCHER"
+  },
+  "assessed_at": "2026-09-24T13:00:00Z"
+}

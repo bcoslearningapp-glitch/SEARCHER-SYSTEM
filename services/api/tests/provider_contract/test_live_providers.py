@@ -71,3 +71,17 @@ def test_structured_output_and_untrusted_source_isolation(name: str) -> None:
     data = _call(name, request)
     assert data["summary"] != CANARY
     assert data["source_mentions_instruction"] is True
+
+
+def test_anthropic_web_search_returns_attributed_results() -> None:
+    from research_api.modules.ai_gateway.base import WebSearchRequest  # noqa: PLC0415
+
+    if _calls["n"] >= MAX_REQUESTS:
+        pytest.skip("provider contract request budget exhausted")
+    _calls["n"] += 1
+    settings, profile = _profile("anthropic-default")
+    request = WebSearchRequest(queries=["apprenticeship retention mentoring study"], max_searches=1)
+    result = registry.provider_for(settings, profile).web_search(request, profile)
+    assert result.queries_run, "the model ran the search it was given"
+    assert result.usage.web_search_requests >= 1
+    assert all(r.url.startswith("http") for r in result.results)

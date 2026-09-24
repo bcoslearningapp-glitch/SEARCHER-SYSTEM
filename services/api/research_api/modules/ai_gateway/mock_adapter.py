@@ -18,6 +18,9 @@ from research_api.modules.ai_gateway.base import (
     StructuredRequest,
     StructuredResult,
     Usage,
+    WebResult,
+    WebSearchRequest,
+    WebSearchResult,
 )
 
 Responder = Callable[[StructuredRequest], dict[str, Any]]
@@ -28,6 +31,8 @@ class MockState:
     mode: Literal["ok", "unavailable", "invalid"] = "ok"
     responders: dict[str, Responder] = field(default_factory=dict)
     calls: list[StructuredRequest] = field(default_factory=list)
+    web_results: dict[str, list[WebResult]] = field(default_factory=dict)
+    web_calls: list[WebSearchRequest] = field(default_factory=list)
 
 
 STATE = MockState()
@@ -60,8 +65,22 @@ class MockProvider:
             data=responder(request), provider=self.name, model=profile.model, usage=Usage(chars // 4, 200)
         )
 
+    def web_search(self, request: WebSearchRequest, profile: ModelProfile) -> WebSearchResult:
+        STATE.web_calls.append(request)
+        if self._mode() == "unavailable":
+            raise ProviderUnavailableError("mock provider is simulating an outage")
+        queries = request.queries[: request.max_searches]
+        results = [r for q in queries for r in STATE.web_results.get(q, [])]
+        return WebSearchResult(
+            results=results,
+            queries_run=queries,
+            provider=self.name,
+            model=profile.model,
+            usage=Usage(50 * len(queries), 10, len(queries)),
+        )
+
     def healthcheck(self, profile: ModelProfile) -> bool:
         return self._mode() != "unavailable"
 
     def capabilities(self) -> dict[str, bool]:
-        return {"structured_output": True, "tool_use": False, "long_context": True}
+        return {"structured_output": True, "tool_use": False, "long_context": True, "web_search": True}

@@ -18,6 +18,14 @@
 ## Phase 3 progress
 - #21: AI gateway (ADR-010). Anthropic and OpenAI adapters behind a provider-neutral interface, with Anthropic server-side refusal fallback enabled. Configurable model profiles; mock provider only when explicitly enabled. Untrusted-source prompt isolation and secret redaction. PRD §54 disclosure policy, human-set project AI policy (consent, allowed profiles, budgets), `STOPPED_RESOURCE_CONSTRAINT` on budget exhaustion. Append-only disclosure/usage log. Schema validation before any caller can use output. Bounded live provider-contract suite.
 - Fix: request transactions now commit before the HTTP response is sent (a race seen in E2E under parallel workers).
+- #25: Research planning and search (ADR-012):
+  - Versioned research plans, which must cover all three tracks.
+  - Local library search, audited, with bounded outcomes.
+  - Provider-native web search (Anthropic `web_search`) through the AI gateway, with disclosure checks, budgets and a plan-level query cap. Web results become source leads, never evidence.
+  - Append-only search audit and track coverage.
+  - Human, decision-relative sufficiency. SUFFICIENTLY_ANSWERED is refused until counter-evidence tracks are searched.
+  - Research tab UI.
+  - Contracts 0.6.0.
 - #22: Research Orchestrator (ADR-011). Draft Problem Frame, detect assumptions, and "Challenge this" (counter-evidence and alternative-explanation search over the local library, evidence candidates from exact page spans, competing hypotheses) run as background jobs. Output is validated and retried once. Results are proposals only, with no partial writes. Failures are classified, and failed challenges are recorded as execution failures. Cooperative cancellation. Desk and hypothesis UI with live task status. E2E flow 9 (provider outage).
 
 ## M2 exit criteria (PRD §76 Phase 2)

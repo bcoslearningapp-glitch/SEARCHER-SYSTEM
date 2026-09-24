@@ -1,12 +1,16 @@
 # Data Model
 
-Current schema (migration `0001`):
+Current schema (migrations `0001`–`0009`), by owning module:
 
-| Table | Purpose | Notes |
+| Migration | Tables | Integrity rules |
 |---|---|---|
-| `audit_events` | Who did what to which entity, previous/new state, reason, AI provenance | Append-only trigger; CHECK: AI actor ⇒ `ai_action` present |
-| `research_events` | Meaningful research changes (`ProblemFrameApproved`, ...) | Append-only trigger |
-| `background_jobs` | Durable job state machine | QUEUED → RUNNING → SUCCEEDED/FAILED/CANCELLED |
+| 0001 platform, governance | `audit_events`, `research_events`, `background_jobs` | Events append-only (trigger); AI actor ⇒ `ai_action` |
+| 0002 project workflow | `projects`, `research_states`, `scratch_notes`, `problem_frame_versions`, `approvals`, `quality_gate_evaluations`, `decisions`, `project_closures` | Approved frames immutable; approvals human-only |
+| 0003–0004 sources | `source_works`, `source_editions`, `source_assets`, `project_sources`, `source_excerpts`, `source_access_requests`, `source_leads`, `source_pages`, `source_chunks` | Content-addressed assets; excerpts append-only; OCR never exact quote until verified |
+| 0005–0006 claims, evidence, hypotheses | `claims`, `assumptions`, `open_questions`, `evidence`, `source_lineage`, `research_track_runs`, `hypotheses`, `hypothesis_versions`, `hypothesis_competitions`, `mechanisms`, `hypothesis_mechanisms` | Assessed evidence immutable; hypothesis versions append-only |
+| 0007 reference, constraints | `foundational_sources`, `quran_surahs`, `quran_ayat`, `hadith_records`, `reference_reviews`, `reference_entries`, `reference_judgments`, `operational_constraints` | Foundational text and judgments append-only; human approval (ADR-009) |
+| 0008 AI gateway | `project_ai_policies`, `ai_requests` | Request log append-only; written in its own transaction (ADR-010) |
+| 0009 research planning | `research_plans`, `search_records`, `sufficiency_assessments`; web-origin columns on `source_leads` | Plan versions immutable except ACTIVE→SUPERSEDED; audit and sufficiency append-only (ADR-012) |
 
 Conventions:
 - Primary keys are UUIDs (portable IDs, PRD §60.6).

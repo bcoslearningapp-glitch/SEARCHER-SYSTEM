@@ -22,6 +22,7 @@ from research_api.contracts.enums import (
     SourceAccessMode,
     SourceAccessRequestStatus,
     SourceAssetKind,
+    SourceLeadOrigin,
     SourceLeadState,
     SourceVerificationState,
     TextOrigin,
@@ -606,6 +607,58 @@ def create_lead(session: Session, principal: Principal, project_id: UUID, data: 
         entity_id=lead.id,
         project_id=project_id,
         new={"statement": lead.statement},
+    )
+    return SourceLeadOut.model_validate(lead)
+
+
+def create_web_lead(
+    session: Session,
+    principal: Principal,
+    project_id: UUID,
+    *,
+    url: str,
+    title: str,
+    query: str | None,
+    search_record_id: UUID,
+    ai_action: AIActionRecord | None = None,
+) -> SourceLeadOut | None:
+    """A web result becomes a lead to catalogue and verify, never evidence (FR-WEB-003). None if already a lead."""
+    auth = authorized(principal, "source_lead.create", ai_action=ai_action)
+    _editable_project(session, project_id)
+    existing = session.scalar(
+        select(SourceLead.id).where(
+            SourceLead.project_id == project_id,
+            SourceLead.url == url,
+            SourceLead.status == SourceLeadState.SOURCE_LEAD.value,
+        )
+    )
+    if existing is not None:
+        return None
+    lead = SourceLead(
+        project_id=project_id,
+        statement=f"Web result for “{query}”: {title}" if query else f"Web result: {title}",
+        status=SourceLeadState.SOURCE_LEAD.value,
+        created_by_id=auth.actor.id,
+        origin=SourceLeadOrigin.WEB_SEARCH.value,
+        url=url,
+        title=title,
+        search_record_id=search_record_id,
+        provenance={
+            "kind": ProvenanceKind.SOURCE_DERIVED.value,
+            "actor": auth.actor.model_dump(mode="json", exclude_none=True),
+            **({"ai_action": ai_action.model_dump(mode="json", exclude_none=True)} if ai_action else {}),
+        },
+    )
+    session.add(lead)
+    session.flush()
+    _audit(
+        session,
+        auth,
+        "source_lead.create",
+        entity_type="SourceLead",
+        entity_id=lead.id,
+        project_id=project_id,
+        new={"origin": lead.origin, "url": url},
     )
     return SourceLeadOut.model_validate(lead)
 

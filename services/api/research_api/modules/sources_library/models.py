@@ -141,6 +141,12 @@ class SourceLead(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     status: Mapped[str] = mapped_column(String(20))
     verified_by_excerpt_id: Mapped[UUID | None] = mapped_column(ForeignKey("source_excerpts.id"))
     created_by_id: Mapped[str] = mapped_column(String(200))
+    # Web results enter as leads, never evidence (FR-WEB-003). URL and title are untrusted text.
+    origin: Mapped[str] = mapped_column(String(30), default="RESEARCHER_MEMORY", server_default="RESEARCHER_MEMORY")
+    url: Mapped[str | None] = mapped_column(Text)
+    title: Mapped[str | None] = mapped_column(Text)
+    search_record_id: Mapped[UUID | None] = mapped_column(index=True)
+    provenance: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
 
 class SourcePage(UUIDPrimaryKeyMixin, Base):
