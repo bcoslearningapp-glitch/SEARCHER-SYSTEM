@@ -193,3 +193,21 @@ def test_tool_call_log_is_append_only(client: TestClient, session: Session) -> N
     registry.invoke(session, _ctx(pid, "search_sources"), "search_sources", {"query": "x"})
     with pytest.raises(DBAPIError, match="append-only"), session.begin_nested():
         session.execute(text("UPDATE ai_tool_calls SET status = 'OK' WHERE project_id = :p"), {"p": pid})
+
+
+def test_design_proposals_through_tools_stay_reviewable(client: TestClient, session: Session) -> None:
+    pid = _project(client)
+    ctx = _ctx(pid, "propose_design_requirement", "propose_design_concept", action=True)
+    requirement = registry.invoke(
+        session,
+        ctx,
+        "propose_design_requirement",
+        {"statement": "Must not add paperwork", "priority": "MUST", "traces": [{"basis": "HUMAN_CONTEXT_NEED"}]},
+    )
+    assert requirement["status"] == "PROPOSED"
+    concept = registry.invoke(session, ctx, "propose_design_concept", {"title": "Digital log", "description": "d"})
+    assert concept["status"] == "PROPOSED"
+    stored = client.get(f"/api/v1/projects/{pid}/design/concepts/{concept['concept_id']}").json()
+    assert stored["origin"] == "AI" and stored["provenance"]["kind"] == "AI_GENERATED"
+    with pytest.raises(ToolInputError):
+        registry.invoke(session, ctx, "propose_design_requirement", {"statement": "x", "traces": []})

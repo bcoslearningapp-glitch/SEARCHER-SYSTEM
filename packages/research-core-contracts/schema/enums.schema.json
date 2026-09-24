@@ -698,8 +698,39 @@
       "enum": [
         "CLAIM",
         "HYPOTHESIS",
-        "MECHANISM"
+        "MECHANISM",
+        "DESIGN_CONCEPT"
       ]
+    },
+    "DesignRequirementBasis": {
+      "description": "What a design requirement is derived from (FR-DESIGN-002, Core §47).",
+      "type": "string",
+      "enum": ["PURPOSE", "REFERENCE_CONSTRAINT", "HUMAN_CONTEXT_NEED", "MECHANISM", "EVIDENCE", "RISK", "OPERATIONAL_CONSTRAINT"]
+    },
+    "RequirementPriority": {
+      "description": "Design requirement priority.",
+      "type": "string",
+      "enum": ["MUST", "SHOULD", "COULD"]
+    },
+    "DesignRequirementStatus": {
+      "description": "Requirement versions are never edited; a revision supersedes (Core §47). AI-proposed requirements stay PROPOSED until a human confirms them.",
+      "type": "string",
+      "enum": ["PROPOSED", "ACTIVE", "SUPERSEDED", "WITHDRAWN"]
+    },
+    "DesignConceptStatus": {
+      "description": "Design concept status; selection is a human decision (FR-DESIGN-006). Rejected designs stay in history (FR-DESIGN-005).",
+      "type": "string",
+      "enum": ["PROPOSED", "UNDER_REVIEW", "SELECTED", "REJECTED", "WITHDRAWN"]
+    },
+    "RequirementCoverage": {
+      "description": "How a design concept addresses a requirement.",
+      "type": "string",
+      "enum": ["MEETS", "PARTIAL", "NOT_ADDRESSED", "CONFLICTS"]
+    },
+    "RejectionGround": {
+      "description": "Why a design was rejected; REFERENCE rejections keep reusable mechanisms visible (FR-DESIGN-005).",
+      "type": "string",
+      "enum": ["REFERENCE", "EVIDENCE", "OPERATIONAL", "FEASIBILITY", "OTHER"]
     },
     "FoundationalSourceStatus": {
       "description": "Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003).",

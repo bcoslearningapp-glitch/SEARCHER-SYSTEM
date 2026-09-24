@@ -1,6 +1,10 @@
 /** Shapes of API responses used by the UI (subset of the backend schemas). */
 import type {
   AccessResponseForm,
+  DesignConceptStatus,
+  DesignOrigin,
+  DesignRequirementBasis,
+  DesignRequirementStatus,
   IngestionStatus,
   NotificationLevel,
   ProblemFrameStatus,
@@ -8,6 +12,9 @@ import type {
   ProjectStatus,
   QualityGateResult,
   ReferenceAuthorityLayer,
+  RejectionGround,
+  RequirementCoverage,
+  RequirementPriority,
   ResearchMode,
   RiskLevel,
   SensitivityLevel,
@@ -387,4 +394,52 @@ export type Reliability = {
     blocking_failures: string[];
     blocking_unevaluated: string[];
   }[];
+};
+
+export type RequirementTrace = { basis: DesignRequirementBasis; entity_type?: string | null; entity_id?: string | null; note?: string | null };
+
+export type DesignRequirement = {
+  id: string;
+  series_id: string;
+  version_number: number;
+  supersedes_id: string | null;
+  statement: string;
+  priority: RequirementPriority;
+  traces: RequirementTrace[];
+  status: DesignRequirementStatus;
+  change_reason: string | null;
+  provenance: { kind: string };
+};
+
+export type ConceptCoverage = {
+  requirement_id: string;
+  requirement_series_id: string;
+  coverage: RequirementCoverage;
+  note: string | null;
+  stale: boolean;
+};
+
+export type DesignConcept = {
+  id: string;
+  title: string;
+  description: string;
+  origin: DesignOrigin;
+  origin_reference: string | null;
+  status: DesignConceptStatus;
+  hypothesis_ids: string[];
+  mechanism_ids: string[];
+  derived_from_concept_ids: string[];
+  coverage: ConceptCoverage[];
+  rejection: { ground: RejectionGround; reason: string; reusable_mechanism_ids: string[] } | null;
+  selection: { gate_result: QualityGateResult; methodology_path: string } | null;
+  provenance: { kind: string };
+};
+
+export type GateEvaluation = {
+  id: string;
+  gate: string;
+  result: QualityGateResult;
+  risk_level: RiskLevel;
+  findings: GateFinding[];
+  evaluated_at: string;
 };

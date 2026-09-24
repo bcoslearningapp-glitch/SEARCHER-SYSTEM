@@ -411,3 +411,74 @@ export async function approveFoundational(_: ActionResult, form: FormData): Prom
     }),
   );
 }
+
+// --- Design synthesis (PRD §32): requirements before solutions; selection is a human decision ---
+
+const D = (form: FormData) => `${P(form)}/design`;
+
+export async function createDesignRequirement(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${D(form)}/requirements`, {
+      statement: text(form, "statement"),
+      priority: text(form, "priority"),
+      traces: [{ basis: text(form, "basis"), note: optionalText(form, "note") }],
+    }),
+  );
+}
+
+export async function confirmDesignRequirement(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("POST", `${D(form)}/requirements/${text(form, "requirement_id")}/confirm`, {}));
+}
+
+export async function withdrawDesignRequirement(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${D(form)}/requirements/${text(form, "requirement_id")}/withdraw`, { reason: text(form, "reason") }),
+  );
+}
+
+export async function createDesignConcept(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${D(form)}/concepts`, {
+      title: text(form, "title"),
+      description: text(form, "description"),
+      origin: text(form, "origin"),
+      origin_reference: optionalText(form, "origin_reference"),
+      hypothesis_ids: form.getAll("hypothesis_ids").map(String),
+      mechanism_ids: form.getAll("mechanism_ids").map(String),
+      derived_from_concept_ids: form.getAll("derived_from_concept_ids").map(String),
+    }),
+  );
+}
+
+export async function setDesignCoverage(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("PUT", `${D(form)}/concepts/${text(form, "concept_id")}/coverage`, {
+      requirement_id: text(form, "requirement_id"),
+      coverage: text(form, "coverage"),
+      note: optionalText(form, "note"),
+    }),
+  );
+}
+
+export async function evaluateDesignReadiness(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("POST", `${D(form)}/concepts/${text(form, "concept_id")}/readiness`, {}));
+}
+
+export async function selectDesignConcept(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${D(form)}/concepts/${text(form, "concept_id")}/select`, {
+      reason: optionalText(form, "reason"),
+      acknowledge_reservations: form.get("acknowledge_reservations") === "on",
+    }),
+  );
+}
+
+export async function rejectDesignConcept(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${D(form)}/concepts/${text(form, "concept_id")}/reject`, {
+      ground: text(form, "ground"),
+      reason: text(form, "reason"),
+      reusable_mechanism_ids: form.getAll("reusable_mechanism_ids").map(String),
+    }),
+  );
+}

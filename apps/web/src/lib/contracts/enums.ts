@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.6.0";
+export const CONTRACT_SCHEMA_VERSION = "0.7.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -253,8 +253,32 @@ export const EvidenceStatusValues = ["CANDIDATE", "ACCEPTED", "REJECTED"] as con
 export type EvidenceStatus = (typeof EvidenceStatusValues)[number];
 
 /** What evidence can bear on (FR-EVID-001). */
-export const EvidenceTargetTypeValues = ["CLAIM", "HYPOTHESIS", "MECHANISM"] as const;
+export const EvidenceTargetTypeValues = ["CLAIM", "HYPOTHESIS", "MECHANISM", "DESIGN_CONCEPT"] as const;
 export type EvidenceTargetType = (typeof EvidenceTargetTypeValues)[number];
+
+/** What a design requirement is derived from (FR-DESIGN-002, Core §47). */
+export const DesignRequirementBasisValues = ["PURPOSE", "REFERENCE_CONSTRAINT", "HUMAN_CONTEXT_NEED", "MECHANISM", "EVIDENCE", "RISK", "OPERATIONAL_CONSTRAINT"] as const;
+export type DesignRequirementBasis = (typeof DesignRequirementBasisValues)[number];
+
+/** Design requirement priority. */
+export const RequirementPriorityValues = ["MUST", "SHOULD", "COULD"] as const;
+export type RequirementPriority = (typeof RequirementPriorityValues)[number];
+
+/** Requirement versions are never edited; a revision supersedes (Core §47). AI-proposed requirements stay PROPOSED until a human confirms them. */
+export const DesignRequirementStatusValues = ["PROPOSED", "ACTIVE", "SUPERSEDED", "WITHDRAWN"] as const;
+export type DesignRequirementStatus = (typeof DesignRequirementStatusValues)[number];
+
+/** Design concept status; selection is a human decision (FR-DESIGN-006). Rejected designs stay in history (FR-DESIGN-005). */
+export const DesignConceptStatusValues = ["PROPOSED", "UNDER_REVIEW", "SELECTED", "REJECTED", "WITHDRAWN"] as const;
+export type DesignConceptStatus = (typeof DesignConceptStatusValues)[number];
+
+/** How a design concept addresses a requirement. */
+export const RequirementCoverageValues = ["MEETS", "PARTIAL", "NOT_ADDRESSED", "CONFLICTS"] as const;
+export type RequirementCoverage = (typeof RequirementCoverageValues)[number];
+
+/** Why a design was rejected; REFERENCE rejections keep reusable mechanisms visible (FR-DESIGN-005). */
+export const RejectionGroundValues = ["REFERENCE", "EVIDENCE", "OPERATIONAL", "FEASIBILITY", "OTHER"] as const;
+export type RejectionGround = (typeof RejectionGroundValues)[number];
 
 /** Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003). */
 export const FoundationalSourceStatusValues = ["STAGED", "APPROVED", "RETIRED"] as const;

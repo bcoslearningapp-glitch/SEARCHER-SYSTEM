@@ -11,6 +11,7 @@ from research_api.modules.claims_evidence.models import (
     ResearchTrackRun,
     SourceLineage,
 )
+from research_api.modules.design_experiments.models import ConceptCoverage, DesignConcept, DesignRequirement
 from research_api.modules.governance_audit.models import (
     ApprovalRecord,
     AuditEventRecord,
@@ -67,7 +68,10 @@ __all__ = [
     "BackgroundJob",
     "Base",
     "Claim",
+    "ConceptCoverage",
     "DecisionRecord",
+    "DesignConcept",
+    "DesignRequirement",
     "Evidence",
     "FoundationalSource",
     "HadithRecord",

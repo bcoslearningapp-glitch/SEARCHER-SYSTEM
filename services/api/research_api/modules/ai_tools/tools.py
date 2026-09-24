@@ -18,10 +18,13 @@ from research_api.contracts.enums import (
     ActorKind,
     ClaimType,
     Criticality,
+    DesignOrigin,
+    DesignRequirementBasis,
     EvidenceRole,
     EvidenceTargetType,
     HypothesisLifecycleState,
     ProblemFrameStatus,
+    RequirementPriority,
     ResearchOutcomeKind,
     ResearchTrack,
 )
@@ -30,6 +33,8 @@ from research_api.modules.ai_gateway.base import WebSearchRequest
 from research_api.modules.ai_tools.registry import Tool, ToolContext, register
 from research_api.modules.claims_evidence import service as claims
 from research_api.modules.claims_evidence.schemas import AssumptionIn, ClaimIn, EvidenceIn
+from research_api.modules.design_experiments import service as design
+from research_api.modules.design_experiments.schemas import ConceptIn, RequirementIn, TraceIn
 from research_api.modules.hypothesis_lab import service as hypotheses
 from research_api.modules.hypothesis_lab.schemas import CompeteIn, HypothesisContent, HypothesisIn
 from research_api.modules.project_workflow import service as projects
@@ -185,6 +190,30 @@ def _propose_hypothesis(session: Session, ctx: ToolContext, args: dict[str, Any]
             ai_action=ctx.ai_action,
         )
     return {"hypothesis_id": str(created.id), "lifecycle_state": created.lifecycle_state.value}
+
+
+def _propose_design_requirement(session: Session, ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
+    """Stays PROPOSED until a researcher confirms it; it cannot define the design space alone."""
+    data = RequirementIn(
+        statement=args["statement"].strip(),
+        priority=RequirementPriority(args.get("priority", "SHOULD")),
+        traces=[TraceIn.model_validate(t) for t in args["traces"]],
+    )
+    created = design.create_requirement(session, ctx.principal, ctx.project_id, data, ai_action=ctx.ai_action)
+    return {"requirement_id": str(created.id), "status": created.status.value}
+
+
+def _propose_design_concept(session: Session, ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
+    data = ConceptIn(
+        title=args["title"].strip(),
+        description=args["description"].strip(),
+        origin=DesignOrigin.AI,
+        hypothesis_ids=[UUID(i) for i in args.get("hypothesis_ids", [])],
+        mechanism_ids=[UUID(i) for i in args.get("mechanism_ids", [])],
+        derived_from_concept_ids=[UUID(i) for i in args.get("derived_from_concept_ids", [])],
+    )
+    created = design.create_concept(session, ctx.principal, ctx.project_id, data, ai_action=ctx.ai_action)
+    return {"concept_id": str(created.id), "status": created.status.value}
 
 
 def _propose_evidence(session: Session, ctx: ToolContext, args: dict[str, Any]) -> dict[str, Any]:
@@ -410,6 +439,53 @@ for _tool in (
         _propose_hypothesis,
         needs_ai_action=True,
         output_ids=_ids("hypothesis_id"),
+    ),
+    Tool(
+        "propose_design_requirement",
+        "PROPOSE",
+        "Propose a traced design requirement. It stays PROPOSED until a researcher confirms it.",
+        _schema(
+            {
+                "statement": TEXT,
+                "priority": {"type": "string", "enum": [p.value for p in RequirementPriority]},
+                "traces": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 10,
+                    "items": _schema(
+                        {
+                            "basis": {"type": "string", "enum": [b.value for b in DesignRequirementBasis]},
+                            "entity_type": {"type": "string", "enum": [t.value for t in EvidenceTargetType]},
+                            "entity_id": UUID_S,
+                            "note": {"type": "string", "maxLength": 1000},
+                        },
+                        ["basis"],
+                    ),
+                },
+            },
+            ["statement", "traces"],
+        ),
+        _propose_design_requirement,
+        needs_ai_action=True,
+        output_ids=_ids("requirement_id"),
+    ),
+    Tool(
+        "propose_design_concept",
+        "PROPOSE",
+        "Propose a design concept (recorded with AI origin). Selection and rejection are human decisions.",
+        _schema(
+            {
+                "title": {"type": "string", "minLength": 1, "maxLength": 300},
+                "description": TEXT,
+                "hypothesis_ids": {"type": "array", "items": UUID_S, "maxItems": 10},
+                "mechanism_ids": {"type": "array", "items": UUID_S, "maxItems": 10},
+                "derived_from_concept_ids": {"type": "array", "items": UUID_S, "maxItems": 10},
+            },
+            ["title", "description"],
+        ),
+        _propose_design_concept,
+        needs_ai_action=True,
+        output_ids=_ids("concept_id"),
     ),
     Tool(
         "propose_evidence",
