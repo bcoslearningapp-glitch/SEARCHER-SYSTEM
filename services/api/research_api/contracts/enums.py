@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.5.0"
+CONTRACT_SCHEMA_VERSION = "0.6.0"
 
 
 class ProjectStatus(StrEnum):
@@ -276,6 +276,13 @@ class TextOrigin(StrEnum):
     NATIVE_DIGITAL = "NATIVE_DIGITAL"
     OCR_EXTRACTED = "OCR_EXTRACTED"
     HUMAN_TRANSCRIBED = "HUMAN_TRANSCRIBED"
+
+
+class SourceLeadOrigin(StrEnum):
+    """Where a source lead came from. Web results are leads, never evidence (FR-WEB-003)."""
+
+    RESEARCHER_MEMORY = "RESEARCHER_MEMORY"
+    WEB_SEARCH = "WEB_SEARCH"
 
 
 class SourceLeadState(StrEnum):

@@ -1,0 +1,23 @@
+{
+  "id": "2b3c4d5e-6f7a-4b2c-9d3e-4f5a6b7c8d9e",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "plan_id": "1a2b3c4d-5e6f-4a1b-8c2d-3e4f5a6b7c8d",
+  "track": "CHALLENGE",
+  "question": "What drives year-two apprentice disengagement?",
+  "provider": "web",
+  "queries": [
+    "mentoring cut retention rose"
+  ],
+  "languages": [
+    "en"
+  ],
+  "outcome": "RESEARCH_EXECUTION_FAILURE",
+  "result_count": 0,
+  "scope": "web search: provider unavailable",
+  "performed_at": "2026-09-24T12:00:00Z",
+  "actor": {
+    "kind": "HUMAN",
+    "id": "local-owner",
+    "role": "RESEARCHER"
+  }
+}

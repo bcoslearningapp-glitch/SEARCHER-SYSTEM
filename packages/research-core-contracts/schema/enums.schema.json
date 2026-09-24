@@ -296,6 +296,14 @@
         "HUMAN_TRANSCRIBED"
       ]
     },
+    "SourceLeadOrigin": {
+      "description": "Where a source lead came from. Web results are leads, never evidence (FR-WEB-003).",
+      "type": "string",
+      "enum": [
+        "RESEARCHER_MEMORY",
+        "WEB_SEARCH"
+      ]
+    },
     "SourceLeadState": {
       "description": "Researcher memory of a source is a lead until verified (Core §27).",
       "type": "string",

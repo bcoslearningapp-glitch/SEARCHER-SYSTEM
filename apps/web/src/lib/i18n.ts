@@ -6,6 +6,7 @@
 
 import { aiAr, aiEn, aiFr, type AIStrings } from "@/lib/i18n-ai";
 import { labAr, labEn, labFr, type LabStrings } from "@/lib/i18n-lab";
+import { researchAr, researchEn, researchFr, type ResearchStrings } from "@/lib/i18n-research";
 import { ar as uiAr, en as uiEn, fr as uiFr, type UiStrings } from "@/lib/i18n-ui";
 
 export const LOCALES = ["en", "fr", "ar"] as const;
@@ -28,6 +29,7 @@ export type Dictionary = {
   ui: UiStrings;
   lab: LabStrings;
   ai: AIStrings;
+  research: ResearchStrings;
   spaces: Record<Space, string>;
   spaceDescriptions: Record<Space, string>;
   notYetAvailable: string;
@@ -42,6 +44,7 @@ const en: Dictionary = {
   ui: uiEn,
   lab: labEn,
   ai: aiEn,
+  research: researchEn,
   spaces: { desk: "Desk", map: "Map", library: "Library", lab: "Lab", outputs: "Outputs" },
   spaceDescriptions: {
     desk: "Current question, mode, next step, and items that need your attention.",
@@ -62,6 +65,7 @@ const fr: Dictionary = {
   ui: uiFr,
   lab: labFr,
   ai: aiFr,
+  research: researchFr,
   spaces: { desk: "Bureau", map: "Carte", library: "Bibliothèque", lab: "Laboratoire", outputs: "Productions" },
   spaceDescriptions: {
     desk: "Question actuelle, mode, prochaine étape et éléments nécessitant votre attention.",
@@ -87,6 +91,7 @@ const ar: Dictionary = {
   ui: uiAr,
   lab: labAr,
   ai: aiAr,
+  research: researchAr,
   spaces: { desk: "المكتب", map: "الخريطة", library: "المكتبة", lab: "المختبر", outputs: "المخرجات" },
   spaceDescriptions: {
     desk: "السؤال الحالي، والنمط، والخطوة التالية، والعناصر التي تحتاج إلى انتباهك.",

@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     anthropic_effort: str = "high"
     anthropic_input_usd_per_mtok: float = 5.0
     anthropic_output_usd_per_mtok: float = 25.0
+    anthropic_web_search_usd_per_request: float = 0.01
     openai_model: str = "gpt-5"
     openai_effort: str = "high"
     openai_input_usd_per_mtok: float = 1.25

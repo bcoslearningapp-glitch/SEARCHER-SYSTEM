@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/research.schema.json",
+  "title": "Research Core research plans, search audit and sufficiency",
+  "$defs": {
+    "ResearchLanguage": {
+      "description": "Language searched or read (BCP 47). Research language is independent of question and output language (Core §40).",
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+    },
+    "TrackPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["track", "approach"],
+      "properties": {
+        "track": { "$ref": "enums.schema.json#/$defs/ResearchTrack" },
+        "approach": { "type": "string", "minLength": 1 },
+        "queries": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "ResearchPlan": {
+      "description": "Versioned plan for one research question (FR-RSCH-001/002). Question routing never changes reference authority order (FR-RSCH-004).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "version_number", "question", "decision_served", "question_type", "tracks", "sufficiency_criteria", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "supersedes_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "question": { "type": "string", "minLength": 1 },
+        "decision_served": { "type": "string", "minLength": 1, "description": "The decision or use the answer serves; sufficiency is relative to it (Core §46)." },
+        "question_type": { "$ref": "enums.schema.json#/$defs/ResearchQuestionType" },
+        "risk_impact": { "type": "string" },
+        "desired_evidence_types": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "languages": { "type": "array", "items": { "$ref": "#/$defs/ResearchLanguage" } },
+        "tracks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TrackPlan" },
+          "minItems": 3,
+          "description": "Support, challenge and alternative-explanation tracks are all planned (FR-BIAS-001)."
+        },
+        "sufficiency_criteria": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
+        "max_web_searches": { "type": "integer", "minimum": 0 },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      }
+    },
+    "SearchRecord": {
+      "description": "Search audit entry (FR-WEB-005). Outcome keeps absence, failure, inaccessibility and coverage apart (FR-WEB-004, Core §72).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "question", "provider", "queries", "outcome", "result_count", "scope", "performed_at", "actor"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "plan_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "track": { "$ref": "enums.schema.json#/$defs/ResearchTrack" },
+        "question": { "type": "string", "minLength": 1 },
+        "provider": { "type": "string", "minLength": 1, "description": "Provider-neutral name of what was searched, e.g. local_library or web." },
+        "queries": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "languages": { "type": "array", "items": { "$ref": "#/$defs/ResearchLanguage" } },
+        "outcome": { "$ref": "enums.schema.json#/$defs/ResearchOutcomeKind" },
+        "result_count": { "type": "integer", "minimum": 0 },
+        "scope": { "type": "string", "minLength": 1 },
+        "exclusions": { "type": "string" },
+        "performed_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+        "actor": { "$ref": "common.schema.json#/$defs/Actor" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "outcome": { "const": "RESULTS_FOUND" } }, "required": ["outcome"] },
+          "then": { "properties": { "result_count": { "minimum": 1 } } }
+        }
+      ]
+    },
+    "SufficiencyAssessment": {
+      "description": "Decision-relative sufficiency conclusion recorded by a human (FR-SUFF-001..003). 'Not known' is a valid conclusion.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "plan_id", "decision_served", "result", "considerations", "rationale", "assessed_by", "assessed_at"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "plan_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "decision_served": { "type": "string", "minLength": 1 },
+        "result": { "$ref": "enums.schema.json#/$defs/SufficiencyResult" },
+        "considerations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["support_evidence", "counter_evidence", "alternative_explanations", "independence", "diversity", "context_fit", "critical_unknowns", "impact", "reversibility", "remaining_uncertainty"],
+          "properties": {
+            "support_evidence": { "type": "string", "minLength": 1 },
+            "counter_evidence": { "type": "string", "minLength": 1 },
+            "alternative_explanations": { "type": "string", "minLength": 1 },
+            "independence": { "type": "string", "minLength": 1 },
+            "diversity": { "type": "string", "minLength": 1 },
+            "context_fit": { "type": "string", "minLength": 1 },
+            "critical_unknowns": { "type": "string", "minLength": 1 },
+            "impact": { "type": "string", "minLength": 1 },
+            "reversibility": { "type": "string", "minLength": 1 },
+            "remaining_uncertainty": { "type": "string", "minLength": 1 }
+          }
+        },
+        "rationale": { "type": "string", "minLength": 1 },
+        "recommend_experiment": { "type": "boolean", "description": "Further reading has low marginal value; a controlled experiment is suggested (FR-SUFF-004)." },
+        "assessed_by": { "$ref": "common.schema.json#/$defs/Actor" },
+        "assessed_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [
+        {
+          "description": "Sufficiency is a human judgment.",
+          "properties": { "assessed_by": { "properties": { "kind": { "const": "HUMAN" } } } }
+        }
+      ]
+    }
+  }
+}

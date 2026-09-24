@@ -23,6 +23,7 @@ def profiles(settings: Settings) -> dict[str, ModelProfile]:
             max_tokens=settings.ai_max_output_tokens,
             input_usd_per_mtok=settings.anthropic_input_usd_per_mtok,
             output_usd_per_mtok=settings.anthropic_output_usd_per_mtok,
+            web_search_usd_per_request=settings.anthropic_web_search_usd_per_request,
         ),
         ModelProfile(
             name="openai-default",

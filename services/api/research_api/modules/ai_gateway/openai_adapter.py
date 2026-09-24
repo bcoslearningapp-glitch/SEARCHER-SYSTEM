@@ -27,6 +27,8 @@ from research_api.modules.ai_gateway.base import (
     StructuredRequest,
     StructuredResult,
     Usage,
+    WebSearchRequest,
+    WebSearchResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -91,6 +93,10 @@ class OpenAIProvider:
             request_id=getattr(response, "_request_id", None),
         )
 
+    def web_search(self, request: WebSearchRequest, profile: ModelProfile) -> WebSearchResult:
+        # Not wired for this adapter yet; the gateway reports it as unavailable, never as "no results".
+        raise ProviderUnavailableError("web search is not supported by the OpenAI adapter")
+
     def healthcheck(self, profile: ModelProfile) -> bool:
         try:
             self._client.models.retrieve(profile.model)
@@ -100,4 +106,4 @@ class OpenAIProvider:
         return True
 
     def capabilities(self) -> dict[str, bool]:
-        return {"structured_output": True, "tool_use": True, "long_context": True}
+        return {"structured_output": True, "tool_use": True, "long_context": True, "web_search": False}

@@ -6,6 +6,7 @@ Principle: the LLM may propose; the application decides whether a proposal can m
 - `modules/ai_gateway`: provider-neutral `AIProvider` (`generate_structured`, `healthcheck`, `capabilities`) with Anthropic, OpenAI and mock adapters. Provider SDK imports are allowed only in the adapters (architecture test).
 - `service.run_structured(session, CallContext, StructuredRequest)` is the only path from domain code to a model: profile selection → disclosure policy (PRD §54) → per-task/project budget → provider → JSON-Schema validation → append-only `ai_requests` log → `AIActionRecord` for the caller's audit entry.
 - Prompts: instructions in the system prompt; retrieved sources and tool output wrapped as escaped `<untrusted_source>` data; secrets redacted.
+- `service.run_web_search` (ADR-012): provider-native web search under the same disclosure, budget and log rules; results are returned for the caller to turn into source leads.
 - HTTP: `GET /api/v1/ai/profiles`, `GET|PUT /api/v1/projects/{id}/ai-policy`, `GET /api/v1/projects/{id}/ai-requests`.
 
 ## Research Orchestrator (implemented — ADR-011)

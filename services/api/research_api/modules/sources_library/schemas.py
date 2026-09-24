@@ -16,6 +16,7 @@ from research_api.contracts.enums import (
     SourceAccessMode,
     SourceAccessRequestStatus,
     SourceAssetKind,
+    SourceLeadOrigin,
     SourceLeadState,
     SourceVerificationState,
     TextOrigin,
@@ -212,6 +213,10 @@ class SourceLeadOut(BaseModel):
     suspected_work_id: UUID | None
     status: SourceLeadState
     verified_by_excerpt_id: UUID | None
+    origin: SourceLeadOrigin = SourceLeadOrigin.RESEARCHER_MEMORY
+    url: str | None = None
+    title: str | None = None
+    search_record_id: UUID | None = None
     created_at: datetime
 
     def to_contract(self) -> dict[str, Any]:

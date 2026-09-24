@@ -6,7 +6,7 @@ import { Badge, Select } from "@/components/fields";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import type { Project } from "@/lib/types";
 
-export type ProjectTab = "desk" | "map" | "lab" | "sources";
+export type ProjectTab = "desk" | "map" | "research" | "lab" | "sources";
 
 const MANUAL_TARGETS = ["FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE"] as const;
 
@@ -31,6 +31,7 @@ export function ProjectHeader({ project, dict, locale, active }: { project: Proj
           [
             ["desk", base, dict.spaces.desk],
             ["map", `${base}/map`, dict.spaces.map],
+            ["research", `${base}/research`, dict.research.tab],
             ["lab", `${base}/lab`, dict.spaces.lab],
             ["sources", `${base}/sources`, ui.sources],
           ] as const

@@ -26,9 +26,12 @@ from research_api.modules.ai_gateway.base import (
     ModelProfile,
     ProviderError,
     ProviderOutputError,
+    ProviderUnavailableError,
     StructuredRequest,
     StructuredResult,
     Usage,
+    WebSearchRequest,
+    WebSearchResult,
 )
 from research_api.modules.ai_gateway.models import AIRequestRecord, ProjectAIPolicy
 from research_api.modules.ai_gateway.policy import cloud_disclosure
@@ -193,17 +196,54 @@ def _worst_case_cost(profile: ModelProfile, request: StructuredRequest, chars: i
     return Decimal(str(estimate))
 
 
-def run_structured(
-    session: Session, ctx: CallContext, request: StructuredRequest, *, profile_name: str | None = None
-) -> AIOutcome:
+@dataclass
+class _Attempt:
+    """One logged AI call: the disclosure/usage record plus the settings and profile it runs under."""
+
+    record: AIRequestRecord
+    settings: Settings
+    profile: ModelProfile
+
+    def stop(self, status: str, kind: str, error: Exception) -> Exception:
+        self.record.status, self.record.error_kind = status, kind
+        write_log(self.record)
+        return error
+
+    def finish(self, usage: Usage, model: str, request_id: str | None) -> None:
+        self.record.model = model
+        self.record.input_tokens, self.record.output_tokens = usage.input_tokens, usage.output_tokens
+        self.record.estimated_cost_usd = Decimal(str(round(self.profile.estimate_cost(usage), 6)))
+        self.record.provider_request_id = request_id
+
+    def ai_action(self, ctx: CallContext, provider: str, model: str) -> AIActionRecord:
+        return AIActionRecord(
+            provider=provider,
+            model=model,
+            template_version=self.record.template_version,
+            supplied_entity_ids=ctx.entity_ids,
+            task_id=str(self.record.id),
+            timestamp=utcnow(),
+        )
+
+
+def _preflight(
+    session: Session,
+    ctx: CallContext,
+    *,
+    task: str,
+    template_version: str,
+    chars: int,
+    profile_name: str | None,
+    worst_case: Callable[[ModelProfile], Decimal],
+) -> _Attempt:
+    """Profile, disclosure (PRD §54) and budget checks (FR-COST-002/003). Every refusal is logged."""
     settings = get_settings()
     policy = session.get(ProjectAIPolicy, ctx.project_id)
-    chars = prompting.outbound_chars(request)
     record = AIRequestRecord(
         id=uuid4(),
         project_id=ctx.project_id,
-        task=request.task,
-        template_version=request.template_version,
+        task=task,
+        template_version=template_version,
         profile=profile_name or "",
         provider="",
         model="",
@@ -214,8 +254,8 @@ def run_structured(
         disclosure_reason="",
     )
 
-    def stop(status: str, kind: str, reason: str, error: Exception) -> Exception:
-        record.status, record.error_kind = status, kind
+    def block(kind: str, reason: str, error: Exception) -> Exception:
+        record.status, record.error_kind = BLOCKED, kind
         record.disclosure_reason = record.disclosure_reason or reason
         write_log(record)
         return error
@@ -223,7 +263,7 @@ def run_structured(
     try:
         profile = _select_profile(settings, policy, profile_name)
     except RuleViolationError as exc:
-        raise stop(BLOCKED, exc.code, exc.message, exc) from None
+        raise block(exc.code, exc.message, exc) from None
     record.profile, record.provider, record.model = profile.name, profile.provider, profile.model
 
     disclosure = cloud_disclosure(
@@ -231,50 +271,96 @@ def run_structured(
     )
     record.disclosure_reason = disclosure.reason
     if not disclosure.allowed:
-        raise stop(BLOCKED, "disclosure_blocked", disclosure.reason, DisclosureBlockedError(disclosure.reason))
+        raise block("disclosure_blocked", disclosure.reason, DisclosureBlockedError(disclosure.reason))
 
-    worst = _worst_case_cost(profile, request, chars)
+    worst = worst_case(profile)
     if policy and policy.task_budget_usd is not None and worst > policy.task_budget_usd:
         message = "task could exceed the per-task AI budget"
         error = ResourceConstraintError(message, estimate_usd=str(worst), budget_usd=str(policy.task_budget_usd))
-        raise stop(BLOCKED, STOPPED_RESOURCE_CONSTRAINT, message, error)
+        raise block(STOPPED_RESOURCE_CONSTRAINT, message, error)
     if policy and policy.project_budget_usd is not None:
         spent = _spent(session, ctx.project_id)
         if spent + worst > policy.project_budget_usd:
             message = "project AI budget would be exceeded"
             error = ResourceConstraintError(message, spent_usd=str(spent), budget_usd=str(policy.project_budget_usd))
-            raise stop(BLOCKED, STOPPED_RESOURCE_CONSTRAINT, message, error)
-
+            raise block(STOPPED_RESOURCE_CONSTRAINT, message, error)
     record.outbound_chars = chars
-    try:
-        result = registry.provider_for(settings, profile).generate_structured(request, profile)
-    except ProviderError as exc:
-        raise stop(FAILED, exc.kind, record.disclosure_reason, exc) from exc
+    return _Attempt(record, settings, profile)
 
-    record.model = result.model
-    record.input_tokens, record.output_tokens = result.usage.input_tokens, result.usage.output_tokens
-    record.estimated_cost_usd = Decimal(str(round(profile.estimate_cost(result.usage), 6)))
-    record.served_by_fallback = result.served_by_fallback
-    record.provider_request_id = result.request_id
+
+def run_structured(
+    session: Session, ctx: CallContext, request: StructuredRequest, *, profile_name: str | None = None
+) -> AIOutcome:
+    chars = prompting.outbound_chars(request)
+    attempt = _preflight(
+        session,
+        ctx,
+        task=request.task,
+        template_version=request.template_version,
+        chars=chars,
+        profile_name=profile_name,
+        worst_case=lambda p: _worst_case_cost(p, request, chars),
+    )
+    try:
+        result = registry.provider_for(attempt.settings, attempt.profile).generate_structured(request, attempt.profile)
+    except ProviderError as exc:
+        raise attempt.stop(FAILED, exc.kind, exc) from exc
+    attempt.finish(result.usage, result.model, result.request_id)
+    attempt.record.served_by_fallback = result.served_by_fallback
     try:
         validate_output(result.data, request.output_schema)
     except ProviderOutputError as exc:
-        raise stop(FAILED, exc.kind, record.disclosure_reason, exc) from exc
+        raise attempt.stop(FAILED, exc.kind, exc) from exc
+    attempt.record.status = SUCCEEDED
+    write_log(attempt.record)
+    return AIOutcome(result, attempt.record.id, attempt.ai_action(ctx, result.provider, result.model))
 
-    record.status = SUCCEEDED
-    write_log(record)
-    return AIOutcome(
-        result=result,
-        request_record_id=record.id,
-        ai_action=AIActionRecord(
-            provider=result.provider,
-            model=result.model,
-            template_version=request.template_version,
-            supplied_entity_ids=ctx.entity_ids,
-            task_id=str(record.id),
-            timestamp=utcnow(),
-        ),
+
+@dataclass(frozen=True)
+class WebSearchOutcome:
+    result: WebSearchResult
+    request_record_id: UUID
+    ai_action: AIActionRecord
+
+
+WEB_SEARCH_TASK = "web_search"
+_WEB_SEARCH_OVERHEAD_TOKENS = 4000  # runner prompt, result blocks and continuations per call
+
+
+def run_web_search(
+    session: Session, ctx: CallContext, request: WebSearchRequest, *, profile_name: str | None = None
+) -> WebSearchOutcome:
+    """Queries are outbound disclosure: same policy, budget and log as any other AI call (PRD §54)."""
+    chars = sum(len(q) for q in request.queries)
+
+    def worst(profile: ModelProfile) -> Decimal:
+        usage = Usage(_WEB_SEARCH_OVERHEAD_TOKENS * 2, 2000, request.max_searches)
+        return Decimal(str(profile.estimate_cost(usage)))
+
+    attempt = _preflight(
+        session,
+        ctx,
+        task=WEB_SEARCH_TASK,
+        template_version=request.template_version,
+        chars=chars,
+        profile_name=profile_name,
+        worst_case=worst,
     )
+    provider = registry.provider_for(attempt.settings, attempt.profile) if _configured(attempt) else None
+    try:
+        if provider is None or not provider.capabilities().get("web_search"):
+            raise ProviderUnavailableError(f"profile '{attempt.profile.name}' has no web search")
+        result = provider.web_search(request, attempt.profile)
+    except ProviderError as exc:
+        raise attempt.stop(FAILED, exc.kind, exc) from exc
+    attempt.finish(result.usage, result.model, result.request_id)
+    attempt.record.status = SUCCEEDED
+    write_log(attempt.record)
+    return WebSearchOutcome(result, attempt.record.id, attempt.ai_action(ctx, result.provider, result.model))
+
+
+def _configured(attempt: _Attempt) -> bool:
+    return registry.is_configured(attempt.settings, attempt.profile)
 
 
 def validate_output(data: dict[str, Any], schema: dict[str, Any]) -> None:

@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.5.0";
+export const CONTRACT_SCHEMA_VERSION = "0.6.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -103,6 +103,10 @@ export type SourceAssetKind = (typeof SourceAssetKindValues)[number];
 /** Origin of source text (Core §28, FR-INGEST-002). OCR is never automatically exact. */
 export const TextOriginValues = ["NATIVE_DIGITAL", "OCR_EXTRACTED", "HUMAN_TRANSCRIBED"] as const;
 export type TextOrigin = (typeof TextOriginValues)[number];
+
+/** Where a source lead came from. Web results are leads, never evidence (FR-WEB-003). */
+export const SourceLeadOriginValues = ["RESEARCHER_MEMORY", "WEB_SEARCH"] as const;
+export type SourceLeadOrigin = (typeof SourceLeadOriginValues)[number];
 
 /** Researcher memory of a source is a lead until verified (Core §27). */
 export const SourceLeadStateValues = ["SOURCE_LEAD", "VERIFIED", "DISCARDED"] as const;

@@ -36,6 +36,7 @@ class StructuredRequest:
 class Usage:
     input_tokens: int = 0
     output_tokens: int = 0
+    web_search_requests: int = 0
 
 
 @dataclass(frozen=True)
@@ -60,9 +61,42 @@ class ModelProfile:
     input_usd_per_mtok: float = 0.0
     output_usd_per_mtok: float = 0.0
     local: bool = False  # True only for providers that keep data on this machine
+    web_search_usd_per_request: float = 0.0
 
     def estimate_cost(self, usage: Usage) -> float:
-        return (usage.input_tokens * self.input_usd_per_mtok + usage.output_tokens * self.output_usd_per_mtok) / 1e6
+        tokens = (usage.input_tokens * self.input_usd_per_mtok + usage.output_tokens * self.output_usd_per_mtok) / 1e6
+        return tokens + usage.web_search_requests * self.web_search_usd_per_request
+
+
+@dataclass(frozen=True)
+class WebSearchRequest:
+    """Provider-native web search (FR-WEB-002). Queries leave the machine and are disclosure-checked."""
+
+    queries: list[str]
+    max_searches: int
+    languages: list[str] = field(default_factory=list)
+    template_version: str = "web_search@1"
+
+
+@dataclass(frozen=True)
+class WebResult:
+    """A web hit. Untrusted: it becomes a source lead, never evidence (FR-WEB-003)."""
+
+    url: str
+    title: str
+    query: str | None = None
+    page_age: str | None = None
+
+
+@dataclass(frozen=True)
+class WebSearchResult:
+    results: list[WebResult]
+    queries_run: list[str]
+    provider: str
+    model: str
+    usage: Usage = field(default_factory=Usage)
+    request_id: str | None = None
+    failed_queries: list[str] = field(default_factory=list)
 
 
 class ProviderError(Exception):
@@ -89,6 +123,8 @@ class AIProvider(Protocol):
     name: str
 
     def generate_structured(self, request: StructuredRequest, profile: ModelProfile) -> StructuredResult: ...
+
+    def web_search(self, request: WebSearchRequest, profile: ModelProfile) -> WebSearchResult: ...
 
     def healthcheck(self, profile: ModelProfile) -> bool: ...
 

@@ -268,3 +268,63 @@ export type Job = {
 };
 
 export type AIProfile = { name: string; provider: string; model: string; local: boolean; configured: boolean; default: boolean };
+
+export type TrackPlan = { track: string; approach: string; queries: string[] };
+export type ResearchPlan = {
+  id: string;
+  series_id: string;
+  version_number: number;
+  status: "ACTIVE" | "SUPERSEDED";
+  question: string;
+  decision_served: string;
+  question_type: string;
+  risk_impact: string;
+  desired_evidence_types: string[];
+  languages: string[];
+  tracks: TrackPlan[];
+  sufficiency_criteria: string[];
+  max_web_searches: number | null;
+  change_reason: string | null;
+  created_at: string;
+};
+export type SearchRecord = {
+  id: string;
+  plan_id: string | null;
+  track: string | null;
+  question: string;
+  provider: string;
+  queries: string[];
+  languages: string[];
+  outcome: string;
+  result_count: number;
+  scope: string;
+  actor: { kind: string; id: string };
+  performed_at: string;
+};
+export type Sufficiency = {
+  id: string;
+  result: string;
+  considerations: Record<string, string>;
+  rationale: string;
+  recommend_experiment: boolean;
+  assessed_by: { kind: string; id: string };
+  assessed_at: string;
+};
+export type PlanOverview = {
+  plan: ResearchPlan;
+  versions: ResearchPlan[];
+  coverage: { track: string; searches: number; searched: boolean; last_outcome: string | null; execution_failed: boolean }[];
+  web_searches_used: number;
+  searches: SearchRecord[];
+  current_sufficiency: Sufficiency | null;
+  sufficiency_history: Sufficiency[];
+};
+export type SourceLead = {
+  id: string;
+  statement: string;
+  status: string;
+  origin: string;
+  url: string | null;
+  title: string | null;
+  search_record_id: string | null;
+};

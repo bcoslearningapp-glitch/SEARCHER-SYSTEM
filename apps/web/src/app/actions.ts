@@ -314,11 +314,75 @@ export async function judgeReview(_: ActionResult, form: FormData): Promise<Acti
 
 export async function launchAITask(_: ActionResult, form: FormData): Promise<ActionResult> {
   const targetId = optionalText(form, "target_id");
+  const search =
+    text(form, "task") === "web_search"
+      ? {
+          plan_id: optionalText(form, "plan_id") ?? null,
+          track: optionalText(form, "track") ?? null,
+          queries: listField(form, "queries"),
+          languages: listField(form, "languages"),
+        }
+      : {};
   return run(() =>
     apiSend("POST", `${P(form)}/ai-tasks`, {
       task: text(form, "task"),
       target_type: targetId ? text(form, "target_type") : null,
       target_id: targetId ?? null,
+      ...search,
+    }),
+  );
+}
+
+const TRACKS = ["SUPPORT", "CHALLENGE", "ALTERNATIVE_EXPLANATION"] as const;
+
+export async function createResearchPlan(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const budget = optionalText(form, "max_web_searches");
+  return run(() =>
+    apiSend("POST", `${P(form)}/research-plans`, {
+      question: text(form, "question"),
+      decision_served: text(form, "decision_served"),
+      question_type: text(form, "question_type"),
+      risk_impact: text(form, "risk_impact"),
+      desired_evidence_types: listField(form, "desired_evidence_types"),
+      languages: listField(form, "languages"),
+      tracks: TRACKS.map((track) => ({ track, approach: text(form, `approach_${track}`) })),
+      sufficiency_criteria: listField(form, "sufficiency_criteria"),
+      max_web_searches: budget ? Number(budget) : null,
+    }),
+  );
+}
+
+export async function searchLocalLibrary(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/searches/local`, {
+      plan_id: text(form, "plan_id"),
+      track: optionalText(form, "track") ?? null,
+      queries: listField(form, "queries"),
+      languages: listField(form, "languages"),
+    }),
+  );
+}
+
+const CONSIDERATIONS = [
+  "support_evidence",
+  "counter_evidence",
+  "alternative_explanations",
+  "independence",
+  "diversity",
+  "context_fit",
+  "critical_unknowns",
+  "impact",
+  "reversibility",
+  "remaining_uncertainty",
+] as const;
+
+export async function assessSufficiency(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/research-plans/${text(form, "plan_id")}/sufficiency`, {
+      result: text(form, "result"),
+      considerations: Object.fromEntries(CONSIDERATIONS.map((k) => [k, text(form, k)])),
+      rationale: text(form, "rationale"),
+      recommend_experiment: form.get("recommend_experiment") === "on",
     }),
   );
 }
