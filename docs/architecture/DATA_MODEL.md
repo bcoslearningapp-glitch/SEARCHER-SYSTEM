@@ -1,6 +1,6 @@
 # Data Model
 
-Current schema (migrations `0001`–`0009`), by owning module:
+Current schema (migrations `0001`–`0010`), by owning module:
 
 | Migration | Tables | Integrity rules |
 |---|---|---|
@@ -11,6 +11,7 @@ Current schema (migrations `0001`–`0009`), by owning module:
 | 0007 reference, constraints | `foundational_sources`, `quran_surahs`, `quran_ayat`, `hadith_records`, `reference_reviews`, `reference_entries`, `reference_judgments`, `operational_constraints` | Foundational text and judgments append-only; human approval (ADR-009) |
 | 0008 AI gateway | `project_ai_policies`, `ai_requests` | Request log append-only; written in its own transaction (ADR-010) |
 | 0009 research planning | `research_plans`, `search_records`, `sufficiency_assessments`; web-origin columns on `source_leads` | Plan versions immutable except ACTIVE→SUPERSEDED; audit and sufficiency append-only (ADR-012) |
+| 0010 AI tools | `ai_tool_calls` | Append-only; written in its own transaction (ADR-013) |
 
 Conventions:
 - Primary keys are UUIDs (portable IDs, PRD §60.6).

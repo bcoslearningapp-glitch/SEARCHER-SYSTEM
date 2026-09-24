@@ -14,4 +14,7 @@ Principle: the LLM may propose; the application decides whether a proposal can m
 - The model only proposes. Writes go through domain services with the AI principal and gateway provenance: frames as DRAFT, assumptions UNCONFIRMED, evidence CANDIDATE (quote text copied server-side from page spans), competing hypotheses SIGNAL.
 - Invalid output is retried once, then surfaced. A job body is one transaction, so there are no partial writes. Provider failures and budget stops are distinct job failure kinds. A failed challenge records RESEARCH_EXECUTION_FAILURE on its tracks, never "no evidence".
 - Cooperative cancellation (`jobs.raise_if_cancelled`). The UI follows job status from the API while a task is active.
-- Controlled tool registry for agent loops (FR-AI-TOOL-003) is still planned; the current tasks call domain services directly and give the model no tools.
+
+## Controlled tools (implemented — ADR-013)
+- `modules/ai_tools`: READ / PROPOSE / EXTERNAL tools with closed schemas; `invoke` enforces the task allow-list, model provenance for proposals, schema validation and project scoping, and logs every call (append-only `ai_tool_calls`, refused calls included).
+- The orchestrator acts only through the registry; HTTP: `GET /api/v1/ai/tools`, `GET /api/v1/projects/{id}/ai-tool-calls`.

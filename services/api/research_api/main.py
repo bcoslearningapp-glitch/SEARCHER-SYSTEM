@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from research_api import __version__
 from research_api.config import get_settings
 from research_api.modules.ai_gateway.router import router as ai_router
+from research_api.modules.ai_tools.router import router as tools_router
 from research_api.modules.claims_evidence.router import lineage_router
 from research_api.modules.claims_evidence.router import router as claims_router
 from research_api.modules.governance_audit.decisions_router import router as decisions_router
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(ai_router)
     app.include_router(orchestrator_router)
     app.include_router(planning_router)
+    app.include_router(tools_router)
     install_error_handlers(app)
     return app
 
