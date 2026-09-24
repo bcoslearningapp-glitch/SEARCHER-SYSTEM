@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.12.0";
+export const CONTRACT_SCHEMA_VERSION = "0.13.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;

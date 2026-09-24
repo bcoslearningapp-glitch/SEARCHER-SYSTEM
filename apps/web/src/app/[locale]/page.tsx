@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createProject } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
 import { AppShell } from "@/components/AppShell";
+import { ImportPackage } from "@/components/ImportPackage";
 import { Badge, Card, Empty, Field, Select, TextArea, TextInput } from "@/components/fields";
 import { LoadError } from "@/components/LoadError";
 import { StatusPanel } from "@/components/StatusPanel";
@@ -81,6 +82,9 @@ export default async function DeskPage(props: LocaleParams) {
             </ActionForm>
           </Card>
         </div>
+        <Card title={dict.portability.importTitle} testId="import-card">
+          <ImportPackage t={dict.portability} locale={locale} />
+        </Card>
         <StatusPanel result={readiness} dict={dict} />
         <p>
           <Link href={`/${locale}/ai-reliability`} className="text-sm underline">

@@ -88,3 +88,20 @@ test("7. referenced output passes the integrity pipeline, is approved, and expor
   expect(markdown).toContain(`> ${PASSAGE}`);
   expect(markdown).toContain("Cohort study");
 });
+
+test("8. export a Research Core Package; importing it where the project exists never overwrites it", async ({ page, request }) => {
+  const { projectId } = await projectWithEvidence(request);
+  await page.goto(`/en/projects/${projectId}`);
+  const href = await page.getByTestId("export-package").getAttribute("href");
+  const download = await page.request.get(href!);
+  expect(download.ok()).toBeTruthy();
+  expect(download.headers()["content-type"]).toBe("application/zip");
+  const zip = await download.body();
+  expect(zip.subarray(0, 2).toString()).toBe("PK");
+
+  await page.goto("/en");
+  const form = page.getByTestId("import-package");
+  await form.locator('input[type="file"]').setInputFiles({ name: "package.zip", mimeType: "application/zip", buffer: zip });
+  await form.getByRole("button", { name: "Import" }).click();
+  await expect(page.getByTestId("import-card").getByRole("alert")).toContainText("already exists");
+});

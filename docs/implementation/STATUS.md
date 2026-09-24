@@ -59,6 +59,11 @@
   - FAILED blocks approval; warnings need an acknowledged override.
   - Markdown and HTML export, with RTL, verbatim quotes, a reference list built from records, and an integrity footer.
   - Integrity panel and downloads in the UI, E2E flow 7, and contracts 0.12.0.
+- #46: Research Core Package (ADR-022):
+  - Checksummed zip export of the project, the library records it uses, and portable asset files.
+  - Validated import that never overwrites a project and never raises trust. Withheld files become metadata-only sources; foundational texts arrive staged.
+  - Export link and import card in the UI, and E2E flow 8.
+  - The full round trip is tested against a second, freshly migrated database.
 
 ## M4 exit criteria (PRD §76 Phase 4)
 - [x] Complete hypothesis → design → experiment → learning workflow. E2E flow 6 runs through the UI: requirement → concept → design hypothesis → experiment (protocol, approval, run, observation, result, interpretation) → learning review → close → local knowledge → promotion → labelled reuse.
