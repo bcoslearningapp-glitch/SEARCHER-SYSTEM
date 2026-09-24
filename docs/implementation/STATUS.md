@@ -24,6 +24,13 @@
   - Human selection (not a ranking), with an override when the gate needs a human decision.
   - Rejection keeps the concept and its reusable mechanisms.
   - AI PROPOSE tools, a Design tab, E2E flow, and contracts 0.7.0.
+- #34: Design hypotheses and experiments (ADR-016):
+  - Versioned design hypotheses (FR-EXP-001).
+  - A code-enforced twelve-state experiment workflow with a risk-aware Experiment Readiness Gate and human-only approval.
+  - A human-impact review, separate from reference judgment, where external approvals become unresolved operational constraints.
+  - Observations, analysed results and interpretations kept as distinct append-only records.
+  - Invalidated experiments never change the hypothesis' state.
+  - AI PROPOSE tools, an Experiments tab, E2E flow, and contracts 0.8.0.
 
 ## Phase 3 progress
 - #21: AI gateway (ADR-010). Anthropic and OpenAI adapters behind a provider-neutral interface, with Anthropic server-side refusal fallback enabled. Configurable model profiles; mock provider only when explicitly enabled. Untrusted-source prompt isolation and secret redaction. PRD §54 disclosure policy, human-set project AI policy (consent, allowed profiles, budgets), `STOPPED_RESOURCE_CONSTRAINT` on budget exhaustion. Append-only disclosure/usage log. Schema validation before any caller can use output. Bounded live provider-contract suite.

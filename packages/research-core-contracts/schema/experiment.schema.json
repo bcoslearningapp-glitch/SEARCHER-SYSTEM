@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/experiment.schema.json",
+  "title": "Research Core design hypotheses, experiments, human-impact review, observations, results and interpretations",
+  "$defs": {
+    "DesignHypothesisContent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intervention", "target_population", "context", "mechanism", "expected_outcome", "measurement_plan"],
+      "properties": {
+        "intervention": { "type": "string", "minLength": 1 },
+        "target_population": { "type": "string", "minLength": 1 },
+        "context": { "type": "string", "minLength": 1 },
+        "mechanism": { "type": "string", "minLength": 1 },
+        "expected_outcome": { "type": "string", "minLength": 1 },
+        "measurement_plan": { "type": "string", "minLength": 1 },
+        "failure_conditions": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "side_effects": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "stop_conditions": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "DesignHypothesis": {
+      "description": "A testable claim about a design concept (Core §49, FR-EXP-001). Its epistemic state changes only by human assessment of interpretations.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "concept_id", "current_version", "content", "affects_people", "epistemic_state", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "concept_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "current_version": { "type": "integer", "minimum": 1 },
+        "content": { "$ref": "#/$defs/DesignHypothesisContent" },
+        "affects_people": { "type": "boolean" },
+        "epistemic_state": { "$ref": "enums.schema.json#/$defs/HypothesisEpistemicState" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      }
+    },
+    "ExperimentProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": { "type": "string" },
+        "sample": { "type": "string" },
+        "duration": { "type": "string" },
+        "data_collected": { "type": "string" },
+        "analysis_plan": { "type": "string" },
+        "success_criteria": { "type": "string" }
+      }
+    },
+    "Experiment": {
+      "description": "An experiment testing a design hypothesis (Core §50, FR-EXP-002). INVALIDATED is not a failed test of the hypothesis (FR-EXP-004).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "design_hypothesis_id", "title", "protocol", "state", "affects_people", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "design_hypothesis_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "title": { "type": "string", "minLength": 1 },
+        "protocol": { "$ref": "#/$defs/ExperimentProtocol" },
+        "state": { "$ref": "enums.schema.json#/$defs/ExperimentState" },
+        "affects_people": { "type": "boolean" },
+        "invalidation_reason": { "type": "string", "minLength": 1 },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      },
+      "allOf": [
+        {
+          "description": "An invalidated experiment records why.",
+          "if": { "properties": { "state": { "const": "INVALIDATED" } }, "required": ["state"] },
+          "then": { "required": ["invalidation_reason"] }
+        }
+      ]
+    },
+    "HumanImpactAssessment": {
+      "description": "One dimension of the human-impact review (Core §51, FR-HUMAN-001..003). Logically separate from reference judgments.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "experiment_id", "dimension", "finding", "note", "assessed_by", "assessed_at"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "experiment_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "dimension": { "$ref": "enums.schema.json#/$defs/HumanImpactDimension" },
+        "finding": { "$ref": "enums.schema.json#/$defs/HumanImpactFinding" },
+        "note": { "type": "string", "minLength": 1 },
+        "external_authority": { "type": "string", "minLength": 1 },
+        "operational_constraint_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "assessed_by": { "$ref": "common.schema.json#/$defs/Actor" },
+        "assessed_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [
+        {
+          "description": "An external approval names the authority and is tracked as an operational requirement.",
+          "if": { "properties": { "finding": { "const": "REQUIRES_EXTERNAL_APPROVAL" } }, "required": ["finding"] },
+          "then": { "required": ["external_authority", "operational_constraint_id"] }
+        },
+        {
+          "properties": { "assessed_by": { "properties": { "kind": { "const": "HUMAN" } } } }
+        }
+      ]
+    },
+    "Observation": {
+      "description": "What was observed, recorded as it happened (FR-EXP-003). Append-only; never AI-generated.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "experiment_id", "description", "observed_at", "recorded_by"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "experiment_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "description": { "type": "string", "minLength": 1 },
+        "measurements": { "type": "object" },
+        "observed_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+        "recorded_by": { "$ref": "common.schema.json#/$defs/Actor" }
+      }
+    },
+    "ExperimentResult": {
+      "description": "An analysed result derived from named observations (FR-EXP-003).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "experiment_id", "observation_ids", "method", "summary", "recorded_by"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "experiment_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "observation_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" }, "minItems": 1 },
+        "method": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "values": { "type": "object" },
+        "recorded_by": { "$ref": "common.schema.json#/$defs/Actor" }
+      }
+    },
+    "Interpretation": {
+      "description": "A human reading of analysed results for the design hypothesis (FR-EXP-003).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "experiment_id", "result_ids", "outcome", "statement", "interpreted_by"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "experiment_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "result_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" }, "minItems": 1 },
+        "outcome": { "$ref": "enums.schema.json#/$defs/InterpretationOutcome" },
+        "statement": { "type": "string", "minLength": 1 },
+        "limitations": { "type": "string" },
+        "interpreted_by": { "$ref": "common.schema.json#/$defs/Actor" }
+      },
+      "allOf": [{ "properties": { "interpreted_by": { "properties": { "kind": { "const": "HUMAN" } } } } }]
+    }
+  }
+}

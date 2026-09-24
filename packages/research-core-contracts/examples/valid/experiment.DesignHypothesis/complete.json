@@ -1,0 +1,33 @@
+{
+  "id": "7c8d9e0f-1a2b-4c3d-8e4f-5a6b7c8d9e01",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "concept_id": "6b7c8d9e-0f1a-4b2c-9d3e-4f5a6b7c8d90",
+  "current_version": 1,
+  "content": {
+    "intervention": "Weekly buddy check-in",
+    "target_population": "Second-year apprentices",
+    "context": "Construction sites",
+    "mechanism": "Peer accountability",
+    "expected_outcome": "Attendance stays above 90%",
+    "measurement_plan": "Weekly attendance records",
+    "failure_conditions": [
+      "Attendance below 80% after 8 weeks"
+    ],
+    "side_effects": [
+      "Buddy workload"
+    ],
+    "stop_conditions": [
+      "Any safeguarding concern"
+    ]
+  },
+  "affects_people": true,
+  "epistemic_state": "UNRESOLVED",
+  "provenance": {
+    "kind": "HUMAN_INPUT",
+    "actor": {
+      "kind": "HUMAN",
+      "id": "local-owner",
+      "role": "RESEARCHER"
+    }
+  }
+}

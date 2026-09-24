@@ -5,6 +5,7 @@ import type {
   DesignOrigin,
   DesignRequirementBasis,
   DesignRequirementStatus,
+  ExperimentState,
   IngestionStatus,
   NotificationLevel,
   ProblemFrameStatus,
@@ -442,4 +443,56 @@ export type GateEvaluation = {
   risk_level: RiskLevel;
   findings: GateFinding[];
   evaluated_at: string;
+};
+
+export type DesignHypothesisContent = {
+  intervention: string;
+  target_population: string;
+  context: string;
+  mechanism: string;
+  expected_outcome: string;
+  measurement_plan: string;
+  failure_conditions: string[];
+  side_effects: string[];
+  stop_conditions: string[];
+};
+
+export type DesignHypothesis = {
+  id: string;
+  concept_id: string;
+  current_version: number;
+  content: DesignHypothesisContent;
+  affects_people: boolean;
+  epistemic_state: string;
+  provenance: { kind: string };
+};
+
+export type ExperimentProtocol = Record<"method" | "sample" | "duration" | "data_collected" | "analysis_plan" | "success_criteria", string>;
+
+export type Experiment = {
+  id: string;
+  design_hypothesis_id: string;
+  title: string;
+  protocol: ExperimentProtocol;
+  state: ExperimentState;
+  paused_from: ExperimentState | null;
+  affects_people: boolean;
+  invalidation_reason: string | null;
+  provenance: { kind: string };
+  transitions: { from_state: string; to_state: string; reason: string | null; created_at: string; actor: Actor }[];
+};
+
+export type ExperimentRecord = {
+  human_impact: {
+    id: string;
+    dimension: string;
+    finding: string;
+    note: string;
+    external_authority: string | null;
+    operational_constraint_id: string | null;
+    assessed_at: string;
+  }[];
+  observations: { id: string; description: string; measurements: Record<string, unknown> | null; observed_at: string }[];
+  results: { id: string; observation_ids: string[]; method: string; summary: string }[];
+  interpretations: { id: string; result_ids: string[]; outcome: string; statement: string; limitations: string | null }[];
 };

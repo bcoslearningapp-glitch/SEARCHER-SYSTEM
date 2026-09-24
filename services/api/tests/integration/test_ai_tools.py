@@ -211,3 +211,25 @@ def test_design_proposals_through_tools_stay_reviewable(client: TestClient, sess
     assert stored["origin"] == "AI" and stored["provenance"]["kind"] == "AI_GENERATED"
     with pytest.raises(ToolInputError):
         registry.invoke(session, ctx, "propose_design_requirement", {"statement": "x", "traces": []})
+
+
+def test_experiment_proposals_through_tools_stay_proposed(client: TestClient, session: Session) -> None:
+    pid = _project(client)
+    concept = client.post(f"/api/v1/projects/{pid}/design/concepts", json={"title": "t", "description": "d"}).json()
+    ctx = _ctx(pid, "propose_design_hypothesis", "propose_experiment", action=True)
+    content = {
+        k: "x"
+        for k in ("intervention", "target_population", "context", "mechanism", "expected_outcome", "measurement_plan")
+    } | {"failure_conditions": ["f"], "side_effects": [], "stop_conditions": ["s"]}
+    dh = registry.invoke(
+        session,
+        ctx,
+        "propose_design_hypothesis",
+        {"concept_id": concept["id"], "affects_people": True, "content": content},
+    )
+    experiment = registry.invoke(
+        session, ctx, "propose_experiment", {"design_hypothesis_id": dh["design_hypothesis_id"], "title": "Pilot"}
+    )
+    assert experiment["state"] == "PROPOSED"
+    stored = client.get(f"/api/v1/projects/{pid}/experiments/{experiment['experiment_id']}").json()
+    assert stored["affects_people"] is True and stored["provenance"]["kind"] == "AI_GENERATED"

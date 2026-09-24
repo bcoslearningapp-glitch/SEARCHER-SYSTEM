@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.7.0"
+CONTRACT_SCHEMA_VERSION = "0.8.0"
 
 
 class ProjectStatus(StrEnum):
@@ -644,6 +644,7 @@ class EvidenceTargetType(StrEnum):
     HYPOTHESIS = "HYPOTHESIS"
     MECHANISM = "MECHANISM"
     DESIGN_CONCEPT = "DESIGN_CONCEPT"
+    DESIGN_HYPOTHESIS = "DESIGN_HYPOTHESIS"
 
 
 class DesignRequirementBasis(StrEnum):
@@ -702,6 +703,37 @@ class RejectionGround(StrEnum):
     OPERATIONAL = "OPERATIONAL"
     FEASIBILITY = "FEASIBILITY"
     OTHER = "OTHER"
+
+
+class HumanImpactDimension(StrEnum):
+    """What a human-impact review inspects when people are affected (Core §51, FR-HUMAN-001). Distinct from the reference judgment (FR-HUMAN-002)."""
+
+    PRIVACY = "PRIVACY"
+    CONSENT = "CONSENT"
+    HARM = "HARM"
+    AUTHORITY = "AUTHORITY"
+    LAW_AND_POLICY = "LAW_AND_POLICY"
+    DATA_HANDLING = "DATA_HANDLING"
+    INSTITUTIONAL_APPROVAL = "INSTITUTIONAL_APPROVAL"
+    REVERSIBILITY = "REVERSIBILITY"
+
+
+class HumanImpactFinding(StrEnum):
+    """Outcome of one human-impact dimension; REQUIRES_EXTERNAL_APPROVAL becomes an unresolved operational requirement (FR-HUMAN-003)."""
+
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    ADDRESSED = "ADDRESSED"
+    CONCERN = "CONCERN"
+    REQUIRES_EXTERNAL_APPROVAL = "REQUIRES_EXTERNAL_APPROVAL"
+
+
+class InterpretationOutcome(StrEnum):
+    """What a human interpretation concludes about the design hypothesis from analysed results (FR-EXP-003)."""
+
+    SUPPORTS = "SUPPORTS"
+    CONTRADICTS = "CONTRADICTS"
+    INCONCLUSIVE = "INCONCLUSIVE"
+    QUALIFIES = "QUALIFIES"
 
 
 class FoundationalSourceStatus(StrEnum):
