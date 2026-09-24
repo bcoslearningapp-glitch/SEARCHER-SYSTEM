@@ -11,6 +11,12 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
+from research_api.modules.ai_gateway.base import (
+    ProviderError,
+    ProviderOutputError,
+    ProviderRefusalError,
+    ProviderUnavailableError,
+)
 from research_api.modules.governance_audit.policy import PolicyViolationError
 
 
@@ -49,6 +55,22 @@ def install_error_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=exc.status_code,
             content={"error": {"code": exc.code, "message": exc.message, "details": exc.details}},
+        )
+
+    @app.exception_handler(ProviderError)
+    async def _provider(_: Request, exc: ProviderError) -> JSONResponse:
+        # Provider failures are distinct from application errors (PRD §72); no provider text is echoed.
+        if isinstance(exc, ProviderUnavailableError):
+            code, status_code = "provider_unavailable", status.HTTP_503_SERVICE_UNAVAILABLE
+        elif isinstance(exc, ProviderRefusalError):
+            code, status_code = "provider_refusal", status.HTTP_422_UNPROCESSABLE_CONTENT
+        elif isinstance(exc, ProviderOutputError):
+            code, status_code = "invalid_structured_output", status.HTTP_502_BAD_GATEWAY
+        else:
+            code, status_code = "provider_error", status.HTTP_502_BAD_GATEWAY
+        return JSONResponse(
+            status_code=status_code,
+            content={"error": {"code": code, "message": str(exc), "details": {"kind": exc.kind}}},
         )
 
     @app.exception_handler(IntegrityError)

@@ -1,6 +1,6 @@
 # Status
 
-**Current milestone:** M2 Reference, Evidence, Hypothesis (v0.3.0) — feature-complete with this PR. Next: M3 AI Research Engine.
+**Current milestone:** M3 AI Research Engine (v0.4.0) — in progress. M2 is feature-complete.
 
 ## Completed
 - M0 Foundation — #1.
@@ -13,7 +13,11 @@
 - #14, #15 — #18: evidence pipeline (candidate → human assessment → evidence), exact quotes copied from verified page spans, lineage-based independence, counter-evidence tracks, hypotheses with immutable versions / Hypothesis Gate / automatic downgrade on new evidence, mechanisms.
 
 - #12, #13 — #19: foundational library with human-approved Qur'an dataset import (no bundled text), exact ayah retrieval, Hadith records with edition numbering, layered reference review, human judgments with blocking reservations → blocking decisions, risk-aware Reference Gate wired into design eligibility, operational constraints kept separate (Scenarios E and F).
-- #16 (this PR): Lab (claims, assumptions with human review, hypotheses, mechanisms), hypothesis workspace (evidence map with candidates and acceptance, searches, reference review and judgments, standing, versions, assessment, revision), Map; E2E flows 4 and 5.
+- #16 — #20: Lab (claims, assumptions with human review, hypotheses, mechanisms), hypothesis workspace (evidence map with candidates and acceptance, searches, reference review and judgments, standing, versions, assessment, revision), Map; E2E flows 4 and 5.
+
+## Phase 3 progress
+- #21: AI gateway (ADR-010). Anthropic and OpenAI adapters behind a provider-neutral interface, with Anthropic server-side refusal fallback enabled. Configurable model profiles; mock provider only when explicitly enabled. Untrusted-source prompt isolation and secret redaction. PRD §54 disclosure policy, human-set project AI policy (consent, allowed profiles, budgets), `STOPPED_RESOURCE_CONSTRAINT` on budget exhaustion. Append-only disclosure/usage log. Schema validation before any caller can use output. Bounded live provider-contract suite.
+- Fix: request transactions now commit before the HTTP response is sent (a race seen in E2E under parallel workers).
 
 ## M2 exit criteria (PRD §76 Phase 2)
 - [x] reference review trace is source → interpretation → system inference → judgment (layers, ADR-009)
@@ -29,6 +33,7 @@
 ## Blocked (needs a human)
 - Tag `v0.2.0` on `5b7e7a2` (M1) and `v0.3.0` after this PR merges (M2): this session can only push its working branch.
 - Import and approve the Qur'an text dataset (Constitutional Authority) — see ADR-009.
+- Add `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` as secrets of the protected `integration` environment so the provider-contract workflow can run; set them in your local `.env` to use cloud AI.
 - P0-12 protect `main` with required checks (repository admin settings).
 
 ## Next

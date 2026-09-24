@@ -54,6 +54,21 @@ class Settings(BaseSettings):
     anthropic_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None
 
+    # Model profiles (PRD §46.2, ADR-010). Model ids and prices are configuration, not product logic.
+    ai_default_profile: str = "anthropic-default"
+    anthropic_model: str = "claude-opus-5"
+    anthropic_effort: str = "high"
+    anthropic_input_usd_per_mtok: float = 5.0
+    anthropic_output_usd_per_mtok: float = 25.0
+    openai_model: str = "gpt-5"
+    openai_effort: str = "high"
+    openai_input_usd_per_mtok: float = 1.25
+    openai_output_usd_per_mtok: float = 10.0
+    ai_max_output_tokens: int = 16000
+    ai_request_timeout_seconds: float = 300.0
+    # Deterministic mock provider for CI/E2E/demos. Never enabled implicitly.
+    ai_mock_enabled: bool = False
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
