@@ -64,6 +64,14 @@ export type ExperimentStrings = {
   limitations: string;
   fromResults: string;
   none: string;
+  learningReview: string;
+  learningExplainer: string;
+  learned: string;
+  hypothesisEffect: string;
+  surprises: string;
+  reviewLimitations: string;
+  validityThreats: string;
+  nextSteps: string;
 };
 
 export const experimentsEn: ExperimentStrings = {
@@ -136,6 +144,14 @@ export const experimentsEn: ExperimentStrings = {
   limitations: "Limitations",
   fromResults: "From results",
   none: "None yet.",
+  learningReview: "Learning review",
+  learningExplainer: "Required to close an experiment (Learning Integrity Gate). Also useful for aborted or invalidated ones.",
+  learned: "What was learned",
+  hypothesisEffect: "What it means for the design hypothesis",
+  surprises: "Surprises",
+  reviewLimitations: "Limitations",
+  validityThreats: "Threats to validity",
+  nextSteps: "Next steps",
 };
 
 export const experimentsFr: ExperimentStrings = {
@@ -208,6 +224,14 @@ export const experimentsFr: ExperimentStrings = {
   limitations: "Limites",
   fromResults: "À partir des résultats",
   none: "Rien pour l'instant.",
+  learningReview: "Revue d'apprentissage",
+  learningExplainer: "Requise pour clôturer une expérience (porte d'intégrité de l'apprentissage). Utile aussi pour les expériences abandonnées ou invalidées.",
+  learned: "Ce qui a été appris",
+  hypothesisEffect: "Ce que cela signifie pour l'hypothèse de conception",
+  surprises: "Surprises",
+  reviewLimitations: "Limites",
+  validityThreats: "Menaces à la validité",
+  nextSteps: "Prochaines étapes",
 };
 
 export const experimentsAr: ExperimentStrings = {
@@ -280,4 +304,12 @@ export const experimentsAr: ExperimentStrings = {
   limitations: "الحدود",
   fromResults: "من النتائج",
   none: "لا شيء بعد.",
+  learningReview: "مراجعة التعلّم",
+  learningExplainer: "مطلوبة لإغلاق التجربة (بوابة سلامة التعلّم). ومفيدة أيضًا للتجارب الموقوفة أو الملغاة.",
+  learned: "ما تم تعلّمه",
+  hypothesisEffect: "ماذا يعني ذلك لفرضية التصميم",
+  surprises: "مفاجآت",
+  reviewLimitations: "الحدود",
+  validityThreats: "تهديدات الصلاحية",
+  nextSteps: "الخطوات التالية",
 };

@@ -164,3 +164,19 @@ class Interpretation(UUIDPrimaryKeyMixin, Base):
     limitations: Mapped[str | None] = mapped_column(Text)
     interpreted_by: Mapped[dict[str, Any]] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class LearningReview(UUIDPrimaryKeyMixin, Base):
+    """Human review that closes an experiment; append-only, the latest counts."""
+
+    __tablename__ = "learning_reviews"
+
+    experiment_id: Mapped[UUID] = mapped_column(ForeignKey("experiments.id"), index=True)
+    learned: Mapped[str] = mapped_column(Text)
+    hypothesis_effect: Mapped[str] = mapped_column(Text)
+    surprises: Mapped[str | None] = mapped_column(Text)
+    limitations: Mapped[list[str]] = mapped_column(JSONB)
+    validity_threats: Mapped[list[str]] = mapped_column(JSONB)
+    next_steps: Mapped[list[str]] = mapped_column(JSONB)
+    reviewed_by: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

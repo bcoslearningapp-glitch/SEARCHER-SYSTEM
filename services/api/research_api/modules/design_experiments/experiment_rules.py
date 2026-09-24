@@ -56,6 +56,8 @@ class ReadinessInput:
     observations: int = 0
     results: int = 0
     interpretations: int = 0
+    learning_reviews: int = 0
+    review_limitations: int = 0
 
 
 Add = Callable[[str, G, str], None]
@@ -120,6 +122,15 @@ def _running(data: ReadinessInput, add: Add) -> None:
         add("reference.not_cleared", G.BLOCKED, "Reference review is BLOCKED.")
 
 
+def _learning(data: ReadinessInput, add: Add) -> None:
+    """Learning Integrity Gate: an experiment closes only through a human learning review."""
+    if not data.learning_reviews:
+        add("learning.missing", G.BLOCKED, "Record a learning review before closing the experiment.")
+    elif not data.review_limitations:
+        severity = G.NEEDS_HUMAN_DECISION if data.risk in HIGH_RISK else G.PASS_WITH_RESERVATIONS
+        add("learning.no_limitations", severity, "The learning review names no limitations.")
+
+
 def evaluate(data: ReadinessInput) -> tuple[G, list[GateFinding]]:
     findings: list[GateFinding] = []
 
@@ -140,6 +151,8 @@ def evaluate(data: ReadinessInput) -> tuple[G, list[GateFinding]]:
             G.BLOCKED,
             "Interpreting needs at least one analysed result and one interpretation.",
         )
+    elif data.target is E.CLOSED:
+        _learning(data, add)
     for severity in (G.BLOCKED, G.NEEDS_HUMAN_DECISION, G.PASS_WITH_RESERVATIONS):
         if any(f.severity is severity for f in findings):
             return severity, findings

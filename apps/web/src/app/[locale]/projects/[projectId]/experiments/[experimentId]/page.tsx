@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   assessHumanImpact,
   recordInterpretation,
+  recordLearningReview,
   recordObservation,
   recordResult,
   transitionExperiment,
@@ -64,7 +65,7 @@ export default async function ExperimentPage(props: Props) {
   ]);
   if (project === null || experiment === null) notFound();
   const dh = await load<DesignHypothesis>(`${base}/design-hypotheses/${experiment.design_hypothesis_id}`);
-  const data = record ?? { human_impact: [], observations: [], results: [], interpretations: [] };
+  const data = record ?? { human_impact: [], observations: [], results: [], interpretations: [], learning_reviews: [] };
   const hidden = (
     <>
       <input type="hidden" name="project_id" value={projectId} />
@@ -292,6 +293,47 @@ export default async function ExperimentPage(props: Props) {
                 <Field label={x.limitations}>
                   <TextInput name="limitations" />
                 </Field>
+              </ActionForm>
+            ) : null}
+          </Card>
+          <Card title={x.learningReview} testId="learning-review">
+            <p className="text-sm text-[var(--color-muted)]">{x.learningExplainer}</p>
+            {data.learning_reviews.length ? (
+              <ul className="space-y-2 text-sm">
+                {data.learning_reviews.map((r) => (
+                  <li key={r.id} className="space-y-1">
+                    <p dir="auto">{r.learned}</p>
+                    <p dir="auto" className="text-xs">
+                      {x.hypothesisEffect}: {r.hypothesis_effect}
+                    </p>
+                    {r.limitations.length ? (
+                      <p dir="auto" className="text-xs">
+                        {x.reviewLimitations}: {r.limitations.join("; ")}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Empty>{x.none}</Empty>
+            )}
+            {["INTERPRETED", "ABORTED", "INVALIDATED"].includes(experiment.state) ? (
+              <ActionForm action={recordLearningReview} submitLabel={x.record} pendingLabel={x.saving} testId="learning-form">
+                {hidden}
+                <Field label={x.learned}>
+                  <TextArea name="learned" rows={2} required />
+                </Field>
+                <Field label={x.hypothesisEffect}>
+                  <TextInput name="hypothesis_effect" required />
+                </Field>
+                <Field label={x.surprises}>
+                  <TextInput name="surprises" />
+                </Field>
+                {(["limitations", "validity_threats", "next_steps"] as const).map((f) => (
+                  <Field key={f} label={{ limitations: x.reviewLimitations, validity_threats: x.validityThreats, next_steps: x.nextSteps }[f]} hint={x.listHint}>
+                    <TextArea name={f} rows={2} />
+                  </Field>
+                ))}
               </ActionForm>
             ) : null}
           </Card>

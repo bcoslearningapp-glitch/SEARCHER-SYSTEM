@@ -23,6 +23,8 @@ from research_api.modules.design_experiments.experiment_schemas import (
     ImpactOut,
     InterpretationIn,
     InterpretationOut,
+    LearningReviewIn,
+    LearningReviewOut,
     ObservationIn,
     ObservationOut,
     ProtocolUpdate,
@@ -133,3 +135,14 @@ def record_interpretation(
     project_id: UUID, experiment_id: UUID, data: InterpretationIn, db: DB, who: Who
 ) -> InterpretationOut:
     return service.record_interpretation(db, who, project_id, experiment_id, data)
+
+
+@router.post(
+    "/experiments/{experiment_id}/learning-reviews",
+    response_model=LearningReviewOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def record_learning_review(
+    project_id: UUID, experiment_id: UUID, data: LearningReviewIn, db: DB, who: Who
+) -> LearningReviewOut:
+    return service.record_learning_review(db, who, project_id, experiment_id, data)

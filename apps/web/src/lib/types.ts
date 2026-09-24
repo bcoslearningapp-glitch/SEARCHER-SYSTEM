@@ -6,6 +6,8 @@ import type {
   DesignRequirementBasis,
   DesignRequirementStatus,
   ExperimentState,
+  KnowledgeLifecycleStage,
+  KnowledgeStatus,
   IngestionStatus,
   NotificationLevel,
   ProblemFrameStatus,
@@ -495,4 +497,51 @@ export type ExperimentRecord = {
   observations: { id: string; description: string; measurements: Record<string, unknown> | null; observed_at: string }[];
   results: { id: string; observation_ids: string[]; method: string; summary: string }[];
   interpretations: { id: string; result_ids: string[]; outcome: string; statement: string; limitations: string | null }[];
+  learning_reviews: {
+    id: string;
+    learned: string;
+    hypothesis_effect: string;
+    surprises: string | null;
+    limitations: string[];
+    validity_threats: string[];
+    next_steps: string[];
+    created_at: string;
+  }[];
+};
+
+export type KnowledgeBasis = { entity_type: string; entity_id: string; context?: string | null; note?: string | null };
+
+export type KnowledgeItem = {
+  id: string;
+  project_id: string;
+  current_version: number;
+  statement: string;
+  stage: KnowledgeLifecycleStage;
+  status: KnowledgeStatus;
+  effective_status: KnowledgeStatus;
+  revalidation_due: boolean;
+  scope: string;
+  contexts: string[];
+  evidence_basis: KnowledgeBasis[];
+  contrary_evidence: KnowledgeBasis[];
+  contrary_evidence_searched: boolean;
+  confidence: string;
+  temporal_profile: string;
+  last_verified_at: string | null;
+  revalidation_interval_days: number | null;
+  provenance: { kind: string };
+};
+
+export type KnowledgeReuse = {
+  id: string;
+  knowledge_item_id: string;
+  statement: string;
+  source_project_id: string;
+  stage: KnowledgeLifecycleStage;
+  effective_status: KnowledgeStatus;
+  transferability: string;
+  rationale: string;
+  differences: string | null;
+  label: string;
+  direct_evidence: false;
 };
