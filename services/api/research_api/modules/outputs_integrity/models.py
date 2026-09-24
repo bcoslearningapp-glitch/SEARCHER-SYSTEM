@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, false
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -38,6 +38,19 @@ class OutputVersion(UUIDPrimaryKeyMixin, Base):
     status: Mapped[str] = mapped_column(String(20), index=True)
     blocks: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
     change_reason: Mapped[str | None] = mapped_column(Text)
+    edited: Mapped[bool] = mapped_column(Boolean, server_default=false(), default=False)
     approval_id: Mapped[UUID | None]
     created_by: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class IntegrityRun(UUIDPrimaryKeyMixin, Base):
+    """One run of the eight-step integrity pipeline on a version (FR-OUT-002). Append-only."""
+
+    __tablename__ = "output_integrity_runs"
+
+    output_version_id: Mapped[UUID] = mapped_column(ForeignKey("output_versions.id"), index=True)
+    status: Mapped[str] = mapped_column(String(30))
+    steps: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    run_by: Mapped[dict[str, Any]] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

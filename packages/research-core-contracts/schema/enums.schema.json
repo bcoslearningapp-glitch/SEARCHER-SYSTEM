@@ -776,6 +776,24 @@
       "type": "string",
       "enum": ["EXCERPT", "QURAN", "HADITH"]
     },
+    "IntegrityStep": {
+      "description": "The output integrity pipeline, in order (FR-OUT-002).",
+      "type": "string",
+      "enum": [
+        "CLAIM_VERIFICATION", "CITATION_VERIFICATION", "EXACT_QUOTE_VERIFICATION", "REFERENCE_INTEGRITY",
+        "TERMINOLOGY_CHECK", "TRANSLATION_SEMANTIC_CHECK", "LANGUAGE_EDITING", "FINAL_RENDERING"
+      ]
+    },
+    "IntegrityStepStatus": {
+      "description": "Result of one integrity step.",
+      "type": "string",
+      "enum": ["PASS", "WARN", "FAIL", "SKIPPED"]
+    },
+    "IntegrityStatus": {
+      "description": "Overall integrity of an output version; FAILED cannot be approved (FR-OUT-002).",
+      "type": "string",
+      "enum": ["VERIFIED", "VERIFIED_WITH_WARNINGS", "FAILED"]
+    },
     "FoundationalSourceStatus": {
       "description": "Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003).",
       "type": "string",

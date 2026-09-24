@@ -54,6 +54,11 @@
   - Every claim traced; exact quotes (excerpt, Qur'an, Hadith) copied from source and re-verified on every revision and at approval.
   - Immutable versions; human-only approval.
   - Outputs tab, E2E, and contracts 0.11.0.
+- #44, #45: Output integrity pipeline and export (ADR-021):
+  - The eight FR-OUT-002 steps run in order on each version, with append-only run records.
+  - FAILED blocks approval; warnings need an acknowledged override.
+  - Markdown and HTML export, with RTL, verbatim quotes, a reference list built from records, and an integrity footer.
+  - Integrity panel and downloads in the UI, E2E flow 7, and contracts 0.12.0.
 
 ## M4 exit criteria (PRD §76 Phase 4)
 - [x] Complete hypothesis → design → experiment → learning workflow. E2E flow 6 runs through the UI: requirement → concept → design hypothesis → experiment (protocol, approval, run, observation, result, interpretation) → learning review → close → local knowledge → promotion → labelled reuse.

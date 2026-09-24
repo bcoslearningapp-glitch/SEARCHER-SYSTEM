@@ -703,3 +703,10 @@ def count_candidates(session: Session, project_id: UUID) -> int:
         select(Evidence.id).where(Evidence.project_id == project_id, Evidence.status == EvidenceStatus.CANDIDATE.value)
     )
     return len(list(rows))
+
+
+def get_evidence(session: Session, project_id: UUID, evidence_id: UUID) -> EvidenceOut:
+    item = session.get(Evidence, evidence_id)
+    if item is None or item.project_id != project_id:
+        raise NotFoundError("evidence not found")
+    return EvidenceOut.model_validate(item)

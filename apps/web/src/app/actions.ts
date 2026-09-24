@@ -739,5 +739,14 @@ export async function setOutputMode(_: ActionResult, form: FormData): Promise<Ac
 }
 
 export async function approveOutputVersion(_: ActionResult, form: FormData): Promise<ActionResult> {
-  return run(() => apiSend("POST", `${O(form)}/versions/${text(form, "version_id")}/approve`, { reason: optionalText(form, "reason") }));
+  return run(() =>
+    apiSend("POST", `${O(form)}/versions/${text(form, "version_id")}/approve`, {
+      reason: optionalText(form, "reason"),
+      acknowledge_warnings: form.get("acknowledge_warnings") === "on",
+    }),
+  );
+}
+
+export async function runOutputIntegrity(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("POST", `${O(form)}/versions/${text(form, "version_id")}/integrity`, {}));
 }
