@@ -1,4 +1,4 @@
-"""'Needs Your Attention' queue (PRD §65): pending approvals, blocking decisions, access requests.
+"""'Needs Your Attention' queue (PRD §65): approvals, blocking decisions, access requests, due revalidations.
 
 Aggregates other modules through their public services only.
 """
@@ -18,6 +18,7 @@ from research_api.contracts.enums import (
     SourceAccessRequestStatus,
 )
 from research_api.modules.governance_audit import service as governance
+from research_api.modules.knowledge_memory import service as knowledge
 from research_api.modules.project_workflow import service as projects
 from research_api.modules.sources_library import service as sources
 from research_api.platform.db import DBSession
@@ -70,6 +71,16 @@ def attention_queue(session: Session, project_id: UUID) -> list[AttentionItem]:
                     entity_id=request.id,
                 )
             )
+    for item in knowledge.revalidation_due(session, project_id):
+        items.append(
+            AttentionItem(
+                kind="revalidation",
+                level=NotificationLevel.ATTENTION,
+                title=f"Knowledge needs revalidation: {item.statement[:120]}",
+                entity_type="KnowledgeItem",
+                entity_id=item.id,
+            )
+        )
     return sorted(items, key=lambda i: _LEVEL_ORDER.index(i.level))
 
 

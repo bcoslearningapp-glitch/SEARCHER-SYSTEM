@@ -135,6 +135,13 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("experiment.observe", A.FORBIDDEN),
         _p("experiment.analyse", A.FORBIDDEN),
         _p("experiment.interpret", A.FORBIDDEN),
+        _p("experiment.learning_review", A.FORBIDDEN),
+        # local knowledge (PRD §35): AI may record findings; promotion, standing and reuse are human
+        _p("knowledge.create", A.ACT_AND_NOTIFY),
+        _p("knowledge.revise", A.FORBIDDEN),
+        _p("knowledge.promote", A.FORBIDDEN, approval=True),
+        _p("knowledge.standing", A.FORBIDDEN),
+        _p("knowledge.reuse", A.FORBIDDEN),
         _p("source.catalog", A.ACT_AND_NOTIFY),
         _p("source.catalog_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),
         _p("source.upload_asset", A.FORBIDDEN),

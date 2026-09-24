@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.8.0"
+CONTRACT_SCHEMA_VERSION = "0.9.0"
 
 
 class ProjectStatus(StrEnum):

@@ -104,3 +104,11 @@ def test_data_and_interpretation_prerequisites() -> None:
     assert _codes(_input(E.DATA_COLLECTION_COMPLETE, observations=3))[0] is G.PASS
     assert _codes(_input(E.INTERPRETED, results=1)) == (G.BLOCKED, {"interpretation.missing"})
     assert _codes(_input(E.INTERPRETED, results=1, interpretations=1))[0] is G.PASS
+
+
+def test_learning_integrity_gate_closes_only_with_a_review() -> None:
+    assert _codes(_input(E.CLOSED)) == (G.BLOCKED, {"learning.missing"})
+    reviewed = _input(E.CLOSED, learning_reviews=1)
+    assert _codes(reviewed) == (G.PASS_WITH_RESERVATIONS, {"learning.no_limitations"})
+    assert _codes(_input(E.CLOSED, learning_reviews=1, risk=RiskLevel.L3_HIGH_IMPACT))[0] is G.NEEDS_HUMAN_DECISION
+    assert _codes(_input(E.CLOSED, learning_reviews=1, review_limitations=2)) == (G.PASS, set())

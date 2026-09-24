@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/knowledge.schema.json",
+  "title": "Research Core learning reviews, local knowledge and cross-context reuse",
+  "$defs": {
+    "LearningReview": {
+      "description": "Human review that closes an experiment (Learning Integrity Gate, Core §60).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "experiment_id", "learned", "hypothesis_effect", "limitations", "reviewed_by", "created_at"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "experiment_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "learned": { "type": "string", "minLength": 1 },
+        "hypothesis_effect": { "type": "string", "minLength": 1 },
+        "surprises": { "type": "string" },
+        "limitations": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "validity_threats": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "next_steps": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "reviewed_by": { "$ref": "common.schema.json#/$defs/Actor" },
+        "created_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [{ "properties": { "reviewed_by": { "properties": { "kind": { "const": "HUMAN" } } } } }]
+    },
+    "KnowledgeBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_type", "entity_id"],
+      "properties": {
+        "entity_type": { "type": "string", "maxLength": 60 },
+        "entity_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "context": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "KnowledgeItem": {
+      "description": "Local knowledge with its lifecycle stage and standing (Core §52, FR-KNOW-001..005). Distinct from foundational reference knowledge.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "project_id", "current_version", "statement", "stage", "status", "scope", "contexts",
+        "evidence_basis", "contrary_evidence", "confidence", "temporal_profile", "provenance"
+      ],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "current_version": { "type": "integer", "minimum": 1 },
+        "statement": { "type": "string", "minLength": 1 },
+        "stage": { "$ref": "enums.schema.json#/$defs/KnowledgeLifecycleStage" },
+        "status": { "$ref": "enums.schema.json#/$defs/KnowledgeStatus" },
+        "scope": { "type": "string" },
+        "contexts": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "evidence_basis": { "type": "array", "items": { "$ref": "#/$defs/KnowledgeBasis" } },
+        "contrary_evidence": { "type": "array", "items": { "$ref": "#/$defs/KnowledgeBasis" } },
+        "contrary_evidence_searched": { "type": "boolean" },
+        "confidence": { "$ref": "enums.schema.json#/$defs/EvidenceStrength" },
+        "temporal_profile": { "$ref": "enums.schema.json#/$defs/TemporalProfile" },
+        "valid_from": { "type": "string", "format": "date" },
+        "last_verified_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+        "revalidation_interval_days": { "type": "integer", "minimum": 1 },
+        "source_version": { "type": "string" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      },
+      "allOf": [
+        {
+          "description": "Time-sensitive knowledge states how often it must be revalidated (FR-TIME-002).",
+          "if": { "properties": { "temporal_profile": { "enum": ["DYNAMIC", "HIGHLY_VOLATILE"] } }, "required": ["temporal_profile"] },
+          "then": { "required": ["revalidation_interval_days", "last_verified_at"] }
+        }
+      ]
+    },
+    "KnowledgeReuse": {
+      "description": "Explicit, labelled reuse of knowledge in another project (Core §44, FR-TRANS-001..003). Never automatic; analogy is never direct evidence.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "knowledge_item_id", "target_project_id", "transferability", "rationale", "assessed_by", "created_at"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "knowledge_item_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "knowledge_version": { "type": "integer", "minimum": 1 },
+        "target_project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "transferability": { "$ref": "enums.schema.json#/$defs/TransferabilityState" },
+        "rationale": { "type": "string", "minLength": 1 },
+        "differences": { "type": "string" },
+        "assessed_by": { "$ref": "common.schema.json#/$defs/Actor" },
+        "created_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [{ "properties": { "assessed_by": { "properties": { "kind": { "const": "HUMAN" } } } } }]
+    }
+  }
+}

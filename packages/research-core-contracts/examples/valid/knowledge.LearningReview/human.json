@@ -1,0 +1,22 @@
+{
+  "id": "4d5e6f7a-8b9c-4d0e-9f1a-2b3c4d5e6f78",
+  "experiment_id": "8d9e0f1a-2b3c-4d4e-9f5a-6b7c8d9e0f12",
+  "learned": "Weekly buddy check-ins kept attendance at 90% for 8 weeks",
+  "hypothesis_effect": "Supports the design hypothesis within two sites",
+  "surprises": "Buddies also reported fewer safety incidents",
+  "limitations": [
+    "Two sites only"
+  ],
+  "validity_threats": [
+    "Seasonal attendance pattern"
+  ],
+  "next_steps": [
+    "Repeat at a third site"
+  ],
+  "reviewed_by": {
+    "kind": "HUMAN",
+    "id": "local-owner",
+    "role": "RESEARCHER"
+  },
+  "created_at": "2026-09-24T12:00:00Z"
+}

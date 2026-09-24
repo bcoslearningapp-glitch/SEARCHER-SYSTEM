@@ -581,3 +581,70 @@ export async function recordInterpretation(_: ActionResult, form: FormData): Pro
     }),
   );
 }
+
+// --- Learning reviews and local knowledge (PRD §28-29, §35) ---
+
+export async function recordLearningReview(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${X(form)}/learning-reviews`, {
+      learned: text(form, "learned"),
+      hypothesis_effect: text(form, "hypothesis_effect"),
+      surprises: optionalText(form, "surprises"),
+      limitations: listField(form, "limitations"),
+      validity_threats: listField(form, "validity_threats"),
+      next_steps: listField(form, "next_steps"),
+    }),
+  );
+}
+
+const KN = (form: FormData) => `${P(form)}/knowledge/${text(form, "knowledge_id")}`;
+
+export async function createKnowledge(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const interval = optionalText(form, "revalidation_interval_days");
+  return run(() =>
+    apiSend("POST", `${P(form)}/knowledge`, {
+      statement: text(form, "statement"),
+      scope: text(form, "scope"),
+      contexts: listField(form, "contexts"),
+      evidence_basis: form.getAll("basis").map((value) => {
+        const [entity_type, entity_id] = String(value).split(":");
+        return { entity_type, entity_id };
+      }),
+      contrary_evidence_searched: form.get("contrary_evidence_searched") === "on",
+      confidence: text(form, "confidence"),
+      temporal_profile: text(form, "temporal_profile"),
+      revalidation_interval_days: interval ? Number(interval) : null,
+    }),
+  );
+}
+
+export async function promoteKnowledge(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${KN(form)}/promote`, {
+      target: text(form, "target"),
+      reason: optionalText(form, "reason"),
+      acknowledge_reservations: form.get("acknowledge_reservations") === "on",
+    }),
+  );
+}
+
+export async function changeKnowledgeStanding(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${KN(form)}/standing`, {
+      action: text(form, "action"),
+      reason: text(form, "reason"),
+      target_stage: optionalText(form, "target_stage") ?? null,
+    }),
+  );
+}
+
+export async function reuseKnowledge(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${KN(form)}/reuse`, {
+      target_project_id: text(form, "target_project_id"),
+      transferability: text(form, "transferability"),
+      rationale: text(form, "rationale"),
+      differences: optionalText(form, "differences"),
+    }),
+  );
+}

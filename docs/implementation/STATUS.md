@@ -31,6 +31,13 @@
   - Observations, analysed results and interpretations kept as distinct append-only records.
   - Invalidated experiments never change the hypothesis' state.
   - AI PROPOSE tools, an Experiments tab, E2E flow, and contracts 0.8.0.
+- #35: Learning and local knowledge (ADR-017):
+  - Learning reviews and the Learning Integrity Gate for closing experiments.
+  - Local knowledge items with versioned lifecycle, promoted one stage at a time by a person through the Knowledge Promotion Gate (repetition across experiments, contexts, scope, contrary evidence, confidence, time).
+  - Downgrade, contest, suspend, reinstate and revalidate.
+  - Time-sensitive knowledge flagged REVALIDATION_REQUIRED and surfaced in the attention queue.
+  - Cross-project reuse only as a human transferability judgment, labelled and never evidence.
+  - Knowledge tab, E2E flow 6, and contracts 0.9.0.
 
 ## Phase 3 progress
 - #21: AI gateway (ADR-010). Anthropic and OpenAI adapters behind a provider-neutral interface, with Anthropic server-side refusal fallback enabled. Configurable model profiles; mock provider only when explicitly enabled. Untrusted-source prompt isolation and secret redaction. PRD §54 disclosure policy, human-set project AI policy (consent, allowed profiles, budgets), `STOPPED_RESOURCE_CONSTRAINT` on budget exhaustion. Append-only disclosure/usage log. Schema validation before any caller can use output. Bounded live provider-contract suite.

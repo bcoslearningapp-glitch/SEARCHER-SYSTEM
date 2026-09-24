@@ -6,7 +6,7 @@ import { Badge, Select } from "@/components/fields";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import type { Project } from "@/lib/types";
 
-export type ProjectTab = "desk" | "map" | "research" | "lab" | "design" | "experiments" | "sources";
+export type ProjectTab = "desk" | "map" | "research" | "lab" | "design" | "experiments" | "knowledge" | "sources";
 
 const MANUAL_TARGETS = ["FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE"] as const;
 
@@ -35,6 +35,7 @@ export function ProjectHeader({ project, dict, locale, active }: { project: Proj
             ["lab", `${base}/lab`, dict.spaces.lab],
             ["design", `${base}/design`, dict.design.tab],
             ["experiments", `${base}/experiments`, dict.experiments.tab],
+            ["knowledge", `${base}/knowledge`, dict.knowledge.tab],
             ["sources", `${base}/sources`, ui.sources],
           ] as const
         ).map(([tab, href, label]) => (

@@ -17,6 +17,7 @@ from research_api.modules.design_experiments.router import router as design_rout
 from research_api.modules.governance_audit.decisions_router import router as decisions_router
 from research_api.modules.governance_audit.router import router as audit_router
 from research_api.modules.hypothesis_lab.router import router as hypotheses_router
+from research_api.modules.knowledge_memory.router import router as knowledge_router
 from research_api.modules.operational_constraints.router import router as constraints_router
 from research_api.modules.project_workflow.attention import router as attention_router
 from research_api.modules.project_workflow.router import router as projects_router
@@ -52,6 +53,7 @@ def create_app() -> FastAPI:
     app.include_router(hypotheses_router)
     app.include_router(design_router)
     app.include_router(experiments_router)
+    app.include_router(knowledge_router)
     app.include_router(reference_router)
     app.include_router(reference_reviews_router)
     app.include_router(constraints_router)

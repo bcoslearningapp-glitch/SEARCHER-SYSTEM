@@ -22,6 +22,7 @@ from research_api.modules.design_experiments.models import (
     ExperimentTransition,
     HumanImpactAssessment,
     Interpretation,
+    LearningReview,
     Observation,
 )
 from research_api.modules.governance_audit.models import (
@@ -38,6 +39,7 @@ from research_api.modules.hypothesis_lab.models import (
     HypothesisVersion,
     Mechanism,
 )
+from research_api.modules.knowledge_memory.models import KnowledgeItem, KnowledgeReuse, KnowledgeVersion
 from research_api.modules.operational_constraints.models import OperationalConstraint
 from research_api.modules.project_workflow.models import (
     ProblemFrameVersion,
@@ -98,6 +100,10 @@ __all__ = [
     "HypothesisMechanism",
     "HypothesisVersion",
     "Interpretation",
+    "KnowledgeItem",
+    "KnowledgeReuse",
+    "KnowledgeVersion",
+    "LearningReview",
     "Mechanism",
     "Observation",
     "OpenQuestion",

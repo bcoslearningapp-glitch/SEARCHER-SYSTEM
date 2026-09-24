@@ -50,6 +50,8 @@ from research_api.modules.design_experiments.experiment_schemas import (
     ImpactOut,
     InterpretationIn,
     InterpretationOut,
+    LearningReviewIn,
+    LearningReviewOut,
     ObservationIn,
     ObservationOut,
     ProtocolIn,
@@ -66,6 +68,7 @@ from research_api.modules.design_experiments.models import (
     ExperimentTransition,
     HumanImpactAssessment,
     Interpretation,
+    LearningReview,
     Observation,
 )
 from research_api.modules.governance_audit import service as governance
@@ -391,6 +394,11 @@ def _readiness_input(session: Session, row: Experiment, target: E) -> rules.Read
         operational.operational_standing(session, row.project_id, DH_TARGET, dh.id),
         operational.operational_standing(session, row.project_id, EvidenceTargetType.DESIGN_CONCEPT, concept.id),
     ]
+    reviews = list(
+        session.scalars(
+            select(LearningReview).where(LearningReview.experiment_id == row.id).order_by(LearningReview.created_at)
+        )
+    )
     pending = sum(
         1 for s in standings for c in s.blocking if c.state is OperationalConstraintState.REQUIRES_EXTERNAL_APPROVAL
     )
@@ -410,6 +418,8 @@ def _readiness_input(session: Session, row: Experiment, target: E) -> rules.Read
         observations=_count(session, Observation, row.id),
         results=_count(session, ExperimentResult, row.id),
         interpretations=_count(session, Interpretation, row.id),
+        learning_reviews=len(reviews),
+        review_limitations=len(reviews[-1].limitations) if reviews else 0,
     )
 
 
@@ -420,9 +430,10 @@ def evaluate_readiness(
     row = _experiment(session, project_id, experiment_id)
     data = _readiness_input(session, row, target)
     result, findings = rules.evaluate(data)
+    gate = QualityGateType.LEARNING_INTEGRITY if target is E.CLOSED else QualityGateType.EXPERIMENT_READINESS
     return governance.record_gate_evaluation(
         session,
-        gate=QualityGateType.EXPERIMENT_READINESS,
+        gate=gate,
         result=result,
         risk_level=data.risk,
         findings=findings,
@@ -673,6 +684,39 @@ def record_interpretation(
     return InterpretationOut.model_validate(interpretation)
 
 
+def record_learning_review(
+    session: Session, principal: Principal, project_id: UUID, experiment_id: UUID, data: LearningReviewIn
+) -> LearningReviewOut:
+    """Lessons are recorded for interpreted, aborted and invalidated experiments alike."""
+    auth = authorized(principal, "experiment.learning_review")
+    projects.require_editable_project(session, project_id)
+    row = _experiment(session, project_id, experiment_id, lock=True)
+    _require_state(row, {E.INTERPRETED, E.ABORTED, E.INVALIDATED}, "learning reviews")
+    review = LearningReview(
+        experiment_id=row.id,
+        learned=data.learned,
+        hypothesis_effect=data.hypothesis_effect,
+        surprises=data.surprises,
+        limitations=data.limitations,
+        validity_threats=data.validity_threats,
+        next_steps=data.next_steps,
+        reviewed_by=_actor(auth),
+    )
+    session.add(review)
+    session.flush()
+    design.record(
+        session,
+        auth,
+        "experiment.learning_review",
+        "LearningReviewRecorded",
+        project_id,
+        EXPERIMENT,
+        row.id,
+        {"learning_review_id": str(review.id)},
+    )
+    return LearningReviewOut.model_validate(review)
+
+
 def experiment_record(session: Session, project_id: UUID, experiment_id: UUID) -> ExperimentRecordOut:
     row = _experiment(session, project_id, experiment_id)
 
@@ -686,12 +730,31 @@ def experiment_record(session: Session, project_id: UUID, experiment_id: UUID) -
         observations=[ObservationOut.model_validate(o) for o in rows(Observation, Observation.observed_at)],
         results=[ResultOut.model_validate(r) for r in rows(ExperimentResult, ExperimentResult.created_at)],
         interpretations=[InterpretationOut.model_validate(i) for i in rows(Interpretation, Interpretation.created_at)],
+        learning_reviews=[LearningReviewOut.model_validate(r) for r in rows(LearningReview, LearningReview.created_at)],
     )
 
 
 def _dh_exists(session: Session, project_id: UUID, dh_id: UUID) -> bool:
     row = session.get(DesignHypothesis, dh_id)
     return row is not None and row.project_id == project_id
+
+
+def record_experiment(session: Session, project_id: UUID, entity_type: str, entity_id: UUID) -> UUID | None:
+    """The experiment an interpretation or learning review belongs to, if it is in this project."""
+    row: Interpretation | LearningReview | None
+    if entity_type == "ExperimentInterpretation":
+        row = session.get(Interpretation, entity_id)
+    elif entity_type == "LearningReview":
+        row = session.get(LearningReview, entity_id)
+    else:
+        return None
+    experiment = session.get(Experiment, row.experiment_id) if row is not None else None
+    return experiment.id if experiment is not None and experiment.project_id == project_id else None
+
+
+def record_exists(session: Session, project_id: UUID, entity_type: str, entity_id: UUID) -> bool:
+    """Public check for other modules citing experiment records (e.g. knowledge evidence bases)."""
+    return record_experiment(session, project_id, entity_type, entity_id) is not None
 
 
 targets.register(DH_TARGET, _dh_exists)

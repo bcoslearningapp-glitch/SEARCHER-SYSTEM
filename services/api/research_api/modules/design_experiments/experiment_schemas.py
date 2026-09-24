@@ -232,6 +232,33 @@ class InterpretationOut(BaseModel):
         return self.model_dump(mode="json", exclude_none=True)
 
 
+class LearningReviewIn(BaseModel):
+    learned: str = Field(min_length=1)
+    hypothesis_effect: str = Field(min_length=1, description="What this means for the design hypothesis")
+    surprises: str | None = None
+    limitations: list[str] = Field(default_factory=list)
+    validity_threats: list[str] = Field(default_factory=list)
+    next_steps: list[str] = Field(default_factory=list)
+
+
+class LearningReviewOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    experiment_id: UUID
+    learned: str
+    hypothesis_effect: str
+    surprises: str | None
+    limitations: list[str]
+    validity_threats: list[str]
+    next_steps: list[str]
+    reviewed_by: Actor
+    created_at: datetime
+
+    def to_contract(self) -> dict[str, Any]:
+        return self.model_dump(mode="json", exclude_none=True)
+
+
 class ExperimentRecordOut(BaseModel):
     """Observation, result and interpretation kept as distinct lists (FR-EXP-003)."""
 
@@ -239,3 +266,4 @@ class ExperimentRecordOut(BaseModel):
     observations: list[ObservationOut]
     results: list[ResultOut]
     interpretations: list[InterpretationOut]
+    learning_reviews: list[LearningReviewOut]

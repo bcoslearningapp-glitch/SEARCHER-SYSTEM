@@ -154,7 +154,16 @@ def _collect_analyse_interpret(client: TestClient, pid: str, eid: str) -> tuple[
         },
     ).json()
     assert contract_errors("experiment.Interpretation", _contract(interpretation)) == []
-    closed = _ok(client, pid, eid, "INTERPRETED", "CLOSED")["experiment"]
+    _ok(client, pid, eid, "INTERPRETED")
+    assert _codes(_move(client, pid, eid, "CLOSED")) == {"learning.missing"}, "Learning Integrity Gate"
+    review = client.post(
+        f"/api/v1/projects/{pid}/experiments/{eid}/learning-reviews",
+        json={"learned": "Buddies sustain attendance", "hypothesis_effect": "Supports", "limitations": ["2 sites"]},
+    )
+    assert review.status_code == 201, review.text
+    closing = _move(client, pid, eid, "CLOSED")
+    assert closing.json()["gate"]["gate"] == "LEARNING_INTEGRITY"
+    closed = closing.json()["experiment"]
     assert [t["to_state"] for t in closed["transitions"]][-2:] == ["INTERPRETED", "CLOSED"]
     return observation, interpretation
 

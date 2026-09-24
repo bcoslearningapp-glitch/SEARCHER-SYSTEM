@@ -1,0 +1,34 @@
+{
+  "id": "5e6f7a8b-9c0d-4e1f-8a2b-3c4d5e6f7a89",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "current_version": 2,
+  "statement": "Weekly buddy check-ins sustain year-two attendance",
+  "stage": "LOCAL_RESULT",
+  "status": "ACTIVE",
+  "scope": "Construction apprenticeships, UK sites",
+  "contexts": [
+    "Site A"
+  ],
+  "evidence_basis": [
+    {
+      "entity_type": "ExperimentInterpretation",
+      "entity_id": "3c4d5e6f-7a8b-4c9d-8e0f-1a2b3c4d5e67",
+      "context": "Site A"
+    }
+  ],
+  "contrary_evidence": [],
+  "contrary_evidence_searched": true,
+  "confidence": "PROMISING",
+  "temporal_profile": "DYNAMIC",
+  "valid_from": "2026-09-01",
+  "last_verified_at": "2026-09-24T12:00:00Z",
+  "revalidation_interval_days": 180,
+  "provenance": {
+    "kind": "HUMAN_INPUT",
+    "actor": {
+      "kind": "HUMAN",
+      "id": "local-owner",
+      "role": "RESEARCHER"
+    }
+  }
+}
