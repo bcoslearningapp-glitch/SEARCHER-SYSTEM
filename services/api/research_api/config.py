@@ -37,6 +37,19 @@ class Settings(BaseSettings):
 
     # Local single-owner mode (PRD §62): the domain stays role-aware.
     local_owner_id: str = "local-owner"
+    local_owner_display_name: str = "Local owner"
+    # In single-owner mode the owner holds every human role (ADR-006).
+    local_owner_roles: list[str] = Field(
+        default_factory=lambda: [
+            "RESEARCHER",
+            "PROJECT_LEAD",
+            "METHODOLOGY_STEWARD",
+            "CONSTITUTIONAL_AUTHORITY",
+        ]
+    )
+
+    # Upload/storage limits (SEC-006).
+    max_upload_bytes: int = 100 * 1024 * 1024
 
     anthropic_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None

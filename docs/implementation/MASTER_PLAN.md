@@ -31,9 +31,11 @@ This plan decomposes the PRD (§76 phases, §83 first vertical slice) into work 
 | P0-09 | Docker images + docker compose single-command startup | §57 | P0-04..08 | Done |
 | P0-10 | CI (ci, e2e, security, provider-contract, release) with required check names | §79.7-79.8 | P0-09 | Done |
 | P0-11 | ADRs 001-005, architecture docs, quality-gates doc | §81 | — | Done |
-| P0-12 | Protect `main` with required checks (repository settings; needs admin) | §79.6 | P0-10 | Blocked: needs `main` branch + admin |
+| P0-12 | Protect `main` with required checks (repository settings; needs admin) | §79.6 | P0-10 | Waiting on repository admin |
 
 ## Phase 1 — Project, framing, source library (M1)
+
+GitHub issues: #2 (P1-01/02), #3 (P1-03/04), #4 (P1-05/06/07), #5 (P1-08/09/11), #6 (P1-10), #7 (P1-12/13).
 
 | Key | Work item | PRD refs | Depends on |
 |---|---|---|---|
@@ -87,10 +89,10 @@ Full E2E suite, security review, AI evaluation suite (`docs/evaluation/QUALITY_G
 
 | Decision | Needed by |
 |---|---|
-| Authentication mechanism (local owner account; multi-user later) | P1-01 |
+| ~~Authentication mechanism~~ — ADR-006 | P1-01 |
 | Storage abstraction and layout (filesystem now, S3/MinIO later) | P1-08 |
 | PDF text extraction / OCR stack | P1-10 |
-| Policy Engine implementation approach | P1-02 |
+| ~~Policy Engine implementation approach~~ — ADR-006 | P1-02 |
 | Default multilingual embedding model (benchmarked) | Phase 3 retrieval |
 | Web search provider order | Phase 3 |
 | Concrete cloud workspace provider | Phase 5 |

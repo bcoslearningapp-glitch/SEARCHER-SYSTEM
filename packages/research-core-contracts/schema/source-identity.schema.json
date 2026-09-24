@@ -7,58 +7,342 @@
     "Identifier": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["scheme", "value"],
+      "required": [
+        "scheme",
+        "value"
+      ],
       "properties": {
-        "scheme": { "type": "string", "enum": ["ISBN", "DOI", "ISSN", "URL", "OCLC", "LCCN", "ARXIV", "PMID", "OTHER"] },
-        "value": { "type": "string", "minLength": 1 }
+        "scheme": {
+          "type": "string",
+          "enum": [
+            "ISBN",
+            "DOI",
+            "ISSN",
+            "URL",
+            "OCLC",
+            "LCCN",
+            "ARXIV",
+            "PMID",
+            "OTHER"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "SourceWork": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title", "authority_layer"],
+      "required": [
+        "id",
+        "title",
+        "authority_layer"
+      ],
       "properties": {
-        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
-        "title": { "type": "string", "minLength": 1 },
-        "authors": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-        "original_language": { "type": "string" },
-        "authority_layer": { "$ref": "enums.schema.json#/$defs/ReferenceAuthorityLayer" },
-        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } }
+        "id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "original_language": {
+          "type": "string"
+        },
+        "authority_layer": {
+          "$ref": "enums.schema.json#/$defs/ReferenceAuthorityLayer"
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          }
+        }
       }
     },
     "SourceEdition": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "work_id", "verification_state"],
+      "required": [
+        "id",
+        "work_id",
+        "verification_state"
+      ],
       "properties": {
-        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
-        "work_id": { "$ref": "common.schema.json#/$defs/EntityId" },
-        "edition_label": { "type": "string" },
-        "language": { "type": "string" },
-        "translator": { "type": "string" },
-        "publisher": { "type": "string" },
-        "published_date": { "type": "string" },
-        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } },
-        "verification_state": { "$ref": "enums.schema.json#/$defs/SourceVerificationState" },
-        "license_note": { "type": "string" },
-        "portable_asset_allowed": { "type": "boolean", "default": false }
+        "id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "work_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "edition_label": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "translator": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "published_date": {
+          "type": "string"
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          }
+        },
+        "verification_state": {
+          "$ref": "enums.schema.json#/$defs/SourceVerificationState"
+        },
+        "license_note": {
+          "type": "string"
+        },
+        "portable_asset_allowed": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "SourceAsset": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "edition_id", "kind", "access_mode", "available_in_environment"],
+      "required": [
+        "id",
+        "edition_id",
+        "kind",
+        "access_mode",
+        "available_in_environment"
+      ],
       "properties": {
-        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
-        "edition_id": { "$ref": "common.schema.json#/$defs/EntityId" },
-        "kind": { "$ref": "enums.schema.json#/$defs/SourceAssetKind" },
-        "access_mode": { "$ref": "enums.schema.json#/$defs/SourceAccessMode" },
-        "available_in_environment": { "type": "boolean" },
-        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "media_type": { "type": "string" },
-        "byte_size": { "type": "integer", "minimum": 0 },
-        "text_origin": { "$ref": "enums.schema.json#/$defs/TextOrigin" }
+        "id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "edition_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "kind": {
+          "$ref": "enums.schema.json#/$defs/SourceAssetKind"
+        },
+        "access_mode": {
+          "$ref": "enums.schema.json#/$defs/SourceAccessMode"
+        },
+        "available_in_environment": {
+          "type": "boolean"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "byte_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "text_origin": {
+          "$ref": "enums.schema.json#/$defs/TextOrigin"
+        }
       }
+    },
+    "SourceExcerpt": {
+      "description": "A located span of source content. Exact quotations are immutable and must match the verified source (Core §29, FR-INGEST-004).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "edition_id",
+        "location",
+        "text",
+        "text_origin",
+        "verification_state",
+        "is_exact_quote",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "edition_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "asset_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Page, chapter, section or other stable locator."
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "type": "string"
+        },
+        "text_origin": {
+          "$ref": "enums.schema.json#/$defs/TextOrigin"
+        },
+        "verification_state": {
+          "$ref": "enums.schema.json#/$defs/SourceVerificationState"
+        },
+        "is_exact_quote": {
+          "type": "boolean"
+        },
+        "access_request_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "provenance": {
+          "$ref": "common.schema.json#/$defs/Provenance"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "text_origin": {
+                "const": "OCR_EXTRACTED"
+              },
+              "is_exact_quote": {
+                "const": true
+              }
+            },
+            "required": [
+              "text_origin",
+              "is_exact_quote"
+            ]
+          },
+          "then": {
+            "properties": {
+              "verification_state": {
+                "enum": [
+                  "MACHINE_VERIFIED",
+                  "RESEARCHER_SUPPLIED_EXACT"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SourceAccessRequest": {
+      "description": "Targeted request for content from a known but unavailable source (FR-HYBRID-001/002).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "project_id",
+        "edition_id",
+        "reason",
+        "requested_scope",
+        "acceptable_forms",
+        "priority",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "project_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "edition_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requested_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surrounding_context": {
+          "type": "string"
+        },
+        "acceptable_forms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "enums.schema.json#/$defs/AccessResponseForm"
+          }
+        },
+        "priority": {
+          "$ref": "enums.schema.json#/$defs/Priority"
+        },
+        "status": {
+          "$ref": "enums.schema.json#/$defs/SourceAccessRequestStatus"
+        }
+      }
+    },
+    "SourceLead": {
+      "description": "Researcher memory of a source; never evidence until verified (Core §27).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "project_id",
+        "statement",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "project_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "suspected_author": {
+          "type": "string"
+        },
+        "suspected_work_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "verified_by_excerpt_id": {
+          "$ref": "common.schema.json#/$defs/EntityId"
+        },
+        "status": {
+          "$ref": "enums.schema.json#/$defs/SourceLeadState"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "VERIFIED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "verified_by_excerpt_id"
+            ]
+          }
+        }
+      ]
     }
   }
 }

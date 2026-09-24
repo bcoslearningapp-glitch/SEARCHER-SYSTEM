@@ -7,8 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from research_api import __version__
 from research_api.config import get_settings
+from research_api.modules.governance_audit.decisions_router import router as decisions_router
 from research_api.modules.governance_audit.router import router as audit_router
+from research_api.modules.project_workflow.router import router as projects_router
 from research_api.platform import health, system_router
+from research_api.platform.errors import install_error_handlers
 from research_api.platform.logging import configure_logging
 
 
@@ -25,6 +28,9 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(system_router.router)
     app.include_router(audit_router)
+    app.include_router(projects_router)
+    app.include_router(decisions_router)
+    install_error_handlers(app)
     return app
 
 

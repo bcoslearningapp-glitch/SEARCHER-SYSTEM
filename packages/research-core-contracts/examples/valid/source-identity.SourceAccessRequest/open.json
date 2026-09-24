@@ -1,0 +1,13 @@
+{
+  "id": "2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "edition_id": "7e1c4b2a-3d5f-4a6b-8c9d-0e1f2a3b4c5d",
+  "reason": "Need Ibn Khaldun on asabiyya decay",
+  "requested_scope": "Chapter 2, sections 10-12",
+  "acceptable_forms": [
+    "EXACT_TEXT",
+    "PAGE_IMAGES"
+  ],
+  "priority": "HIGH",
+  "status": "OPEN"
+}

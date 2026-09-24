@@ -27,9 +27,7 @@ def enqueue_ping(session: Annotated[Session, Depends(get_session)]) -> jobs.JobO
         queue.dispatch(PING_TASK, job.id)
     except Exception as exc:
         logger.warning("dispatch failed for job %s", job.id, exc_info=True)
-        jobs.transition(
-            job, jobs.JobState.FAILED, failure_kind=jobs.JobFailureKind.DISPATCH_FAILURE, error=str(exc)
-        )
+        jobs.transition(job, jobs.JobState.FAILED, failure_kind=jobs.JobFailureKind.DISPATCH_FAILURE, error=str(exc))
         session.commit()
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE,

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/framing.schema.json",
+  "title": "Research Core framing, state, decisions and approvals",
+  "$defs": {
+    "StringList": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "ProblemFrameContent": {
+      "description": "Problem Frame fields (Core §13, FR-FRAME-005).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "central_issue": { "type": "string" },
+        "current_state": { "type": "string" },
+        "desired_state": { "type": "string" },
+        "gap": { "type": "string" },
+        "current_explanations": { "$ref": "#/$defs/StringList" },
+        "initial_hypotheses": { "$ref": "#/$defs/StringList" },
+        "context": { "type": "string" },
+        "constraints": { "$ref": "#/$defs/StringList" },
+        "known": { "$ref": "#/$defs/StringList" },
+        "unknowns": { "$ref": "#/$defs/StringList" },
+        "research_questions": { "$ref": "#/$defs/StringList" },
+        "reference_review_points": { "$ref": "#/$defs/StringList" },
+        "readiness": { "type": "string" }
+      }
+    },
+    "ProblemFrameVersion": {
+      "description": "Versioned Problem Frame. APPROVED and SUPERSEDED versions are immutable (FR-FRAME-006/007).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "version_number", "status", "content", "provenance", "created_at"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "status": { "$ref": "enums.schema.json#/$defs/ProblemFrameStatus" },
+        "content": { "$ref": "#/$defs/ProblemFrameContent" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" },
+        "approval_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "supersedes_version_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "created_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+        "approved_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "enum": ["APPROVED", "SUPERSEDED"] } }, "required": ["status"] },
+          "then": { "required": ["approval_id", "approved_at"] } }
+      ]
+    },
+    "QualityGateEvaluation": {
+      "description": "Result of a risk-aware quality gate (Core §60).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "gate", "result", "risk_level", "findings", "evaluated_at", "methodology_version"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "gate": { "$ref": "enums.schema.json#/$defs/QualityGateType" },
+        "subject_type": { "type": "string" },
+        "subject_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "result": { "$ref": "enums.schema.json#/$defs/QualityGateResult" },
+        "risk_level": { "$ref": "enums.schema.json#/$defs/RiskLevel" },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "severity", "message"],
+            "properties": {
+              "code": { "type": "string" },
+              "severity": { "$ref": "enums.schema.json#/$defs/QualityGateResult" },
+              "message": { "type": "string" }
+            }
+          }
+        },
+        "evaluated_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+        "methodology_version": { "$ref": "common.schema.json#/$defs/VersionString" }
+      }
+    },
+    "Approval": {
+      "description": "Explicit human approval action; never inferred from conversation (FR-APPROVAL-001).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "subject_type", "subject_id", "outcome", "approved_by", "methodology_path", "created_at"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "subject_type": { "type": "string" },
+        "subject_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "outcome": { "$ref": "enums.schema.json#/$defs/ApprovalOutcome" },
+        "approved_by": {
+          "allOf": [
+            { "$ref": "common.schema.json#/$defs/Actor" },
+            { "properties": { "kind": { "const": "HUMAN" } } }
+          ]
+        },
+        "reason": { "type": "string" },
+        "methodology_path": { "$ref": "enums.schema.json#/$defs/MethodologyPathStatus" },
+        "gate_evaluation_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "created_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      }
+    },
+    "Decision": {
+      "description": "Decision record; AI recommendation is distinct from the human decision (FR-DEC-001/002).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "question", "options", "required_role", "blocking", "status"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "question": { "type": "string", "minLength": 1 },
+        "options": { "$ref": "#/$defs/StringList" },
+        "ai_recommendation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["option", "rationale", "ai_action"],
+          "properties": {
+            "option": { "type": "string" },
+            "rationale": { "type": "string" },
+            "ai_action": { "$ref": "common.schema.json#/$defs/AIActionRecord" }
+          }
+        },
+        "rationale": { "type": "string" },
+        "required_role": { "$ref": "enums.schema.json#/$defs/ActorRole" },
+        "blocking": { "type": "boolean" },
+        "status": { "$ref": "enums.schema.json#/$defs/DecisionStatus" },
+        "final_decision": { "type": "string" },
+        "human_justification": { "type": "string" },
+        "methodology_path": { "$ref": "enums.schema.json#/$defs/MethodologyPathStatus" },
+        "decided_by": { "$ref": "common.schema.json#/$defs/Actor" },
+        "decided_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "const": "DECIDED" } }, "required": ["status"] },
+          "then": { "required": ["final_decision", "human_justification", "decided_by", "decided_at"],
+                    "properties": { "decided_by": { "properties": { "kind": { "const": "HUMAN" } } } } } }
+      ]
+    },
+    "ResearchState": {
+      "description": "Durable research state independent of any LLM context window (Core §63, FR-STATE-001/002).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "current_mode", "established_findings", "unresolved_items", "active_hypothesis_ids", "reservations", "blockers", "pending_decision_ids", "updated_at"],
+      "properties": {
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "current_question": { "type": "string" },
+        "current_mode": { "$ref": "enums.schema.json#/$defs/ResearchMode" },
+        "established_findings": { "$ref": "#/$defs/StringList" },
+        "unresolved_items": { "$ref": "#/$defs/StringList" },
+        "active_hypothesis_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" } },
+        "reservations": { "$ref": "#/$defs/StringList" },
+        "blockers": { "$ref": "#/$defs/StringList" },
+        "pending_decision_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" } },
+        "next_action": { "type": "string" },
+        "next_action_reason": { "type": "string" },
+        "updated_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      }
+    }
+  }
+}

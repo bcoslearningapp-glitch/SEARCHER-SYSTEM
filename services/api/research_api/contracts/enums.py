@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.1.0"
+CONTRACT_SCHEMA_VERSION = "0.2.0"
 
 
 class ProjectStatus(StrEnum):
@@ -540,3 +540,57 @@ class LanguageCode(StrEnum):
     AR = "ar"
     EN = "en"
     FR = "fr"
+
+
+class SourceAccessRequestStatus(StrEnum):
+    """Hybrid Source Access request lifecycle (Core §26, FR-HYBRID-001)."""
+
+    OPEN = "OPEN"
+    PARTIALLY_FULFILLED = "PARTIALLY_FULFILLED"
+    FULFILLED = "FULFILLED"
+    CANCELLED = "CANCELLED"
+
+
+class AccessResponseForm(StrEnum):
+    """Accepted forms of a researcher response to a source access request (FR-HYBRID-003)."""
+
+    EXACT_TEXT = "EXACT_TEXT"
+    PAGE_IMAGES = "PAGE_IMAGES"
+    RESEARCHER_SUMMARY = "RESEARCHER_SUMMARY"
+    RESEARCHER_ATTESTATION = "RESEARCHER_ATTESTATION"
+    DIGITAL_ASSET = "DIGITAL_ASSET"
+
+
+class Priority(StrEnum):
+    """Priority of requests and work items."""
+
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    URGENT = "URGENT"
+
+
+class DecisionStatus(StrEnum):
+    """Decision record lifecycle; AI recommendation stays distinct from the human decision (FR-DEC-001/002)."""
+
+    OPEN = "OPEN"
+    DECIDED = "DECIDED"
+    WITHDRAWN = "WITHDRAWN"
+
+
+class ApprovalOutcome(StrEnum):
+    """Outcome of an explicit human approval action (FR-APPROVAL-001)."""
+
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+
+class IngestionStatus(StrEnum):
+    """Source asset ingestion state (PRD §17)."""
+
+    NOT_STARTED = "NOT_STARTED"
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    COMPLETE = "COMPLETE"
+    FAILED = "FAILED"
+    NOT_APPLICABLE = "NOT_APPLICABLE"

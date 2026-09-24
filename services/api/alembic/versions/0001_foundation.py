@@ -66,9 +66,7 @@ def upgrade() -> None:
         sa.Column("reason", sa.Text(), nullable=True),
         sa.Column("ai_action", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_audit_events")),
-        sa.CheckConstraint(
-            "actor_kind <> 'AI' OR ai_action IS NOT NULL", name=op.f("ck_audit_events_ai_provenance")
-        ),
+        sa.CheckConstraint("actor_kind <> 'AI' OR ai_action IS NOT NULL", name=op.f("ck_audit_events_ai_provenance")),
     )
     op.create_index(op.f("ix_audit_events_project_id"), "audit_events", ["project_id"])
     op.create_index(op.f("ix_audit_events_occurred_at"), "audit_events", ["occurred_at"])
