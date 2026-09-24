@@ -41,6 +41,7 @@ from research_api.modules.sources_library.models import (
     SourceEdition,
     SourceExcerpt,
     SourceLead,
+    SourcePage,
     SourceWork,
 )
 from research_api.modules.sources_library.schemas import (
@@ -51,6 +52,7 @@ from research_api.modules.sources_library.schemas import (
     CatalogIn,
     EditionOut,
     ExcerptOut,
+    PageExcerptIn,
     ReverifyIn,
     SearchHit,
     SearchResponse,
@@ -723,3 +725,86 @@ def search(session: Session, query: str, *, project_id: UUID | None = None, limi
         searched_assets=searched,
         hits=hits,
     )
+
+
+# --- excerpts from ingested text (exact-quote protection, Core §29, FR-INGEST-004) ---
+
+
+def create_page_excerpt(session: Session, principal: Principal, asset_id: UUID, data: PageExcerptIn) -> ExcerptOut:
+    """Chunks are discovery units; quotes come from the exact page span of the stored source.
+
+    The text is copied server-side from the extracted page. Native digital text from a
+    checksummed asset is MACHINE_VERIFIED; OCR text can be excerpted but never as an
+    exact quote until verified (DB check).
+    """
+    auth = authorized(principal, "source.excerpt")
+    asset = session.get(SourceAsset, asset_id)
+    if asset is None:
+        raise NotFoundError("source asset not found")
+    page = session.scalars(
+        select(SourcePage).where(SourcePage.asset_id == asset_id, SourcePage.page_number == data.page_number)
+    ).first()
+    if page is None:
+        raise NotFoundError("page not ingested for this asset", page_number=data.page_number)
+    if data.char_end > len(page.text) or data.char_start >= data.char_end:
+        raise RuleViolationError("span is outside the page text", page_length=len(page.text))
+    span = page.text[data.char_start : data.char_end]
+    if data.expected_text is not None and data.expected_text != span:
+        raise RuleViolationError("quoted text does not match the source span exactly; quotes are never edited")
+    origin = TextOrigin(page.text_origin)
+    verification = (
+        SourceVerificationState.MACHINE_VERIFIED
+        if origin is TextOrigin.NATIVE_DIGITAL and asset.sha256
+        else SourceVerificationState.UNVERIFIED
+    )
+    if data.is_exact_quote and not rules.exact_quote_allowed(origin, verification):
+        raise RuleViolationError("OCR text cannot be an exact quote until verified (Core §28)")
+    excerpt = SourceExcerpt(
+        edition_id=asset.edition_id,
+        asset_id=asset.id,
+        location=f"p. {data.page_number}, chars {data.char_start}-{data.char_end}",
+        text=span,
+        text_origin=origin.value,
+        verification_state=verification.value,
+        is_exact_quote=data.is_exact_quote,
+        provenance={
+            "kind": ProvenanceKind.SOURCE_DERIVED.value,
+            "actor": auth.actor.model_dump(mode="json", exclude_none=True),
+            "derived_from": [str(asset.id)],
+        },
+    )
+    session.add(excerpt)
+    session.flush()
+    _audit(
+        session,
+        auth,
+        "source.excerpt",
+        entity_type="SourceExcerpt",
+        entity_id=excerpt.id,
+        new={"asset_id": str(asset.id), "location": excerpt.location, "exact": excerpt.is_exact_quote},
+    )
+    return ExcerptOut.model_validate(excerpt)
+
+
+def get_excerpt(session: Session, excerpt_id: UUID) -> ExcerptOut:
+    excerpt = session.get(SourceExcerpt, excerpt_id)
+    if excerpt is None:
+        raise NotFoundError("excerpt not found")
+    return ExcerptOut.model_validate(excerpt)
+
+
+def work_ids_for_excerpts(session: Session, excerpt_ids: list[UUID]) -> dict[UUID, UUID]:
+    """Map excerpts to their SourceWork, for evidence independence analysis."""
+    if not excerpt_ids:
+        return {}
+    rows = session.execute(
+        select(SourceExcerpt.id, SourceEdition.work_id)
+        .join(SourceEdition, SourceEdition.id == SourceExcerpt.edition_id)
+        .where(SourceExcerpt.id.in_(excerpt_ids))
+    )
+    return {excerpt_id: work_id for excerpt_id, work_id in rows}
+
+
+def require_work(session: Session, work_id: UUID) -> None:
+    if session.get(SourceWork, work_id) is None:
+        raise NotFoundError("source work not found", work_id=str(work_id))

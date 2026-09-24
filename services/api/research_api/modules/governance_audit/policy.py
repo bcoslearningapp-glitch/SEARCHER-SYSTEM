@@ -75,6 +75,19 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("assumption.review", A.FORBIDDEN, approval=True),
         _p("open_question.create", A.ACT_AND_NOTIFY),
         _p("open_question.close", A.REQUEST_APPROVAL),
+        # Evidence: AI may propose candidates; only humans accept or reject (Core §32-36)
+        _p("evidence.propose", A.ACT_AND_NOTIFY),
+        _p("evidence.assess", A.FORBIDDEN, approval=True),
+        _p("research_track.record", A.ACT_AND_NOTIFY, system=True),
+        # Hypotheses and mechanisms
+        _p("hypothesis.create", A.ACT_AND_NOTIFY),
+        _p("hypothesis.revise", A.ACT_AND_NOTIFY),
+        _p("hypothesis.transition", A.REQUEST_APPROVAL),
+        _p("hypothesis.assess", A.FORBIDDEN, approval=True),
+        _p("hypothesis.downgrade", A.AUTONOMOUS, system=True),
+        _p("hypothesis.link", A.ACT_AND_NOTIFY),
+        _p("mechanism.create", A.ACT_AND_NOTIFY),
+        _p("mechanism.update", A.REQUEST_APPROVAL),
         # Sources
         _p("source.catalog", A.ACT_AND_NOTIFY),
         _p("source.catalog_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),
@@ -84,6 +97,8 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("source_access_request.create", A.ACT_AND_NOTIFY),
         _p("source_access_request.respond", A.FORBIDDEN),
         _p("source_access_request.cancel", A.FORBIDDEN),
+        _p("source.excerpt", A.ACT_AND_NOTIFY),
+        _p("source.lineage", A.ACT_AND_NOTIFY),
         _p("source_lead.create", A.ACT_AND_NOTIFY),
         _p("source_lead.resolve", A.FORBIDDEN),
     ]

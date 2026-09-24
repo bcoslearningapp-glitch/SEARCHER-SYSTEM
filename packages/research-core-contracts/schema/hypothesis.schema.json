@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/hypothesis.schema.json",
+  "title": "Research Core hypotheses and mechanisms",
+  "$defs": {
+    "HypothesisContent": {
+      "description": "Research-ready hypothesis fields (Core §21, FR-HYP-003).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement"],
+      "properties": {
+        "statement": { "type": "string", "minLength": 1 },
+        "context": { "type": "string" },
+        "expected_outcome": { "type": "string" },
+        "proposed_mechanism": { "type": "string" },
+        "assumptions": { "type": "array", "items": { "type": "string" } },
+        "boundary_conditions": { "type": "array", "items": { "type": "string" } },
+        "falsification_conditions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "HypothesisVersion": {
+      "description": "Immutable historical snapshot (FR-HYP-004).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "hypothesis_id", "version_number", "content", "lifecycle_state", "epistemic_state", "change_reason", "created_at", "actor"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "hypothesis_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "content": { "$ref": "#/$defs/HypothesisContent" },
+        "lifecycle_state": { "$ref": "enums.schema.json#/$defs/HypothesisLifecycleState" },
+        "epistemic_state": { "$ref": "enums.schema.json#/$defs/HypothesisEpistemicState" },
+        "change_reason": { "type": "string", "minLength": 1 },
+        "created_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+        "actor": { "$ref": "common.schema.json#/$defs/Actor" }
+      }
+    },
+    "Hypothesis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "current_version", "lifecycle_state", "epistemic_state", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "current_version": { "type": "integer", "minimum": 1 },
+        "lifecycle_state": { "$ref": "enums.schema.json#/$defs/HypothesisLifecycleState" },
+        "epistemic_state": { "$ref": "enums.schema.json#/$defs/HypothesisEpistemicState" },
+        "competing_hypothesis_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" } },
+        "mechanism_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" } },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      }
+    },
+    "Mechanism": {
+      "description": "First-class mechanism, distinct from its implementation forms (Core §22, FR-MECH-001).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "name", "description", "status", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "enums.schema.json#/$defs/MechanismStatus" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      }
+    }
+  }
+}

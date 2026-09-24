@@ -1,12 +1,26 @@
 """Import every ORM model so Alembic sees the full metadata."""
 
-from research_api.modules.claims_evidence.models import Assumption, Claim, OpenQuestion
+from research_api.modules.claims_evidence.models import (
+    Assumption,
+    Claim,
+    Evidence,
+    OpenQuestion,
+    ResearchTrackRun,
+    SourceLineage,
+)
 from research_api.modules.governance_audit.models import (
     ApprovalRecord,
     AuditEventRecord,
     DecisionRecord,
     QualityGateEvaluationRecord,
     ResearchEventRecord,
+)
+from research_api.modules.hypothesis_lab.models import (
+    Hypothesis,
+    HypothesisCompetition,
+    HypothesisMechanism,
+    HypothesisVersion,
+    Mechanism,
 )
 from research_api.modules.project_workflow.models import (
     ProblemFrameVersion,
@@ -37,6 +51,12 @@ __all__ = [
     "Base",
     "Claim",
     "DecisionRecord",
+    "Evidence",
+    "Hypothesis",
+    "HypothesisCompetition",
+    "HypothesisMechanism",
+    "HypothesisVersion",
+    "Mechanism",
     "OpenQuestion",
     "ProblemFrameVersion",
     "Project",
@@ -45,6 +65,7 @@ __all__ = [
     "QualityGateEvaluationRecord",
     "ResearchEventRecord",
     "ResearchState",
+    "ResearchTrackRun",
     "ScratchNote",
     "SourceAccessRequest",
     "SourceAsset",
@@ -52,6 +73,7 @@ __all__ = [
     "SourceEdition",
     "SourceExcerpt",
     "SourceLead",
+    "SourceLineage",
     "SourcePage",
     "SourceWork",
 ]

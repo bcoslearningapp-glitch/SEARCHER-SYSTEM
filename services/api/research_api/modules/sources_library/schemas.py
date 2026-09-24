@@ -244,3 +244,15 @@ class SearchResponse(BaseModel):
     searched_assets: int
     hits: list[SearchHit]
     quotation_authority: Literal[False] = False
+
+
+class PageExcerptIn(BaseModel):
+    """Create an excerpt from an ingested page span. The server copies the text; clients never supply it."""
+
+    page_number: int = Field(ge=1)
+    char_start: int = Field(ge=0)
+    char_end: int = Field(gt=0)
+    is_exact_quote: bool = True
+    expected_text: str | None = Field(
+        default=None, description="If given, must equal the source span exactly or the request is rejected"
+    )

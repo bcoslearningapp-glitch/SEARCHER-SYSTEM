@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.3.0";
+export const CONTRACT_SCHEMA_VERSION = "0.4.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -243,3 +243,11 @@ export type AssumptionStatus = (typeof AssumptionStatusValues)[number];
 /** Open question lifecycle (Core §15, §37). */
 export const OpenQuestionStatusValues = ["OPEN", "ANSWERED", "CLOSED_UNANSWERED"] as const;
 export type OpenQuestionStatus = (typeof OpenQuestionStatusValues)[number];
+
+/** Evidence pipeline: candidate -> assessment -> accepted evidence (Core §32). */
+export const EvidenceStatusValues = ["CANDIDATE", "ACCEPTED", "REJECTED"] as const;
+export type EvidenceStatus = (typeof EvidenceStatusValues)[number];
+
+/** What evidence can bear on (FR-EVID-001). */
+export const EvidenceTargetTypeValues = ["CLAIM", "HYPOTHESIS", "MECHANISM"] as const;
+export type EvidenceTargetType = (typeof EvidenceTargetTypeValues)[number];

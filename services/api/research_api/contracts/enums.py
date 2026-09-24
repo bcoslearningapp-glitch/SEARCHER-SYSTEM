@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.3.0"
+CONTRACT_SCHEMA_VERSION = "0.4.0"
 
 
 class ProjectStatus(StrEnum):
@@ -620,3 +620,19 @@ class OpenQuestionStatus(StrEnum):
     OPEN = "OPEN"
     ANSWERED = "ANSWERED"
     CLOSED_UNANSWERED = "CLOSED_UNANSWERED"
+
+
+class EvidenceStatus(StrEnum):
+    """Evidence pipeline: candidate -> assessment -> accepted evidence (Core §32)."""
+
+    CANDIDATE = "CANDIDATE"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+
+
+class EvidenceTargetType(StrEnum):
+    """What evidence can bear on (FR-EVID-001)."""
+
+    CLAIM = "CLAIM"
+    HYPOTHESIS = "HYPOTHESIS"
+    MECHANISM = "MECHANISM"

@@ -14,9 +14,15 @@ from research_api.contracts.enums import (
     ClaimType,
     ClaimWorkflowState,
     Criticality,
+    EvidenceRole,
+    EvidenceStatus,
     EvidenceStrength,
+    EvidenceTargetType,
+    LineageRelation,
     OpenQuestionStatus,
+    ResearchOutcomeKind,
     ResearchQuestionType,
+    ResearchTrack,
     StatementOrigin,
     SufficiencyResult,
 )
@@ -117,3 +123,110 @@ class CaptureIn(BaseModel):
     claim_type: ClaimType | None = None
     question_type: ResearchQuestionType | None = None
     criticality: Criticality = Criticality.MEDIUM
+
+
+# --- evidence (Core §32-36) ---
+
+
+class EvidenceIn(BaseModel):
+    target_type: EvidenceTargetType
+    target_id: UUID
+    role: EvidenceRole
+    finding: str = Field(min_length=1, description="What the source passage shows, in the researcher's words")
+    excerpt_id: UUID
+    track: ResearchTrack | None = None
+
+
+class AssessmentIn(BaseModel):
+    """Human assessment: accept with qualitative assessment, or reject (FR-EVID-003)."""
+
+    decision: Literal["ACCEPT", "REJECT"]
+    strength: EvidenceStrength | None = None
+    quality: str | None = None
+    relevance: str | None = None
+    context_fit: str | None = None
+    directness: str | None = None
+    limitations: str | None = None
+    temporal_relevance: str | None = None
+    reason: str | None = None
+
+
+class EvidenceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    project_id: UUID
+    target_type: EvidenceTargetType
+    target_id: UUID
+    role: EvidenceRole
+    status: EvidenceStatus
+    finding: str
+    excerpt_id: UUID
+    track: ResearchTrack | None
+    assessment: dict[str, Any] | None
+    provenance: dict[str, Any]
+    created_at: datetime
+
+    def to_contract(self) -> dict[str, Any]:
+        return self.model_dump(mode="json", exclude_none=True, exclude={"created_at"})
+
+
+class LineageIn(BaseModel):
+    from_work_id: UUID
+    relation: LineageRelation
+    to_work_id: UUID
+    note: str | None = None
+
+
+class LineageOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    from_work_id: UUID
+    relation: LineageRelation
+    to_work_id: UUID
+    note: str | None
+
+
+class TrackRunIn(BaseModel):
+    target_type: EvidenceTargetType
+    target_id: UUID
+    track: ResearchTrack
+    outcome: ResearchOutcomeKind
+    scope: str = Field(min_length=1, description="What was searched: libraries, databases, languages")
+    queries: list[str] = Field(default_factory=list)
+
+
+class TrackRunOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    target_type: EvidenceTargetType
+    target_id: UUID
+    track: ResearchTrack
+    outcome: ResearchOutcomeKind
+    scope: str
+    queries: list[str]
+    created_at: datetime
+
+
+class TrackStatus(BaseModel):
+    track: ResearchTrack
+    searched: bool
+    last_outcome: ResearchOutcomeKind | None
+    # A failed search is not evidence absence (Core §72).
+    execution_failed: bool
+
+
+class EvidenceMap(BaseModel):
+    target_type: EvidenceTargetType
+    target_id: UUID
+    by_role: dict[str, list[EvidenceOut]]
+    candidates: list[EvidenceOut]
+    support_origins: int
+    contra_origins: int
+    shared_origin_groups: list[list[UUID]]
+    meaningful_conflict: bool
+    suggested_strength: EvidenceStrength
+    tracks: list[TrackStatus]
+    counter_evidence_search_complete: bool
