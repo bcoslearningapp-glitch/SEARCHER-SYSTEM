@@ -29,3 +29,16 @@ Migration `0002` (Phase 1, issues #3/#4):
 | `approvals` | Explicit human approvals | append-only; CHECK approver is HUMAN |
 | `quality_gate_evaluations` | Gate results with findings | append-only |
 | `decisions` | Decisions with AI recommendation kept separate | CHECK: DECIDED ⇒ human + decision + justification; immutable once resolved (trigger) |
+
+Migrations `0003`/`0004` (Phase 1, issues #5/#6):
+
+| Table | Purpose | Notes |
+|---|---|---|
+| `source_works` | The intellectual work (library-wide) | `authority_layer`; foundational layers need Constitutional Authority |
+| `source_editions` | Specific edition/translation | starts `METADATA_ONLY`; changes only via audited reverification |
+| `source_assets` | Concrete file or holding | environment-specific `available_in_environment`; sha256 + storage key; ingestion status/job |
+| `project_sources` | Works used by a project | |
+| `source_excerpts` | Located content (e.g. access responses) | append-only; CHECK: OCR text cannot be an exact quote unless verified |
+| `source_access_requests` | Hybrid Source Access requests | OPEN → PARTIALLY_FULFILLED/FULFILLED/CANCELLED |
+| `source_leads` | Researcher memory of a source | CHECK: VERIFIED ⇒ linked excerpt |
+| `source_pages` / `source_chunks` | Derived page text and retrieval chunks | `tsv` generated column + GIN index |

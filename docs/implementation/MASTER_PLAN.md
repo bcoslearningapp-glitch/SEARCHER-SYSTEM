@@ -90,8 +90,8 @@ Full E2E suite, security review, AI evaluation suite (`docs/evaluation/QUALITY_G
 | Decision | Needed by |
 |---|---|
 | ~~Authentication mechanism~~ — ADR-006 | P1-01 |
-| Storage abstraction and layout (filesystem now, S3/MinIO later) | P1-08 |
-| PDF text extraction / OCR stack | P1-10 |
+| ~~Storage abstraction~~ — ADR-007 | P1-08 |
+| ~~PDF text extraction / OCR stack~~ — ADR-008 (OCR itself still open) | P1-10 |
 | ~~Policy Engine implementation approach~~ — ADR-006 | P1-02 |
 | Default multilingual embedding model (benchmarked) | Phase 3 retrieval |
 | Web search provider order | Phase 3 |

@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from research_api.modules.sources_library import ingestion
 from research_api.platform import jobs
 from research_api.platform.queue import get_celery
 from research_worker.runner import run_job
@@ -23,3 +24,16 @@ def _ping_body(session: Session, job: jobs.BackgroundJob) -> dict[str, Any]:
 @celery_app.task(name="system.ping")  # type: ignore[untyped-decorator]
 def ping(job_id: str) -> str:
     return run_job(UUID(job_id), _ping_body).value
+
+
+def _ingest_body(session: Session, job: jobs.BackgroundJob) -> dict[str, Any]:
+    return ingestion.ingest_asset(session, UUID(job.params["asset_id"]))
+
+
+def _ingest_failed(session: Session, job: jobs.BackgroundJob) -> None:
+    ingestion.mark_failed(session, UUID(job.params["asset_id"]))
+
+
+@celery_app.task(name="sources.ingest_asset")  # type: ignore[untyped-decorator]
+def ingest_asset(job_id: str) -> str:
+    return run_job(UUID(job_id), _ingest_body, _ingest_failed).value

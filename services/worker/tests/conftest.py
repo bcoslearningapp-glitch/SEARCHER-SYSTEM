@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from alembic import command
 from alembic.config import Config
 
 os.environ.setdefault("ENVIRONMENT", "test")
+os.environ.setdefault("STORAGE_ROOT", tempfile.mkdtemp(prefix="product-b-worker-storage-"))
 
 API_ROOT = Path(__file__).resolve().parents[2] / "api"
 

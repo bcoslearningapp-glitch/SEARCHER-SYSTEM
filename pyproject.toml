@@ -30,7 +30,7 @@ extend-exclude = ["services/api/research_api/contracts/enums.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "S", "BLE", "N", "SIM", "RUF", "PL", "T20"]
-ignore = ["PLR0913", "PLR2004", "PLR0911"]
+ignore = ["PLR0913", "PLR2004", "PLR0911", "PLR0917"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["research_api", "research_worker", "tests", "_common"]
