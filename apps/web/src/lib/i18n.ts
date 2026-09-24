@@ -4,6 +4,8 @@
  * Canonical stored data is never localized; only presentation is.
  */
 
+import { ar as uiAr, en as uiEn, fr as uiFr, type UiStrings } from "@/lib/i18n-ui";
+
 export const LOCALES = ["en", "fr", "ar"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
@@ -21,6 +23,7 @@ export type Space = (typeof SPACES)[number];
 
 export type Dictionary = {
   productName: string;
+  ui: UiStrings;
   spaces: Record<Space, string>;
   spaceDescriptions: Record<Space, string>;
   notYetAvailable: string;
@@ -32,6 +35,7 @@ export type Dictionary = {
 
 const en: Dictionary = {
   productName: "Integrated AI Research System",
+  ui: uiEn,
   spaces: { desk: "Desk", map: "Map", library: "Library", lab: "Lab", outputs: "Outputs" },
   spaceDescriptions: {
     desk: "Current question, mode, next step, and items that need your attention.",
@@ -49,6 +53,7 @@ const en: Dictionary = {
 
 const fr: Dictionary = {
   productName: "Système de recherche intégré à l'IA",
+  ui: uiFr,
   spaces: { desk: "Bureau", map: "Carte", library: "Bibliothèque", lab: "Laboratoire", outputs: "Productions" },
   spaceDescriptions: {
     desk: "Question actuelle, mode, prochaine étape et éléments nécessitant votre attention.",
@@ -71,6 +76,7 @@ const fr: Dictionary = {
 
 const ar: Dictionary = {
   productName: "نظام البحث المتكامل بالذكاء الاصطناعي",
+  ui: uiAr,
   spaces: { desk: "المكتب", map: "الخريطة", library: "المكتبة", lab: "المختبر", outputs: "المخرجات" },
   spaceDescriptions: {
     desk: "السؤال الحالي، والنمط، والخطوة التالية، والعناصر التي تحتاج إلى انتباهك.",

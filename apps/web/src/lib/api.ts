@@ -13,8 +13,58 @@ export type Readiness = {
 
 export type ReadinessResult = { reachable: true; readiness: Readiness } | { reachable: false };
 
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+    readonly details: Record<string, unknown> = {},
+  ) {
+    super(message);
+  }
+}
+
 function apiBaseUrl(): string {
   return process.env.API_INTERNAL_URL ?? "http://localhost:8000";
+}
+
+async function parse<T>(response: Response): Promise<T> {
+  const body = (await response.json().catch(() => null)) as unknown;
+  if (!response.ok) {
+    const error = (body as { error?: { message?: string; details?: Record<string, unknown> } } | null)?.error;
+    const detail = (body as { detail?: unknown } | null)?.detail;
+    const message =
+      error?.message ??
+      (typeof detail === "string" ? detail : Array.isArray(detail) ? "The submitted data is invalid." : null) ??
+      `Request failed (${response.status})`;
+    throw new ApiError(response.status, message, error?.details ?? {});
+  }
+  return body as T;
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  const response = await fetch(`${apiBaseUrl()}${path}`, { cache: "no-store", signal: AbortSignal.timeout(10_000) });
+  return parse<T>(response);
+}
+
+export async function apiSend<T>(method: "POST" | "PUT" | "PATCH", path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${apiBaseUrl()}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+    signal: AbortSignal.timeout(30_000),
+  });
+  return parse<T>(response);
+}
+
+export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
+  const response = await fetch(`${apiBaseUrl()}${path}`, {
+    method: "POST",
+    body: form,
+    cache: "no-store",
+    signal: AbortSignal.timeout(120_000),
+  });
+  return parse<T>(response);
 }
 
 export async function getReadiness(): Promise<ReadinessResult> {

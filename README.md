@@ -9,7 +9,7 @@ A local-first research operating system that integrates cloud AI through provide
 - Plan and status: [`docs/implementation/MASTER_PLAN.md`](docs/implementation/MASTER_PLAN.md), [`docs/implementation/STATUS.md`](docs/implementation/STATUS.md)
 - Architecture: [`docs/architecture/OVERVIEW.md`](docs/architecture/OVERVIEW.md) and [`docs/adr/`](docs/adr/)
 
-**Current state:** Phase 0 foundation (platform, contracts, audit, worker, UI shell, CI). Research features start in Phase 1.
+**Current state:** Phase 1 (M1): projects, Research State, Problem Frames with explicit approval, decisions, source library with Hybrid Source Access, PDF ingestion and search, in English, French and Arabic. See [`STATUS.md`](docs/implementation/STATUS.md).
 
 ## Prerequisites
 
