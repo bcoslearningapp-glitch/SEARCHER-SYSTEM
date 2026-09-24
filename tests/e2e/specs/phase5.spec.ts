@@ -62,3 +62,29 @@ test("outputs: composed report traces claims, protects quotes, and is approved b
   await page.getByTestId("approve-output").getByRole("button", { name: "Approve this version" }).click();
   await expect(page.getByTestId("output-status")).toContainText("APPROVED");
 });
+
+test("7. referenced output passes the integrity pipeline, is approved, and exports with verbatim quotes", async ({ page, request }) => {
+  const { projectId } = await projectWithEvidence(request);
+  await page.goto(`/en/projects/${projectId}/outputs`);
+  const form = page.getByTestId("new-output");
+  await form.getByLabel("Title").fill("Referenced report");
+  await form.getByRole("button", { name: "Compose" }).click();
+  await page.getByTestId("output-row").getByRole("link", { name: "Referenced report" }).click();
+
+  const integrity = page.getByTestId("integrity");
+  await integrity.getByRole("button", { name: "Run integrity checks" }).click();
+  const report = page.getByTestId("integrity-report");
+  await expect(report).toContainText("VERIFIED");
+  await expect(report).toContainText("EXACT_QUOTE_VERIFICATION: PASS");
+  await expect(report).toContainText("FINAL_RENDERING: PASS");
+
+  await page.getByTestId("approve-output").getByRole("button", { name: "Approve this version" }).click();
+  await expect(page.getByTestId("output-status")).toContainText("APPROVED");
+
+  const href = await page.getByTestId("export-md").getAttribute("href");
+  const download = await page.request.get(href!);
+  expect(download.ok()).toBeTruthy();
+  const markdown = await download.text();
+  expect(markdown).toContain(`> ${PASSAGE}`);
+  expect(markdown).toContain("Cohort study");
+});

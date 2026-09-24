@@ -5,13 +5,14 @@ from __future__ import annotations
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 
 from research_api.modules.governance_audit.principal import Principal, current_principal
 from research_api.modules.outputs_integrity import service
 from research_api.modules.outputs_integrity.schemas import (
     ApproveIn,
     ApproveOut,
+    IntegrityRunOut,
     OutputIn,
     OutputOut,
     ReviseIn,
@@ -64,3 +65,21 @@ def update_settings(project_id: UUID, output_id: UUID, data: SettingsIn, db: DB,
 @router.post("/{output_id}/versions/{version_id}/approve", response_model=ApproveOut)
 def approve(project_id: UUID, output_id: UUID, version_id: UUID, data: ApproveIn, db: DB, who: Who) -> ApproveOut:
     return service.approve(db, who, project_id, output_id, version_id, data)
+
+
+@router.post("/{output_id}/versions/{version_id}/integrity", response_model=IntegrityRunOut)
+def run_integrity(project_id: UUID, output_id: UUID, version_id: UUID, db: DB, who: Who) -> IntegrityRunOut:
+    return service.run_integrity(db, who, project_id, output_id, version_id)
+
+
+@router.get("/{output_id}/versions/{version_id}/integrity", response_model=list[IntegrityRunOut])
+def integrity_runs(project_id: UUID, output_id: UUID, version_id: UUID, db: DB) -> list[IntegrityRunOut]:
+    return service.integrity_runs(db, project_id, output_id, version_id)
+
+
+@router.get("/{output_id}/versions/{version_id}/export")
+def export(project_id: UUID, output_id: UUID, version_id: UUID, db: DB, format: str = "md") -> Response:
+    content, media_type, filename = service.export(db, project_id, output_id, version_id, format)
+    return Response(
+        content, media_type=media_type, headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )

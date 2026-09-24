@@ -80,3 +80,8 @@ export async function getReadiness(): Promise<ReadinessResult> {
     return { reachable: false };
   }
 }
+
+/** Raw passthrough for downloads (exports); the browser never learns the API's internal URL. */
+export async function apiRaw(path: string): Promise<Response> {
+  return fetch(`${apiBaseUrl()}${path}`, { cache: "no-store", signal: AbortSignal.timeout(30_000) });
+}

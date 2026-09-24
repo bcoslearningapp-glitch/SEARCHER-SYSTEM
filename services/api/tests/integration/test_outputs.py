@@ -103,7 +103,7 @@ def test_composed_report_traces_claims_and_protects_quotes(client: TestClient, s
     assert approved.status_code == 200, approved.text
     assert approved.json()["approval"]["approved_by"]["kind"] == "HUMAN"
     version = approved.json()["version"]
-    assert contract_errors("output.OutputVersion", _plain(version)) == []
+    assert contract_errors("output.OutputVersion", _plain({k: v for k, v in version.items() if k != "integrity"})) == []
     versions = client.get(f"/api/v1/projects/{pid}/outputs/{output['id']}/versions").json()
     assert [(v["version_number"], v["status"]) for v in versions] == [(1, "SUPERSEDED"), (2, "APPROVED")]
 

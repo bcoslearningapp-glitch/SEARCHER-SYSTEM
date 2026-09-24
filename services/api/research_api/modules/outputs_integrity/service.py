@@ -17,26 +17,27 @@ from sqlalchemy.orm import Session
 from research_api.contracts.enums import (
     ActorKind,
     ApprovalOutcome,
-    EvidenceTargetType,
+    IntegrityStatus,
     LanguageCode,
     MethodologyPathStatus,
     OutputBlockKind,
+    OutputMode,
     OutputType,
     OutputVersionStatus,
     ProvenanceKind,
 )
-from research_api.modules import targets
 from research_api.modules.governance_audit import service as governance
 from research_api.modules.governance_audit.context import Authorized, authorized
 from research_api.modules.governance_audit.principal import Principal
 from research_api.modules.governance_audit.schemas import Actor, AIActionRecord, AuditEntry, ResearchEventEntry
-from research_api.modules.outputs_integrity import composer, quotes
-from research_api.modules.outputs_integrity.models import Output, OutputVersion
+from research_api.modules.outputs_integrity import composer, pipeline, quotes, render
+from research_api.modules.outputs_integrity.models import IntegrityRun, Output, OutputVersion
 from research_api.modules.outputs_integrity.schemas import (
     SUBJECT_TYPES,
     ApproveIn,
     ApproveOut,
     Block,
+    IntegrityRunOut,
     OutputIn,
     OutputOut,
     ReviseIn,
@@ -79,8 +80,19 @@ def _record(
     )
 
 
-def _version_out(v: OutputVersion) -> VersionOut:
+def _latest_run(session: Session, version_id: UUID) -> IntegrityRun | None:
+    return session.scalars(
+        select(IntegrityRun)
+        .where(IntegrityRun.output_version_id == version_id)
+        .order_by(IntegrityRun.created_at.desc())
+        .limit(1)
+    ).first()
+
+
+def _version_out(v: OutputVersion, session: Session | None = None) -> VersionOut:
+    run = _latest_run(session, v.id) if session is not None else None
     return VersionOut(
+        integrity=IntegrityStatus(run.status) if run else None,
         id=v.id,
         output_id=v.output_id,
         version_number=v.version_number,
@@ -114,7 +126,7 @@ def _out(session: Session, output: Output) -> OutputOut:
         current_version=output.current_version,
         provenance=output.provenance,
         created_at=output.created_at,
-        latest=_version_out(_latest(session, output)),
+        latest=_version_out(_latest(session, output), session),
     )
 
 
@@ -139,7 +151,7 @@ def _check_quotes(session: Session, project_id: UUID, blocks: list[Block]) -> No
 
 
 def _append(
-    session: Session, output: Output, auth: Authorized, blocks: list[Block], reason: str | None
+    session: Session, output: Output, auth: Authorized, blocks: list[Block], reason: str | None, *, edited: bool = False
 ) -> OutputVersion:
     """A new DRAFT version; any earlier pending draft is superseded (approved versions stay approved)."""
     for draft in session.scalars(
@@ -154,6 +166,7 @@ def _append(
         status=S.DRAFT.value,
         blocks=[b.model_dump(mode="json", exclude_none=True) for b in blocks],
         change_reason=reason,
+        edited=edited,
         created_by=auth.actor.model_dump(mode="json", exclude_none=True),
     )
     session.add(version)
@@ -222,7 +235,7 @@ def revise(
     auth = authorized(principal, "output.revise", ai_action=ai_action)
     output = _load(session, project_id, output_id, lock=True)
     _check_quotes(session, project_id, data.blocks)
-    _append(session, output, auth, data.blocks, data.change_reason)
+    _append(session, output, auth, data.blocks, data.change_reason, edited=True)
     _record(
         session,
         auth,
@@ -262,11 +275,22 @@ def approve(
         raise NotFoundError("output version not found")
     if version.status != S.DRAFT.value or version.version_number != output.current_version:
         raise ConflictError("only the latest draft can be approved")
-    blocks = [Block.model_validate(b) for b in version.blocks]
-    _check_quotes(session, project_id, blocks)
-    missing = _missing_traces(session, project_id, blocks)
-    if missing:
-        raise RuleViolationError("some statements trace to entities that no longer exist", missing=missing)
+    run = _run(session, auth, output, version)
+    if run.status is IntegrityStatus.FAILED:
+        raise RuleViolationError(
+            "the integrity pipeline FAILED; a failed version cannot be approved",
+            integrity_run_id=str(run.id),
+            findings=[f.model_dump() | {"step": s.step.value} for s in run.steps for f in s.findings],
+        )
+    path = MethodologyPathStatus.COMPLIANT
+    if run.status is IntegrityStatus.VERIFIED_WITH_WARNINGS:
+        if not (data.acknowledge_warnings and data.reason):
+            raise RuleViolationError(
+                "integrity warnings need a human decision: acknowledge them and give a reason",
+                integrity_run_id=str(run.id),
+                findings=[f.model_dump() | {"step": s.step.value} for s in run.steps for f in s.findings],
+            )
+        path = MethodologyPathStatus.OVERRIDDEN_WITH_REASON
     approval = governance.record_approval(
         session,
         project_id=project_id,
@@ -274,7 +298,7 @@ def approve(
         subject_id=version.id,
         actor=auth.actor,
         outcome=ApprovalOutcome.APPROVED,
-        methodology_path=MethodologyPathStatus.COMPLIANT,
+        methodology_path=path,
         reason=data.reason,
     )
     for previous in session.scalars(
@@ -294,31 +318,7 @@ def approve(
         {"version": version.version_number},
         reason=data.reason,
     )
-    return ApproveOut(version=_version_out(version), approval=approval)
-
-
-_TARGETS = {
-    "Claim": EvidenceTargetType.CLAIM,
-    "Hypothesis": EvidenceTargetType.HYPOTHESIS,
-    "Mechanism": EvidenceTargetType.MECHANISM,
-    "DesignConcept": EvidenceTargetType.DESIGN_CONCEPT,
-    "DesignHypothesis": EvidenceTargetType.DESIGN_HYPOTHESIS,
-}
-
-
-def _missing_traces(session: Session, project_id: UUID, blocks: list[Block]) -> list[dict[str, str]]:
-    """Traces to registered research targets must resolve in this project."""
-    missing = []
-    for block in blocks:
-        for trace in block.trace:
-            target = _TARGETS.get(trace.entity_type)
-            if target is None:
-                continue
-            try:
-                targets.require(session, project_id, target, trace.entity_id)
-            except NotFoundError:
-                missing.append({"entity_type": trace.entity_type, "entity_id": str(trace.entity_id)})
-    return missing
+    return ApproveOut(version=_version_out(version, session), approval=approval, integrity=run)
 
 
 def get_output(session: Session, project_id: UUID, output_id: UUID) -> OutputOut:
@@ -335,4 +335,101 @@ def list_versions(session: Session, project_id: UUID, output_id: UUID) -> list[V
     rows = session.scalars(
         select(OutputVersion).where(OutputVersion.output_id == output_id).order_by(OutputVersion.version_number)
     )
-    return [_version_out(v) for v in rows]
+    return [_version_out(v, session) for v in rows]
+
+
+def _run_out(run: IntegrityRun) -> IntegrityRunOut:
+    return IntegrityRunOut.model_validate(
+        {
+            "id": run.id,
+            "output_version_id": run.output_version_id,
+            "status": run.status,
+            "steps": run.steps,
+            "run_by": run.run_by,
+            "created_at": run.created_at,
+        }
+    )
+
+
+def _run(session: Session, auth: Authorized, output: Output, version: OutputVersion) -> IntegrityRunOut:
+    project = projects.get_project(session, output.project_id)
+    previous = session.scalars(
+        select(OutputVersion).where(
+            OutputVersion.output_id == output.id, OutputVersion.version_number == version.version_number - 1
+        )
+    ).first()
+    status, steps = pipeline.run(
+        pipeline.Context(
+            session=session,
+            project_id=output.project_id,
+            language=LanguageCode(output.language),
+            source_language=LanguageCode(project.primary_language),
+            blocks=[Block.model_validate(b) for b in version.blocks],
+            previous_blocks=[Block.model_validate(b) for b in previous.blocks] if previous else None,
+            edited=version.edited,
+        )
+    )
+    run = IntegrityRun(
+        output_version_id=version.id,
+        status=status.value,
+        steps=[{"step": s.step.value, "status": s.status.value, "findings": s.findings} for s in steps],
+        run_by=auth.actor.model_dump(mode="json", exclude_none=True),
+    )
+    session.add(run)
+    session.flush()
+    return _run_out(run)
+
+
+def run_integrity(
+    session: Session, principal: Principal, project_id: UUID, output_id: UUID, version_id: UUID
+) -> IntegrityRunOut:
+    auth = authorized(principal, "quality_gate.evaluate")
+    output = _load(session, project_id, output_id)
+    version = session.get(OutputVersion, version_id)
+    if version is None or version.output_id != output.id:
+        raise NotFoundError("output version not found")
+    run = _run(session, auth, output, version)
+    _record(
+        session,
+        auth,
+        "output.integrity",
+        "OutputIntegrityChecked",
+        output,
+        {"version": version.version_number, "status": run.status.value},
+    )
+    return run
+
+
+def integrity_runs(session: Session, project_id: UUID, output_id: UUID, version_id: UUID) -> list[IntegrityRunOut]:
+    _load(session, project_id, output_id)
+    rows = session.scalars(
+        select(IntegrityRun).where(IntegrityRun.output_version_id == version_id).order_by(IntegrityRun.created_at)
+    )
+    return [_run_out(r) for r in rows]
+
+
+EXPORT_TYPES = {"md": "text/markdown; charset=utf-8", "html": "text/html; charset=utf-8"}
+
+
+def export(session: Session, project_id: UUID, output_id: UUID, version_id: UUID, fmt: str) -> tuple[str, str, str]:
+    """(content, media type, filename) for a version (FR-OUT-006). The integrity status travels with it."""
+    output = _load(session, project_id, output_id)
+    version = session.get(OutputVersion, version_id)
+    if version is None or version.output_id != output.id:
+        raise NotFoundError("output version not found")
+    if fmt not in EXPORT_TYPES:
+        raise RuleViolationError("export formats are md and html")
+    run = _latest_run(session, version.id)
+    doc = render.Document(
+        title=output.title,
+        language=output.language,
+        mode=OutputMode(output.mode),
+        blocks=[Block.model_validate(b) for b in version.blocks],
+        version=version.version_number,
+        status=version.status,
+        integrity=run.status if run else "NOT_CHECKED",
+    )
+    content = (
+        render.markdown(session, project_id, doc) if fmt == "md" else render.html_document(session, project_id, doc)
+    )
+    return content, EXPORT_TYPES[fmt], f"output-{output.id}-v{version.version_number}.{fmt}"

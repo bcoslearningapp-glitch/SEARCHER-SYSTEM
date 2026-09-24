@@ -9,6 +9,9 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from research_api.contracts.enums import (
+    IntegrityStatus,
+    IntegrityStep,
+    IntegrityStepStatus,
     LanguageCode,
     OutputBlockKind,
     OutputMode,
@@ -101,6 +104,31 @@ class SettingsIn(BaseModel):
 
 class ApproveIn(BaseModel):
     reason: str | None = None
+    acknowledge_warnings: bool = False
+
+
+class IntegrityFinding(BaseModel):
+    code: str
+    message: str
+    block: int | None = None
+
+
+class IntegrityStepOut(BaseModel):
+    step: IntegrityStep
+    status: IntegrityStepStatus
+    findings: list[IntegrityFinding]
+
+
+class IntegrityRunOut(BaseModel):
+    id: UUID
+    output_version_id: UUID
+    status: IntegrityStatus
+    steps: list[IntegrityStepOut]
+    run_by: Actor
+    created_at: datetime
+
+    def to_contract(self) -> dict[str, Any]:
+        return self.model_dump(mode="json", exclude_none=True)
 
 
 class VersionOut(BaseModel):
@@ -113,10 +141,10 @@ class VersionOut(BaseModel):
     approval_id: UUID | None
     created_by: Actor
     created_at: datetime
+    integrity: IntegrityStatus | None = None
 
     def to_contract(self) -> dict[str, Any]:
-        data = self.model_dump(mode="json", exclude_none=True)
-        return data
+        return self.model_dump(mode="json", exclude_none=True, exclude={"integrity"})
 
 
 class OutputOut(BaseModel):
@@ -140,3 +168,4 @@ class OutputOut(BaseModel):
 class ApproveOut(BaseModel):
     version: VersionOut
     approval: ApprovalOut
+    integrity: IntegrityRunOut

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { approveOutputVersion, recomposeOutput, setOutputMode } from "@/app/actions";
+import { approveOutputVersion, recomposeOutput, runOutputIntegrity, setOutputMode } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
 import { AppShell } from "@/components/AppShell";
 import { Badge, Card, Field, Select, TextInput } from "@/components/fields";
@@ -10,7 +10,7 @@ import { OutputModeValues } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
 import { load } from "@/lib/load";
 import { resolveLocale } from "@/lib/locale-params";
-import type { Output, OutputVersion, Project } from "@/lib/types";
+import type { IntegrityRun, Output, OutputVersion, Project } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +29,10 @@ export default async function OutputPage(props: Props) {
     load<OutputVersion[]>(`${base}/outputs/${outputId}/versions`),
   ]);
   if (project === null || output === null) notFound();
+  const runs = await load<IntegrityRun[]>(`${base}/outputs/${outputId}/versions/${output.latest.id}/integrity`);
+  const run = runs?.at(-1) ?? null;
+  const exportUrl = (format: "md" | "html") =>
+    `/${locale}/projects/${projectId}/outputs/${outputId}/export?version=${output.latest.id}&format=${format}`;
   const hidden = (
     <>
       <input type="hidden" name="project_id" value={projectId} />
@@ -55,6 +59,40 @@ export default async function OutputPage(props: Props) {
             <OutputBlocks output={output} blocks={output.latest.blocks} t={t} />
           </Card>
           <div className="space-y-6">
+            <Card title={t.integrity} testId="integrity">
+              <p className="text-xs text-[var(--color-muted)]">{t.integrityExplainer}</p>
+              {run ? (
+                <div className="space-y-1 text-sm" data-testid="integrity-report">
+                  <Badge tone={run.status === "VERIFIED" ? "good" : "warn"}>{run.status}</Badge>
+                  <ol className="list-decimal ps-5">
+                    {run.steps.map((s) => (
+                      <li key={s.step}>
+                        {s.step}: <strong>{s.status}</strong>
+                        {s.findings.map((f, i) => (
+                          <span key={i} className="block text-xs">
+                            {f.code}: {f.message}
+                          </span>
+                        ))}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : (
+                <p className="text-sm">{t.notChecked}</p>
+              )}
+              <ActionForm action={runOutputIntegrity} submitLabel={t.runIntegrity} pendingLabel={t.saving}>
+                {hidden}
+                <input type="hidden" name="version_id" value={output.latest.id} />
+              </ActionForm>
+              <p className="flex gap-3 text-sm">
+                <a href={exportUrl("md")} className="underline" data-testid="export-md">
+                  {t.export} .md
+                </a>
+                <a href={exportUrl("html")} className="underline" data-testid="export-html">
+                  {t.export} .html
+                </a>
+              </p>
+            </Card>
             <Card title={t.approve} testId="approve-output">
               {output.latest.status === "DRAFT" ? (
                 <ActionForm action={approveOutputVersion} submitLabel={t.approve} pendingLabel={t.saving}>
@@ -64,6 +102,10 @@ export default async function OutputPage(props: Props) {
                   <Field label={t.reason}>
                     <TextInput name="reason" />
                   </Field>
+                  <label className="flex items-center gap-2 text-xs">
+                    <input type="checkbox" name="acknowledge_warnings" />
+                    {t.acknowledgeWarnings}
+                  </label>
                 </ActionForm>
               ) : (
                 <Badge tone="good">{output.latest.status}</Badge>

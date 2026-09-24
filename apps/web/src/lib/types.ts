@@ -600,6 +600,7 @@ export type OutputVersion = {
   approval_id: string | null;
   created_by: Actor;
   created_at: string;
+  integrity: "VERIFIED" | "VERIFIED_WITH_WARNINGS" | "FAILED" | null;
 };
 
 export type Output = {
@@ -614,4 +615,11 @@ export type Output = {
   current_version: number;
   provenance: { kind: string };
   latest: OutputVersion;
+};
+
+export type IntegrityRun = {
+  id: string;
+  status: "VERIFIED" | "VERIFIED_WITH_WARNINGS" | "FAILED";
+  steps: { step: string; status: "PASS" | "WARN" | "FAIL" | "SKIPPED"; findings: { code: string; message: string; block?: number | null }[] }[];
+  created_at: string;
 };

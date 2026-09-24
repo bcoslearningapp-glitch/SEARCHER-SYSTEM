@@ -1,6 +1,6 @@
 # Data Model
 
-Current schema (migrations `0001`–`0017`), by owning module:
+Current schema (migrations `0001`–`0018`), by owning module:
 
 | Migration | Tables | Integrity rules |
 |---|---|---|
@@ -19,6 +19,7 @@ Current schema (migrations `0001`–`0017`), by owning module:
 | 0015 terminology | `terms` | Library-wide, versioned; content immutable, forward status only; approval by Methodology Steward / Constitutional Authority (ADR-018) |
 | 0016 closure gate | `project_closures.gate_evaluation_id`, `project_closures.approval_id` | Closing references its Project Closure Gate evaluation and approval (ADR-019) |
 | 0017 outputs | `outputs`, `output_versions` | Version content immutable, status forward only; outputs never deleted; approval human-only (ADR-020) |
+| 0018 integrity | `output_integrity_runs`, `output_versions.edited` | Runs append-only; a FAILED version cannot be approved (ADR-021) |
 
 Conventions:
 - Primary keys are UUIDs (portable IDs, PRD §60.6).

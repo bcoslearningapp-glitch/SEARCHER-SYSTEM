@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.11.0";
+export const CONTRACT_SCHEMA_VERSION = "0.12.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -311,6 +311,18 @@ export type OutputVersionStatus = (typeof OutputVersionStatusValues)[number];
 /** Where a protected exact quote comes from. */
 export const QuoteSourceKindValues = ["EXCERPT", "QURAN", "HADITH"] as const;
 export type QuoteSourceKind = (typeof QuoteSourceKindValues)[number];
+
+/** The output integrity pipeline, in order (FR-OUT-002). */
+export const IntegrityStepValues = ["CLAIM_VERIFICATION", "CITATION_VERIFICATION", "EXACT_QUOTE_VERIFICATION", "REFERENCE_INTEGRITY", "TERMINOLOGY_CHECK", "TRANSLATION_SEMANTIC_CHECK", "LANGUAGE_EDITING", "FINAL_RENDERING"] as const;
+export type IntegrityStep = (typeof IntegrityStepValues)[number];
+
+/** Result of one integrity step. */
+export const IntegrityStepStatusValues = ["PASS", "WARN", "FAIL", "SKIPPED"] as const;
+export type IntegrityStepStatus = (typeof IntegrityStepStatusValues)[number];
+
+/** Overall integrity of an output version; FAILED cannot be approved (FR-OUT-002). */
+export const IntegrityStatusValues = ["VERIFIED", "VERIFIED_WITH_WARNINGS", "FAILED"] as const;
+export type IntegrityStatus = (typeof IntegrityStatusValues)[number];
 
 /** Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003). */
 export const FoundationalSourceStatusValues = ["STAGED", "APPROVED", "RETIRED"] as const;

@@ -24,6 +24,12 @@ export type OutputStrings = {
   trace: string;
   references: string;
   projects: string;
+  integrity: string;
+  integrityExplainer: string;
+  runIntegrity: string;
+  notChecked: string;
+  acknowledgeWarnings: string;
+  export: string;
 };
 
 export const outputsEn: OutputStrings = {
@@ -51,6 +57,13 @@ export const outputsEn: OutputStrings = {
   trace: "Traced to",
   references: "References",
   projects: "Projects",
+  integrity: "Integrity pipeline",
+  integrityExplainer:
+    "Eight checks in order: claims, citations, exact quotes, reference integrity, terminology, translation strength, editing, rendering. A failed version cannot be approved; warnings need your decision.",
+  runIntegrity: "Run integrity checks",
+  notChecked: "Not checked yet.",
+  acknowledgeWarnings: "I have reviewed the warnings",
+  export: "Download",
 };
 
 export const outputsFr: OutputStrings = {
@@ -78,6 +91,13 @@ export const outputsFr: OutputStrings = {
   trace: "Rattaché à",
   references: "Références",
   projects: "Projets",
+  integrity: "Chaîne d'intégrité",
+  integrityExplainer:
+    "Huit contrôles dans l'ordre : affirmations, citations, citations exactes, intégrité de référence, terminologie, force de traduction, édition, rendu. Une version en échec ne peut pas être approuvée ; les avertissements demandent votre décision.",
+  runIntegrity: "Lancer les contrôles d'intégrité",
+  notChecked: "Pas encore contrôlé.",
+  acknowledgeWarnings: "J'ai examiné les avertissements",
+  export: "Télécharger",
 };
 
 export const outputsAr: OutputStrings = {
@@ -105,4 +125,11 @@ export const outputsAr: OutputStrings = {
   trace: "مرتبط بـ",
   references: "المراجع",
   projects: "المشاريع",
+  integrity: "سلسلة فحص السلامة",
+  integrityExplainer:
+    "ثمانية فحوص بالترتيب: الادعاءات، الإحالات، الاقتباسات الحرفية، السلامة المرجعية، المصطلحات، قوة الترجمة، التحرير، الإخراج. النسخة الفاشلة لا يمكن اعتمادها، والتنبيهات تحتاج إلى قرارك.",
+  runIntegrity: "تشغيل فحوص السلامة",
+  notChecked: "لم تُفحص بعد.",
+  acknowledgeWarnings: "راجعتُ التنبيهات",
+  export: "تنزيل",
 };

@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.11.0"
+CONTRACT_SCHEMA_VERSION = "0.12.0"
 
 
 class ProjectStatus(StrEnum):
@@ -786,6 +786,36 @@ class QuoteSourceKind(StrEnum):
     EXCERPT = "EXCERPT"
     QURAN = "QURAN"
     HADITH = "HADITH"
+
+
+class IntegrityStep(StrEnum):
+    """The output integrity pipeline, in order (FR-OUT-002)."""
+
+    CLAIM_VERIFICATION = "CLAIM_VERIFICATION"
+    CITATION_VERIFICATION = "CITATION_VERIFICATION"
+    EXACT_QUOTE_VERIFICATION = "EXACT_QUOTE_VERIFICATION"
+    REFERENCE_INTEGRITY = "REFERENCE_INTEGRITY"
+    TERMINOLOGY_CHECK = "TERMINOLOGY_CHECK"
+    TRANSLATION_SEMANTIC_CHECK = "TRANSLATION_SEMANTIC_CHECK"
+    LANGUAGE_EDITING = "LANGUAGE_EDITING"
+    FINAL_RENDERING = "FINAL_RENDERING"
+
+
+class IntegrityStepStatus(StrEnum):
+    """Result of one integrity step."""
+
+    PASS = "PASS"
+    WARN = "WARN"
+    FAIL = "FAIL"
+    SKIPPED = "SKIPPED"
+
+
+class IntegrityStatus(StrEnum):
+    """Overall integrity of an output version; FAILED cannot be approved (FR-OUT-002)."""
+
+    VERIFIED = "VERIFIED"
+    VERIFIED_WITH_WARNINGS = "VERIFIED_WITH_WARNINGS"
+    FAILED = "FAILED"
 
 
 class FoundationalSourceStatus(StrEnum):
