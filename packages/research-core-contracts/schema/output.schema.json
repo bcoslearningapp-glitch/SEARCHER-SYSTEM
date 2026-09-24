@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/output.schema.json",
+  "title": "Research Core outputs and their versions",
+  "$defs": {
+    "Trace": {
+      "description": "A canonical entity an output statement rests on (FR-OUT-004).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_type", "entity_id"],
+      "properties": {
+        "entity_type": { "type": "string", "maxLength": 60 },
+        "entity_id": { "$ref": "common.schema.json#/$defs/EntityId" }
+      }
+    },
+    "Quote": {
+      "description": "Protected exact text copied from its source; it is never edited (FR-OUT-003).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_kind", "text"],
+      "properties": {
+        "source_kind": { "$ref": "enums.schema.json#/$defs/QuoteSourceKind" },
+        "excerpt_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "quran_ref": { "type": "string", "pattern": "^[0-9]{1,3}:[0-9]{1,3}(-[0-9]{1,3})?$" },
+        "hadith_record_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "text": { "type": "string", "minLength": 1 },
+        "language": { "type": "string" }
+      },
+      "allOf": [
+        { "if": { "properties": { "source_kind": { "const": "EXCERPT" } } }, "then": { "required": ["excerpt_id"] } },
+        { "if": { "properties": { "source_kind": { "const": "QURAN" } } }, "then": { "required": ["quran_ref"] } },
+        { "if": { "properties": { "source_kind": { "const": "HADITH" } } }, "then": { "required": ["hadith_record_id"] } }
+      ]
+    },
+    "OutputBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "text", "trace"],
+      "properties": {
+        "kind": { "$ref": "enums.schema.json#/$defs/OutputBlockKind" },
+        "text": { "type": "string" },
+        "level": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "items": { "type": "array", "items": { "type": "string" } },
+        "label": { "type": "string", "description": "e.g. epistemic state or evidence role shown with the block" },
+        "trace": { "type": "array", "items": { "$ref": "#/$defs/Trace" } },
+        "quote": { "$ref": "#/$defs/Quote" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "CLAIM" } } }, "then": { "properties": { "trace": { "minItems": 1 } } } },
+        { "if": { "properties": { "kind": { "const": "QUOTE" } } }, "then": { "required": ["quote"] } }
+      ]
+    },
+    "Output": {
+      "description": "A research output (PRD §37). Content lives in versions.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "output_type", "title", "language", "mode", "current_version", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "output_type": { "$ref": "enums.schema.json#/$defs/OutputType" },
+        "title": { "type": "string", "minLength": 1 },
+        "language": { "$ref": "enums.schema.json#/$defs/LanguageCode" },
+        "mode": { "$ref": "enums.schema.json#/$defs/OutputMode" },
+        "subject_type": { "type": "string" },
+        "subject_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "current_version": { "type": "integer", "minimum": 1 },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      }
+    },
+    "OutputVersion": {
+      "description": "An immutable output version; only its status moves forward.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "output_id", "version_number", "status", "blocks", "created_by", "created_at"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "output_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "status": { "$ref": "enums.schema.json#/$defs/OutputVersionStatus" },
+        "blocks": { "type": "array", "items": { "$ref": "#/$defs/OutputBlock" } },
+        "change_reason": { "type": "string" },
+        "approval_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "created_by": { "$ref": "common.schema.json#/$defs/Actor" },
+        "created_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "const": "APPROVED" } }, "required": ["status"] }, "then": { "required": ["approval_id"] } }
+      ]
+    }
+  }
+}

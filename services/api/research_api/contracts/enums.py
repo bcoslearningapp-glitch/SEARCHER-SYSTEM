@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.10.0"
+CONTRACT_SCHEMA_VERSION = "0.11.0"
 
 
 class ProjectStatus(StrEnum):
@@ -743,6 +743,49 @@ class TermStatus(StrEnum):
     APPROVED = "APPROVED"
     SUPERSEDED = "SUPERSEDED"
     REJECTED = "REJECTED"
+
+
+class OutputType(StrEnum):
+    """Output types (PRD §37)."""
+
+    RESEARCH_REPORT = "RESEARCH_REPORT"
+    EXECUTIVE_SUMMARY = "EXECUTIVE_SUMMARY"
+    DECISION_BRIEF = "DECISION_BRIEF"
+    REFERENCE_REVIEW = "REFERENCE_REVIEW"
+    EVIDENCE_MAP = "EVIDENCE_MAP"
+    HYPOTHESIS_DOSSIER = "HYPOTHESIS_DOSSIER"
+    DESIGN_SPECIFICATION = "DESIGN_SPECIFICATION"
+    EXPERIMENT_PROTOCOL = "EXPERIMENT_PROTOCOL"
+    LEARNING_REVIEW = "LEARNING_REVIEW"
+    CLOSURE_REPORT = "CLOSURE_REPORT"
+
+
+class OutputBlockKind(StrEnum):
+    """Block kinds in an output version; CLAIM blocks must trace to canonical entities and QUOTE blocks are protected exact text (FR-OUT-003/004)."""
+
+    HEADING = "HEADING"
+    PARAGRAPH = "PARAGRAPH"
+    CLAIM = "CLAIM"
+    EVIDENCE = "EVIDENCE"
+    QUOTE = "QUOTE"
+    LIST = "LIST"
+    NOTE = "NOTE"
+
+
+class OutputVersionStatus(StrEnum):
+    """Output versions are never overwritten; approval is human (PRD §37)."""
+
+    DRAFT = "DRAFT"
+    APPROVED = "APPROVED"
+    SUPERSEDED = "SUPERSEDED"
+
+
+class QuoteSourceKind(StrEnum):
+    """Where a protected exact quote comes from."""
+
+    EXCERPT = "EXCERPT"
+    QURAN = "QURAN"
+    HADITH = "HADITH"
 
 
 class FoundationalSourceStatus(StrEnum):

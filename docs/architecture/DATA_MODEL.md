@@ -1,6 +1,6 @@
 # Data Model
 
-Current schema (migrations `0001`–`0016`), by owning module:
+Current schema (migrations `0001`–`0017`), by owning module:
 
 | Migration | Tables | Integrity rules |
 |---|---|---|
@@ -18,6 +18,7 @@ Current schema (migrations `0001`–`0016`), by owning module:
 | 0014 knowledge | `learning_reviews`, `knowledge_items`, `knowledge_versions`, `knowledge_reuses` | Reviews, versions and reuses append-only; knowledge items never deleted; promotion human-only through the Knowledge Promotion Gate (ADR-017) |
 | 0015 terminology | `terms` | Library-wide, versioned; content immutable, forward status only; approval by Methodology Steward / Constitutional Authority (ADR-018) |
 | 0016 closure gate | `project_closures.gate_evaluation_id`, `project_closures.approval_id` | Closing references its Project Closure Gate evaluation and approval (ADR-019) |
+| 0017 outputs | `outputs`, `output_versions` | Version content immutable, status forward only; outputs never deleted; approval human-only (ADR-020) |
 
 Conventions:
 - Primary keys are UUIDs (portable IDs, PRD §60.6).

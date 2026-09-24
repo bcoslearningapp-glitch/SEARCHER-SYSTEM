@@ -41,6 +41,7 @@ from research_api.modules.hypothesis_lab.models import (
 )
 from research_api.modules.knowledge_memory.models import KnowledgeItem, KnowledgeReuse, KnowledgeVersion, Term
 from research_api.modules.operational_constraints.models import OperationalConstraint
+from research_api.modules.outputs_integrity.models import Output, OutputVersion
 from research_api.modules.project_workflow.models import (
     ProblemFrameVersion,
     Project,
@@ -108,6 +109,8 @@ __all__ = [
     "Observation",
     "OpenQuestion",
     "OperationalConstraint",
+    "Output",
+    "OutputVersion",
     "ProblemFrameVersion",
     "Project",
     "ProjectAIPolicy",

@@ -1,0 +1,17 @@
+{
+  "id": "9c0d1e2f-3a4b-4c5d-8e6f-7a8b9c0d1e23",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "output_type": "RESEARCH_REPORT",
+  "title": "Year-two disengagement",
+  "language": "en",
+  "mode": "REFERENCED",
+  "current_version": 2,
+  "provenance": {
+    "kind": "HUMAN_INPUT",
+    "actor": {
+      "kind": "HUMAN",
+      "id": "local-owner",
+      "role": "RESEARCHER"
+    }
+  }
+}

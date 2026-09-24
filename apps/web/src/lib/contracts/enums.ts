@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.10.0";
+export const CONTRACT_SCHEMA_VERSION = "0.11.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -295,6 +295,22 @@ export type InterpretationOutcome = (typeof InterpretationOutcomeValues)[number]
 /** Terminology record state; only a human approves the canonical form (FR-TERM-001, Core §53). */
 export const TermStatusValues = ["PROPOSED", "APPROVED", "SUPERSEDED", "REJECTED"] as const;
 export type TermStatus = (typeof TermStatusValues)[number];
+
+/** Output types (PRD §37). */
+export const OutputTypeValues = ["RESEARCH_REPORT", "EXECUTIVE_SUMMARY", "DECISION_BRIEF", "REFERENCE_REVIEW", "EVIDENCE_MAP", "HYPOTHESIS_DOSSIER", "DESIGN_SPECIFICATION", "EXPERIMENT_PROTOCOL", "LEARNING_REVIEW", "CLOSURE_REPORT"] as const;
+export type OutputType = (typeof OutputTypeValues)[number];
+
+/** Block kinds in an output version; CLAIM blocks must trace to canonical entities and QUOTE blocks are protected exact text (FR-OUT-003/004). */
+export const OutputBlockKindValues = ["HEADING", "PARAGRAPH", "CLAIM", "EVIDENCE", "QUOTE", "LIST", "NOTE"] as const;
+export type OutputBlockKind = (typeof OutputBlockKindValues)[number];
+
+/** Output versions are never overwritten; approval is human (PRD §37). */
+export const OutputVersionStatusValues = ["DRAFT", "APPROVED", "SUPERSEDED"] as const;
+export type OutputVersionStatus = (typeof OutputVersionStatusValues)[number];
+
+/** Where a protected exact quote comes from. */
+export const QuoteSourceKindValues = ["EXCERPT", "QURAN", "HADITH"] as const;
+export type QuoteSourceKind = (typeof QuoteSourceKindValues)[number];
 
 /** Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003). */
 export const FoundationalSourceStatusValues = ["STAGED", "APPROVED", "RETIRED"] as const;
