@@ -1,0 +1,48 @@
+{
+  "id": "0d1e2f3a-4b5c-4d6e-9f7a-8b9c0d1e2f34",
+  "output_id": "9c0d1e2f-3a4b-4c5d-8e6f-7a8b9c0d1e23",
+  "version_number": 2,
+  "status": "APPROVED",
+  "change_reason": "Tightened wording",
+  "created_by": {
+    "kind": "HUMAN",
+    "id": "local-owner",
+    "role": "RESEARCHER"
+  },
+  "created_at": "2026-09-24T12:00:00Z",
+  "blocks": [
+    {
+      "kind": "HEADING",
+      "text": "Findings",
+      "level": 2,
+      "trace": []
+    },
+    {
+      "kind": "CLAIM",
+      "text": "Mentoring declines after year one",
+      "label": "SUPPORTED",
+      "trace": [
+        {
+          "entity_type": "Claim",
+          "entity_id": "2f3a4b5c-6d7e-4f8a-9b9c-0d1e2f3a4b56"
+        }
+      ]
+    },
+    {
+      "kind": "QUOTE",
+      "text": "Attendance fell after the first year.",
+      "trace": [
+        {
+          "entity_type": "SourceExcerpt",
+          "entity_id": "3a4b5c6d-7e8f-4a9b-8c0d-1e2f3a4b5c67"
+        }
+      ],
+      "quote": {
+        "source_kind": "EXCERPT",
+        "excerpt_id": "3a4b5c6d-7e8f-4a9b-8c0d-1e2f3a4b5c67",
+        "text": "Attendance fell after the first year.",
+        "language": "en"
+      }
+    }
+  ]
+}

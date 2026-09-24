@@ -146,6 +146,11 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("term.revise", A.ACT_AND_NOTIFY),
         _p("term.approve", A.FORBIDDEN, frozenset({R.METHODOLOGY_STEWARD, R.CONSTITUTIONAL_AUTHORITY}), approval=True),
         _p("term.reject", A.FORBIDDEN, frozenset({R.METHODOLOGY_STEWARD, R.CONSTITUTIONAL_AUTHORITY}), approval=True),
+        # outputs (PRD §37): AI may compose and edit drafts; approval is human
+        _p("output.create", A.ACT_AND_NOTIFY),
+        _p("output.revise", A.ACT_AND_NOTIFY),
+        _p("output.settings", A.FORBIDDEN),
+        _p("output.approve", A.FORBIDDEN, approval=True),
         _p("source.catalog", A.ACT_AND_NOTIFY),
         _p("source.catalog_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),
         _p("source.upload_asset", A.FORBIDDEN),

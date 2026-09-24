@@ -580,3 +580,38 @@ export type Closure = {
   reopened_at: string | null;
   reopen_trigger: string | null;
 };
+
+export type OutputBlock = {
+  kind: "HEADING" | "PARAGRAPH" | "CLAIM" | "EVIDENCE" | "QUOTE" | "LIST" | "NOTE";
+  text: string;
+  level?: number | null;
+  items?: string[] | null;
+  label?: string | null;
+  trace: { entity_type: string; entity_id: string }[];
+  quote?: { source_kind: string; excerpt_id?: string | null; quran_ref?: string | null; hadith_record_id?: string | null; text: string; language?: string | null } | null;
+};
+
+export type OutputVersion = {
+  id: string;
+  version_number: number;
+  status: "DRAFT" | "APPROVED" | "SUPERSEDED";
+  blocks: OutputBlock[];
+  change_reason: string | null;
+  approval_id: string | null;
+  created_by: Actor;
+  created_at: string;
+};
+
+export type Output = {
+  id: string;
+  project_id: string;
+  output_type: string;
+  title: string;
+  language: "en" | "fr" | "ar";
+  mode: "READABLE" | "REFERENCED" | "AUDIT";
+  subject_type: string | null;
+  subject_id: string | null;
+  current_version: number;
+  provenance: { kind: string };
+  latest: OutputVersion;
+};

@@ -753,6 +753,29 @@
       "type": "string",
       "enum": ["PROPOSED", "APPROVED", "SUPERSEDED", "REJECTED"]
     },
+    "OutputType": {
+      "description": "Output types (PRD §37).",
+      "type": "string",
+      "enum": [
+        "RESEARCH_REPORT", "EXECUTIVE_SUMMARY", "DECISION_BRIEF", "REFERENCE_REVIEW", "EVIDENCE_MAP",
+        "HYPOTHESIS_DOSSIER", "DESIGN_SPECIFICATION", "EXPERIMENT_PROTOCOL", "LEARNING_REVIEW", "CLOSURE_REPORT"
+      ]
+    },
+    "OutputBlockKind": {
+      "description": "Block kinds in an output version; CLAIM blocks must trace to canonical entities and QUOTE blocks are protected exact text (FR-OUT-003/004).",
+      "type": "string",
+      "enum": ["HEADING", "PARAGRAPH", "CLAIM", "EVIDENCE", "QUOTE", "LIST", "NOTE"]
+    },
+    "OutputVersionStatus": {
+      "description": "Output versions are never overwritten; approval is human (PRD §37).",
+      "type": "string",
+      "enum": ["DRAFT", "APPROVED", "SUPERSEDED"]
+    },
+    "QuoteSourceKind": {
+      "description": "Where a protected exact quote comes from.",
+      "type": "string",
+      "enum": ["EXCERPT", "QURAN", "HADITH"]
+    },
     "FoundationalSourceStatus": {
       "description": "Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003).",
       "type": "string",

@@ -733,3 +733,13 @@ def reference_standing(
     return ReferenceStanding(
         result=result, findings=[f.model_dump(mode="json") for f in findings], latest_judgments=latest, gate=gate
     )
+
+
+def quran_text(session: Session, ref: str) -> str:
+    """Exact approved text for a reference like '2:255' or '1:1-7' (for protected quotes in outputs)."""
+    surah, first, last = _parse_quran_ref(ref)
+    return "\n".join(a.text for a in get_ayat(session, surah, first, last))
+
+
+def hadith_text(session: Session, record_id: UUID) -> str:
+    return get_hadith(session, record_id).exact_text

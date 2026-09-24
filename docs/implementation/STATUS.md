@@ -1,6 +1,6 @@
 # Status
 
-**Current milestone:** M4 Design, Experiments, Memory (v0.5.0) is feature-complete, and its exit criteria are met (below). Tags for v0.2.0–v0.5.0 wait on the owner (#28). Next: M5 Outputs, portability, cloud workspace.
+**Current milestone:** M5 Outputs, portability, cloud workspace (v0.6.0), in progress. M4 (v0.5.0) is complete (#42). Tags for v0.2.0–v0.5.0 wait on the owner (#28).
 
 ## Completed
 - M0 Foundation — #1.
@@ -47,6 +47,13 @@
   - Blocking decisions, unfinished experiments, unassessed evidence and the quality of the closure record are checked, with a risk-aware override.
   - Closing is recorded as an approval.
   - Desk close and reopen forms, and E2E flow 10.
+
+## Phase 5 progress
+- #43: Output composer (ADR-020):
+  - Ten output types composed deterministically from canonical state, with READABLE / REFERENCED / AUDIT modes.
+  - Every claim traced; exact quotes (excerpt, Qur'an, Hadith) copied from source and re-verified on every revision and at approval.
+  - Immutable versions; human-only approval.
+  - Outputs tab, E2E, and contracts 0.11.0.
 
 ## M4 exit criteria (PRD §76 Phase 4)
 - [x] Complete hypothesis → design → experiment → learning workflow. E2E flow 6 runs through the UI: requirement → concept → design hypothesis → experiment (protocol, approval, run, observation, result, interpretation) → learning review → close → local knowledge → promotion → labelled reuse.

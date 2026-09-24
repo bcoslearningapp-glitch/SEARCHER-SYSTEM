@@ -713,3 +713,31 @@ export async function closeProject(_: ActionResult, form: FormData): Promise<Act
 export async function reopenProject(_: ActionResult, form: FormData): Promise<ActionResult> {
   return run(() => apiSend("POST", `${P(form)}/reopen`, { trigger: text(form, "trigger") }));
 }
+
+// --- Outputs (PRD §37) ---
+
+const O = (form: FormData) => `${P(form)}/outputs/${text(form, "output_id")}`;
+
+export async function createOutput(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/outputs`, {
+      output_type: text(form, "output_type"),
+      title: text(form, "title"),
+      language: text(form, "language"),
+      mode: text(form, "mode"),
+      subject_id: optionalText(form, "subject_id") ?? null,
+    }),
+  );
+}
+
+export async function recomposeOutput(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("POST", `${O(form)}/recompose`, {}));
+}
+
+export async function setOutputMode(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("PATCH", O(form), { mode: text(form, "mode") }));
+}
+
+export async function approveOutputVersion(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("POST", `${O(form)}/versions/${text(form, "version_id")}/approve`, { reason: optionalText(form, "reason") }));
+}
