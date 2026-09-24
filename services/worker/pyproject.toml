@@ -1,0 +1,24 @@
+[project]
+name = "research-worker"
+version = "0.1.0"
+description = "Product B background worker (Celery) for long AI/research/indexing tasks."
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "research-api",
+    "celery[redis]>=5.5",
+]
+
+[tool.uv.sources]
+research-api = { workspace = true }
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["research_worker"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: requires a PostgreSQL database (DATABASE_URL)"]
+addopts = "-ra --strict-markers"
