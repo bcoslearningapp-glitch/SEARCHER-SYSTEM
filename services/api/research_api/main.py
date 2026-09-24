@@ -12,6 +12,7 @@ from research_api.modules.ai_reliability.router import router as reliability_rou
 from research_api.modules.ai_tools.router import router as tools_router
 from research_api.modules.claims_evidence.router import lineage_router
 from research_api.modules.claims_evidence.router import router as claims_router
+from research_api.modules.design_experiments.router import router as design_router
 from research_api.modules.governance_audit.decisions_router import router as decisions_router
 from research_api.modules.governance_audit.router import router as audit_router
 from research_api.modules.hypothesis_lab.router import router as hypotheses_router
@@ -48,6 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(claims_router)
     app.include_router(lineage_router)
     app.include_router(hypotheses_router)
+    app.include_router(design_router)
     app.include_router(reference_router)
     app.include_router(reference_reviews_router)
     app.include_router(constraints_router)

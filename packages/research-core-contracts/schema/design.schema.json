@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/design.schema.json",
+  "title": "Research Core design requirements and design concepts",
+  "$defs": {
+    "RequirementTrace": {
+      "description": "Link from a requirement to what it is derived from (FR-DESIGN-002).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basis"],
+      "properties": {
+        "basis": { "$ref": "enums.schema.json#/$defs/DesignRequirementBasis" },
+        "entity_type": { "type": "string", "maxLength": 60 },
+        "entity_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "note": { "type": "string" }
+      }
+    },
+    "DesignRequirement": {
+      "description": "A design requirement derived before any solution form is assumed (FR-DESIGN-001..003, Core §47).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "series_id", "version_number", "statement", "priority", "traces", "status", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "series_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "supersedes_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "statement": { "type": "string", "minLength": 1 },
+        "priority": { "$ref": "enums.schema.json#/$defs/RequirementPriority" },
+        "traces": { "type": "array", "items": { "$ref": "#/$defs/RequirementTrace" }, "minItems": 1 },
+        "status": { "$ref": "enums.schema.json#/$defs/DesignRequirementStatus" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      }
+    },
+    "RequirementCoverageEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement_id", "coverage"],
+      "properties": {
+        "requirement_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "coverage": { "$ref": "enums.schema.json#/$defs/RequirementCoverage" },
+        "note": { "type": "string" }
+      }
+    },
+    "DesignConcept": {
+      "description": "A candidate design with its origin (FR-DESIGN-004). Rejected designs remain in history (FR-DESIGN-005).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "title", "description", "origin", "status", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "origin": { "$ref": "enums.schema.json#/$defs/DesignOrigin" },
+        "origin_reference": { "type": "string", "description": "e.g. the source excerpt or prior project the idea came from" },
+        "status": { "$ref": "enums.schema.json#/$defs/DesignConceptStatus" },
+        "hypothesis_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" } },
+        "mechanism_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" } },
+        "derived_from_concept_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" } },
+        "coverage": { "type": "array", "items": { "$ref": "#/$defs/RequirementCoverageEntry" } },
+        "rejection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ground", "reason"],
+          "properties": {
+            "ground": { "$ref": "enums.schema.json#/$defs/RejectionGround" },
+            "reason": { "type": "string", "minLength": 1 },
+            "reusable_mechanism_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/EntityId" } }
+          }
+        },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      },
+      "allOf": [
+        {
+          "description": "AI-originated concepts carry AI provenance.",
+          "if": { "properties": { "origin": { "const": "AI" } }, "required": ["origin"] },
+          "then": { "properties": { "provenance": { "properties": { "kind": { "const": "AI_GENERATED" } }, "required": ["kind", "ai_action"] } } }
+        },
+        {
+          "description": "A rejected design records why.",
+          "if": { "properties": { "status": { "const": "REJECTED" } }, "required": ["status"] },
+          "then": { "required": ["rejection"] }
+        }
+      ]
+    }
+  }
+}

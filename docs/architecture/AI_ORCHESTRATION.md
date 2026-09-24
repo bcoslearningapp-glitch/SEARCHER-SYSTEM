@@ -20,4 +20,5 @@ Principle: the LLM may propose; the application decides whether a proposal can m
 
 ## Controlled tools (implemented — ADR-013)
 - `modules/ai_tools`: READ / PROPOSE / EXTERNAL tools with closed schemas; `invoke` enforces the task allow-list, model provenance for proposals, schema validation and project scoping, and logs every call (append-only `ai_tool_calls`, refused calls included).
+- Design proposals (`propose_design_requirement`, `propose_design_concept`, ADR-015) create PROPOSED records only; confirmation, selection and rejection stay human.
 - The orchestrator acts only through the registry; HTTP: `GET /api/v1/ai/tools`, `GET /api/v1/projects/{id}/ai-tool-calls`.

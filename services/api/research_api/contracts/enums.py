@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.6.0"
+CONTRACT_SCHEMA_VERSION = "0.7.0"
 
 
 class ProjectStatus(StrEnum):
@@ -643,6 +643,65 @@ class EvidenceTargetType(StrEnum):
     CLAIM = "CLAIM"
     HYPOTHESIS = "HYPOTHESIS"
     MECHANISM = "MECHANISM"
+    DESIGN_CONCEPT = "DESIGN_CONCEPT"
+
+
+class DesignRequirementBasis(StrEnum):
+    """What a design requirement is derived from (FR-DESIGN-002, Core §47)."""
+
+    PURPOSE = "PURPOSE"
+    REFERENCE_CONSTRAINT = "REFERENCE_CONSTRAINT"
+    HUMAN_CONTEXT_NEED = "HUMAN_CONTEXT_NEED"
+    MECHANISM = "MECHANISM"
+    EVIDENCE = "EVIDENCE"
+    RISK = "RISK"
+    OPERATIONAL_CONSTRAINT = "OPERATIONAL_CONSTRAINT"
+
+
+class RequirementPriority(StrEnum):
+    """Design requirement priority."""
+
+    MUST = "MUST"
+    SHOULD = "SHOULD"
+    COULD = "COULD"
+
+
+class DesignRequirementStatus(StrEnum):
+    """Requirement versions are never edited; a revision supersedes (Core §47). AI-proposed requirements stay PROPOSED until a human confirms them."""
+
+    PROPOSED = "PROPOSED"
+    ACTIVE = "ACTIVE"
+    SUPERSEDED = "SUPERSEDED"
+    WITHDRAWN = "WITHDRAWN"
+
+
+class DesignConceptStatus(StrEnum):
+    """Design concept status; selection is a human decision (FR-DESIGN-006). Rejected designs stay in history (FR-DESIGN-005)."""
+
+    PROPOSED = "PROPOSED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    SELECTED = "SELECTED"
+    REJECTED = "REJECTED"
+    WITHDRAWN = "WITHDRAWN"
+
+
+class RequirementCoverage(StrEnum):
+    """How a design concept addresses a requirement."""
+
+    MEETS = "MEETS"
+    PARTIAL = "PARTIAL"
+    NOT_ADDRESSED = "NOT_ADDRESSED"
+    CONFLICTS = "CONFLICTS"
+
+
+class RejectionGround(StrEnum):
+    """Why a design was rejected; REFERENCE rejections keep reusable mechanisms visible (FR-DESIGN-005)."""
+
+    REFERENCE = "REFERENCE"
+    EVIDENCE = "EVIDENCE"
+    OPERATIONAL = "OPERATIONAL"
+    FEASIBILITY = "FEASIBILITY"
+    OTHER = "OTHER"
 
 
 class FoundationalSourceStatus(StrEnum):

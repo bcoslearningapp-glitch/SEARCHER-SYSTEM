@@ -1,0 +1,18 @@
+{
+  "id": "5a6b7c8d-9e0f-4a1b-8c2d-3e4f5a6b7c80",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "series_id": "5a6b7c8d-9e0f-4a1b-8c2d-3e4f5a6b7c81",
+  "version_number": 1,
+  "statement": "Second-year apprentices keep a named contact for workplace problems.",
+  "priority": "MUST",
+  "traces": [],
+  "status": "ACTIVE",
+  "provenance": {
+    "kind": "HUMAN_INPUT",
+    "actor": {
+      "kind": "HUMAN",
+      "id": "local-owner",
+      "role": "RESEARCHER"
+    }
+  }
+}

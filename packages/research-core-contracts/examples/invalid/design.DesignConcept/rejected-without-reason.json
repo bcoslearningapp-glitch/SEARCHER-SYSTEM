@@ -1,0 +1,28 @@
+{
+  "id": "6b7c8d9e-0f1a-4b2c-9d3e-4f5a6b7c8d90",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "title": "Peer buddy rota",
+  "description": "Pair each second-year apprentice with a third-year buddy.",
+  "origin": "AI",
+  "status": "REJECTED",
+  "hypothesis_ids": [],
+  "mechanism_ids": [
+    "5a6b7c8d-9e0f-4a1b-8c2d-3e4f5a6b7c82"
+  ],
+  "derived_from_concept_ids": [],
+  "coverage": [
+    {
+      "requirement_id": "5a6b7c8d-9e0f-4a1b-8c2d-3e4f5a6b7c80",
+      "coverage": "MEETS"
+    }
+  ],
+  "provenance": {
+    "kind": "AI_GENERATED",
+    "ai_action": {
+      "provider": "example-provider",
+      "model": "example-model",
+      "template_version": "design-concepts@1",
+      "timestamp": "2026-09-24T12:00:00Z"
+    }
+  }
+}

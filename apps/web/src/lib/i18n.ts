@@ -5,6 +5,7 @@
  */
 
 import { aiAr, aiEn, aiFr, type AIStrings } from "@/lib/i18n-ai";
+import { designAr, designEn, designFr, type DesignStrings } from "@/lib/i18n-design";
 import { foundationalAr, foundationalEn, foundationalFr, type FoundationalStrings } from "@/lib/i18n-foundational";
 import { labAr, labEn, labFr, type LabStrings } from "@/lib/i18n-lab";
 import { reliabilityAr, reliabilityEn, reliabilityFr, type ReliabilityStrings } from "@/lib/i18n-reliability";
@@ -32,6 +33,7 @@ export type Dictionary = {
   lab: LabStrings;
   ai: AIStrings;
   research: ResearchStrings;
+  design: DesignStrings;
   foundational: FoundationalStrings;
   reliability: ReliabilityStrings;
   spaces: Record<Space, string>;
@@ -49,6 +51,7 @@ const en: Dictionary = {
   lab: labEn,
   ai: aiEn,
   research: researchEn,
+  design: designEn,
   foundational: foundationalEn,
   reliability: reliabilityEn,
   spaces: { desk: "Desk", map: "Map", library: "Library", lab: "Lab", outputs: "Outputs" },
@@ -72,6 +75,7 @@ const fr: Dictionary = {
   lab: labFr,
   ai: aiFr,
   research: researchFr,
+  design: designFr,
   foundational: foundationalFr,
   reliability: reliabilityFr,
   spaces: { desk: "Bureau", map: "Carte", library: "Bibliothèque", lab: "Laboratoire", outputs: "Productions" },
@@ -100,6 +104,7 @@ const ar: Dictionary = {
   lab: labAr,
   ai: aiAr,
   research: researchAr,
+  design: designAr,
   foundational: foundationalAr,
   reliability: reliabilityAr,
   spaces: { desk: "المكتب", map: "الخريطة", library: "المكتبة", lab: "المختبر", outputs: "المخرجات" },

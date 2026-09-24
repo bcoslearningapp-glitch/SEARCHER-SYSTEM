@@ -1,6 +1,6 @@
 # Data Model
 
-Current schema (migrations `0001`–`0011`), by owning module:
+Current schema (migrations `0001`–`0012`), by owning module:
 
 | Migration | Tables | Integrity rules |
 |---|---|---|
@@ -13,6 +13,7 @@ Current schema (migrations `0001`–`0011`), by owning module:
 | 0009 research planning | `research_plans`, `search_records`, `sufficiency_assessments`; web-origin columns on `source_leads` | Plan versions immutable except ACTIVE→SUPERSEDED; audit and sufficiency append-only (ADR-012) |
 | 0010 AI tools | `ai_tool_calls` | Append-only; written in its own transaction (ADR-013) |
 | 0011 AI reliability | `ai_evaluations` | Append-only; Methodology Steward or golden-evaluation system principal only (ADR-014) |
+| 0012 design | `design_requirements`, `design_concepts`, `design_concept_coverage` | Requirement versions immutable except forward status moves; concepts never deleted; selection/rejection human-only approvals (ADR-015) |
 
 Conventions:
 - Primary keys are UUIDs (portable IDs, PRD §60.6).

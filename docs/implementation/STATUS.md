@@ -1,6 +1,6 @@
 # Status
 
-**Current milestone:** M3 AI Research Engine (v0.4.0): feature-complete, and all exit criteria are met (below). The tag waits on the owner (#28). Next: M4 Design, Experiments, Memory.
+**Current milestone:** M4 Design, Experiments, Memory (v0.5.0), in progress. M3 AI Research Engine (v0.4.0) is complete (#32), and its tag waits on the owner (#28).
 
 ## Completed
 - M0 Foundation — #1.
@@ -14,6 +14,16 @@
 
 - #12, #13 — #19: foundational library with human-approved Qur'an dataset import (no bundled text), exact ayah retrieval, Hadith records with edition numbering, layered reference review, human judgments with blocking reservations → blocking decisions, risk-aware Reference Gate wired into design eligibility, operational constraints kept separate (Scenarios E and F).
 - #16 — #20: Lab (claims, assumptions with human review, hypotheses, mechanisms), hypothesis workspace (evidence map with candidates and acceptance, searches, reference review and judgments, standing, versions, assessment, revision), Map; E2E flows 4 and 5.
+
+## Phase 4 progress
+- #33: Design synthesis (ADR-015):
+  - Versioned design requirements traced to what they derive from; AI-proposed requirements wait for confirmation.
+  - Design concepts with recorded origin, linked hypotheses and mechanisms, and derivation from earlier concepts.
+  - Requirement coverage per version, flagged as stale after a revision.
+  - Risk-aware Design Readiness Gate.
+  - Human selection (not a ranking), with an override when the gate needs a human decision.
+  - Rejection keeps the concept and its reusable mechanisms.
+  - AI PROPOSE tools, a Design tab, E2E flow, and contracts 0.7.0.
 
 ## Phase 3 progress
 - #21: AI gateway (ADR-010). Anthropic and OpenAI adapters behind a provider-neutral interface, with Anthropic server-side refusal fallback enabled. Configurable model profiles; mock provider only when explicitly enabled. Untrusted-source prompt isolation and secret redaction. PRD §54 disclosure policy, human-set project AI policy (consent, allowed profiles, budgets), `STOPPED_RESOURCE_CONSTRAINT` on budget exhaustion. Append-only disclosure/usage log. Schema validation before any caller can use output. Bounded live provider-contract suite.

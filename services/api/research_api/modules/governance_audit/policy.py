@@ -112,6 +112,17 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("search.record", A.ACT_AND_NOTIFY, system=True),
         _p("sufficiency.assess", A.FORBIDDEN, approval=True),
         # Sources
+        # design synthesis (PRD §32): AI may propose; confirmation, selection and rejection are human
+        _p("design_requirement.create", A.ACT_AND_NOTIFY),
+        _p("design_requirement.revise", A.FORBIDDEN),
+        _p("design_requirement.confirm", A.FORBIDDEN, approval=True),
+        _p("design_requirement.withdraw", A.FORBIDDEN),
+        _p("design_concept.create", A.ACT_AND_NOTIFY),
+        _p("design_concept.coverage", A.FORBIDDEN),
+        _p("design_concept.review", A.FORBIDDEN),
+        _p("design_concept.withdraw", A.FORBIDDEN),
+        _p("design_concept.select", A.FORBIDDEN, approval=True),
+        _p("design_concept.reject", A.FORBIDDEN, approval=True),
         _p("source.catalog", A.ACT_AND_NOTIFY),
         _p("source.catalog_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),
         _p("source.upload_asset", A.FORBIDDEN),
