@@ -537,6 +537,44 @@ def capture_note(
     return NoteOut.model_validate(note)
 
 
+def mark_note_captured(
+    session: Session, principal: Principal, project_id: UUID, note_id: UUID, *, target: str, entity_id: UUID
+) -> NoteOut:
+    """Record that another module captured a note into a formal entity (FR-SCRATCH-002).
+
+    The note text is copied by the capturing module; the note itself is only marked.
+    """
+    auth = authorized(principal, "note.capture")
+    _require_editable(_load(session, project_id, lock=True))
+    note = _note(session, project_id, note_id)
+    if note.captured_as is not None:
+        raise ConflictError(f"note was already captured as {note.captured_as}")
+    note.captured_as = target
+    note.captured_at = utcnow()
+    _audit(
+        session,
+        auth,
+        "note.capture",
+        project_id,
+        entity_type="ScratchNote",
+        entity_id=note.id,
+        new={"captured_as": target, "entity_id": str(entity_id)},
+    )
+    session.flush()
+    return NoteOut.model_validate(note)
+
+
+def get_note(session: Session, project_id: UUID, note_id: UUID) -> NoteOut:
+    return NoteOut.model_validate(_note(session, project_id, note_id))
+
+
+def require_editable_project(session: Session, project_id: UUID) -> ProjectOut:
+    """Public guard for other modules: the project exists and accepts research changes."""
+    project = _load(session, project_id)
+    _require_editable(project)
+    return project_out(project)
+
+
 # --- Problem Frame (FR-FRAME-005..007) ---
 
 
@@ -588,7 +626,7 @@ def save_draft(
         "actor": auth.actor.model_dump(mode="json", exclude_none=True),
     }
     if ai_action is not None:
-        provenance["ai_action"] = ai_action.model_dump(mode="json")
+        provenance["ai_action"] = ai_action.model_dump(mode="json", exclude_none=True)
 
     draft = _current(session, project_id, ProblemFrameStatus.DRAFT)
     new_content = content.model_dump(mode="json")

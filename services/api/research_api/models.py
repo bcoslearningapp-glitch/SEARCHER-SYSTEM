@@ -1,5 +1,6 @@
 """Import every ORM model so Alembic sees the full metadata."""
 
+from research_api.modules.claims_evidence.models import Assumption, Claim, OpenQuestion
 from research_api.modules.governance_audit.models import (
     ApprovalRecord,
     AuditEventRecord,
@@ -30,10 +31,13 @@ from research_api.platform.jobs import BackgroundJob
 
 __all__ = [
     "ApprovalRecord",
+    "Assumption",
     "AuditEventRecord",
     "BackgroundJob",
     "Base",
+    "Claim",
     "DecisionRecord",
+    "OpenQuestion",
     "ProblemFrameVersion",
     "Project",
     "ProjectClosure",

@@ -1,12 +1,15 @@
 # Status
 
-**Current milestone:** M1 Framing & Library (v0.2.0) — feature-complete with this PR; tag after merge.
+**Current milestone:** M2 Reference, Evidence, Hypothesis (v0.3.0) — in progress. M1 complete (#10); tag `v0.2.0` pending.
 
 ## Completed
 - M0 Foundation — #1.
 - #2 Policy Engine + principal (ADR-006), #3 Project lifecycle + Research State, #4 notes, Problem Frames, Framing Gate, approvals, decisions — #8.
 - #5 source identity, sandboxed storage (ADR-007), Hybrid Source Access, leads, attention queue; #6 ingestion + search (ADR-008) — #9.
-- #7 (this PR): Desk (projects, Problem Frame drafting with gate feedback and explicit approval, Research State, notes with explicit capture, decisions, attention queue), Library (catalog, upload, verification/availability, search), project Sources (Hybrid Source Access requests and responses); en/fr/ar with RTL and `dir="auto"` for mixed-direction content; E2E flows 1-3 of PRD §73.
+- #7 — #10: Desk (projects, Problem Frame drafting with gate feedback and explicit approval, Research State, notes with explicit capture, decisions, attention queue), Library (catalog, upload, verification/availability, search), project Sources (Hybrid Source Access requests and responses); en/fr/ar with RTL and `dir="auto"` for mixed-direction content; E2E flows 1-3 of PRD §73.
+
+## Phase 2 progress
+- #11 (this PR): claims, assumptions (AI-inferred labeled until human review), open questions, capture from notes.
 
 ## M1 exit criteria (PRD §76 Phase 1)
 - [x] full create → frame → approve flow (E2E 1)

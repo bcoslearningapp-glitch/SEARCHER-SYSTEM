@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/claims.schema.json",
+  "title": "Research Core claims, assumptions and open questions",
+  "$defs": {
+    "Claim": {
+      "description": "A claim with workflow state separate from epistemic strength (Core §18, FR-CLAIM-001/002).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "statement", "claim_type", "statement_origin", "workflow_state", "epistemic_strength", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "statement": { "type": "string", "minLength": 1 },
+        "claim_type": { "$ref": "enums.schema.json#/$defs/ClaimType" },
+        "statement_origin": { "$ref": "enums.schema.json#/$defs/StatementOrigin" },
+        "workflow_state": { "$ref": "enums.schema.json#/$defs/ClaimWorkflowState" },
+        "epistemic_strength": { "$ref": "enums.schema.json#/$defs/EvidenceStrength" },
+        "important": { "type": "boolean", "description": "Important claims require counter-evidence search (Core §41)." },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      }
+    },
+    "Assumption": {
+      "description": "Assumption with origin and criticality (Core §19, FR-CLAIM-003/004).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "statement", "origin", "criticality", "status", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "statement": { "type": "string", "minLength": 1 },
+        "origin": { "$ref": "enums.schema.json#/$defs/AssumptionOrigin" },
+        "criticality": { "$ref": "enums.schema.json#/$defs/Criticality" },
+        "status": { "$ref": "enums.schema.json#/$defs/AssumptionStatus" },
+        "claim_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "origin": { "const": "SYSTEM_INFERRED" } }, "required": ["origin"] },
+          "then": { "properties": { "provenance": { "properties": { "kind": { "const": "AI_GENERATED" } } } } }
+        }
+      ]
+    },
+    "OpenQuestion": {
+      "description": "An explicit research question (Core §37, FR-RSCH-001).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "question", "question_type", "status"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "question": { "type": "string", "minLength": 1 },
+        "question_type": { "$ref": "enums.schema.json#/$defs/ResearchQuestionType" },
+        "status": { "$ref": "enums.schema.json#/$defs/OpenQuestionStatus" },
+        "conclusion": { "$ref": "enums.schema.json#/$defs/SufficiencyResult" }
+      }
+    }
+  }
+}
