@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/project.schema.json",
+  "title": "Research Core Project",
+  "description": "Project identity and configuration (FR-PROJ-001..005). ProjectStatus and ResearchMode are separate dimensions (Core §16-17).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "initial_input", "input_type", "sensitivity", "risk_level", "status", "versions", "owner", "created_at", "updated_at"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "initial_input": { "type": "string", "minLength": 1 },
+    "input_type": { "$ref": "enums.schema.json#/$defs/ProjectInputType" },
+    "sensitivity": { "$ref": "enums.schema.json#/$defs/SensitivityLevel" },
+    "risk_level": { "$ref": "enums.schema.json#/$defs/RiskLevel" },
+    "status": { "$ref": "enums.schema.json#/$defs/ProjectStatus" },
+    "research_mode": { "$ref": "enums.schema.json#/$defs/ResearchMode" },
+    "primary_language": { "$ref": "enums.schema.json#/$defs/LanguageCode" },
+    "forked_from_project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+    "versions": { "$ref": "common.schema.json#/$defs/VersionContext" },
+    "owner": { "$ref": "common.schema.json#/$defs/Actor" },
+    "created_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+    "updated_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+  }
+}

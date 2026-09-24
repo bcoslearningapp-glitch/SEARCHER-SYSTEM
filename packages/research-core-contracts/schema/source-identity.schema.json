@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/source-identity.schema.json",
+  "title": "Research Core source identity",
+  "description": "SourceWork, SourceEdition and SourceAsset are distinct (Core §23, FR-SRC-001..003). Asset availability is environment-specific; identity survives missing assets (FR-SRC-006, FR-PORT-004).",
+  "$defs": {
+    "Identifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scheme", "value"],
+      "properties": {
+        "scheme": { "type": "string", "enum": ["ISBN", "DOI", "ISSN", "URL", "OCLC", "LCCN", "ARXIV", "PMID", "OTHER"] },
+        "value": { "type": "string", "minLength": 1 }
+      }
+    },
+    "SourceWork": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "authority_layer"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "title": { "type": "string", "minLength": 1 },
+        "authors": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "original_language": { "type": "string" },
+        "authority_layer": { "$ref": "enums.schema.json#/$defs/ReferenceAuthorityLayer" },
+        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } }
+      }
+    },
+    "SourceEdition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "work_id", "verification_state"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "work_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "edition_label": { "type": "string" },
+        "language": { "type": "string" },
+        "translator": { "type": "string" },
+        "publisher": { "type": "string" },
+        "published_date": { "type": "string" },
+        "identifiers": { "type": "array", "items": { "$ref": "#/$defs/Identifier" } },
+        "verification_state": { "$ref": "enums.schema.json#/$defs/SourceVerificationState" },
+        "license_note": { "type": "string" },
+        "portable_asset_allowed": { "type": "boolean", "default": false }
+      }
+    },
+    "SourceAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "edition_id", "kind", "access_mode", "available_in_environment"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "edition_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "kind": { "$ref": "enums.schema.json#/$defs/SourceAssetKind" },
+        "access_mode": { "$ref": "enums.schema.json#/$defs/SourceAccessMode" },
+        "available_in_environment": { "type": "boolean" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "media_type": { "type": "string" },
+        "byte_size": { "type": "integer", "minimum": 0 },
+        "text_origin": { "$ref": "enums.schema.json#/$defs/TextOrigin" }
+      }
+    }
+  }
+}

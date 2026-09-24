@@ -1,0 +1,18 @@
+{
+  "id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "title": "Why do apprentices disengage in year two?",
+  "initial_input": "Apprentices seem to lose motivation in their second year.",
+  "input_type": "RAW_QUESTION",
+  "sensitivity": "NORMAL",
+  "risk_level": "L1_EXPLORATORY",
+  "status": "DRAFT",
+  "research_mode": "EXPLORATION",
+  "primary_language": "en",
+  "owner": {
+    "kind": "HUMAN",
+    "id": "local-owner",
+    "role": "RESEARCHER"
+  },
+  "created_at": "2026-09-24T10:00:00Z",
+  "updated_at": "2026-09-24T10:00:00Z"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "3c4d5e6f-7a8b-4c9d-8e0f-1a2b3c4d5e6f",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "action": "hypothesis.propose",
+  "occurred_at": "2026-09-24T11:05:00Z",
+  "actor": {"kind": "AI", "id": "research-orchestrator"},
+  "versions": {"core_schema_version": "1.0.0", "methodology_version": "1.0.0", "constitution_version": "1.0.0"},
+  "ai_action": {
+    "provider": "example-provider",
+    "model": "example-model",
+    "template_version": "hypothesis-proposal@1",
+    "supplied_entity_ids": ["2a3b4c5d-6e7f-4a8b-9c0d-1e2f3a4b5c6d"],
+    "timestamp": "2026-09-24T11:05:00Z"
+  }
+}

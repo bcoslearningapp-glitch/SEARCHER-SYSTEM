@@ -1,0 +1,10 @@
+{
+  "id": "7e1c4b2a-3d5f-4a6b-8c9d-0e1f2a3b4c5d",
+  "work_id": "5d2a7a0e-1c7b-4c0a-8a0e-9f3b2e6c1d44",
+  "edition_label": "Rosenthal translation, 2nd ed.",
+  "language": "en",
+  "translator": "Franz Rosenthal",
+  "identifiers": [{"scheme": "ISBN", "value": "9780691017549"}],
+  "verification_state": "METADATA_ONLY",
+  "portable_asset_allowed": false
+}

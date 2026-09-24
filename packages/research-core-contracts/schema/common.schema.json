@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/common.schema.json",
+  "title": "Research Core common definitions",
+  "$defs": {
+    "EntityId": {
+      "description": "Globally stable, portable entity identifier (PRD §60.6). UUID string.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "Timestamp": {
+      "description": "UTC timestamp in RFC 3339 format. Stored canonically; rendered locale-aware (NFR-I18N-004).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "VersionString": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "Actor": {
+      "description": "Who performed an action. Every approval/decision/audit record identifies its actor (PRD §62).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "$ref": "enums.schema.json#/$defs/ActorKind" },
+        "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "role": { "$ref": "enums.schema.json#/$defs/ActorRole" },
+        "display_name": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "AIActionRecord": {
+      "description": "Reproducibility metadata for a material AI action (Core §71, PRD §53). Provider/model are audit metadata, never schema.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model", "template_version", "timestamp"],
+      "properties": {
+        "provider": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "template_version": { "type": "string", "minLength": 1 },
+        "methodology_version": { "$ref": "#/$defs/VersionString" },
+        "constitution_version": { "$ref": "#/$defs/VersionString" },
+        "supplied_entity_ids": { "type": "array", "items": { "$ref": "#/$defs/EntityId" } },
+        "task_id": { "type": "string" },
+        "timestamp": { "$ref": "#/$defs/Timestamp" }
+      }
+    },
+    "Provenance": {
+      "description": "Provenance attached to any content-bearing entity (Core §7, §36).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "$ref": "enums.schema.json#/$defs/ProvenanceKind" },
+        "actor": { "$ref": "#/$defs/Actor" },
+        "ai_action": { "$ref": "#/$defs/AIActionRecord" },
+        "derived_from": { "type": "array", "items": { "$ref": "#/$defs/EntityId" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "AI_GENERATED" } } },
+          "then": { "required": ["ai_action"] }
+        }
+      ]
+    },
+    "VersionContext": {
+      "description": "Versions under which a record was produced (FR-PROJ-003, PRD §67).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["core_schema_version", "methodology_version", "constitution_version"],
+      "properties": {
+        "core_schema_version": { "$ref": "#/$defs/VersionString" },
+        "methodology_version": { "$ref": "#/$defs/VersionString" },
+        "constitution_version": { "$ref": "#/$defs/VersionString" }
+      }
+    }
+  }
+}
