@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.9.0";
+export const CONTRACT_SCHEMA_VERSION = "0.10.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -291,6 +291,10 @@ export type HumanImpactFinding = (typeof HumanImpactFindingValues)[number];
 /** What a human interpretation concludes about the design hypothesis from analysed results (FR-EXP-003). */
 export const InterpretationOutcomeValues = ["SUPPORTS", "CONTRADICTS", "INCONCLUSIVE", "QUALIFIES"] as const;
 export type InterpretationOutcome = (typeof InterpretationOutcomeValues)[number];
+
+/** Terminology record state; only a human approves the canonical form (FR-TERM-001, Core §53). */
+export const TermStatusValues = ["PROPOSED", "APPROVED", "SUPERSEDED", "REJECTED"] as const;
+export type TermStatus = (typeof TermStatusValues)[number];
 
 /** Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003). */
 export const FoundationalSourceStatusValues = ["STAGED", "APPROVED", "RETIRED"] as const;

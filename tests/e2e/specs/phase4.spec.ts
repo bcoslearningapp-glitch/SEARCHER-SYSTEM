@@ -236,3 +236,30 @@ test("6. design -> experiment -> learning review -> local knowledge, reused with
   await expect(reused).toContainText("ANALOGICAL_ONLY");
   await expect(reused).toContainText("Not evidence in this project");
 });
+
+test("terminology: approved canonical form; translation check flags association turned into causation", async ({ page }) => {
+  const domain = `apprenticeships-${unique()}`;
+  await page.goto("/en/library/terminology");
+  const form = page.getByTestId("propose-term");
+  await form.getByLabel("Term", { exact: true }).fill("year-two disengagement");
+  await form.getByLabel("Domain").fill(domain);
+  await form.getByLabel("Definition").fill("Falling engagement in the second year of an apprenticeship");
+  await form.getByLabel("fr", { exact: true }).fill("désengagement de deuxième année");
+  await form.getByLabel("ar", { exact: true }).fill("الانسحاب في السنة الثانية");
+  await form.getByRole("button", { name: "Propose term" }).click();
+  const row = page.getByTestId("term-row").filter({ hasText: domain });
+  await expect(row).toContainText("PROPOSED");
+  await row.getByRole("button", { name: "Approve" }).click();
+  await expect(row).toContainText("APPROVED");
+
+  const check = page.getByTestId("translation-check");
+  await check.getByLabel("Source text").fill("Year-two disengagement is associated with pay freezes.");
+  await check.getByLabel("Translation language").selectOption("fr");
+  await check.getByLabel("Translation", { exact: true }).fill("Le gel des salaires provoque le décrochage.");
+  await check.getByLabel("Domain").fill(domain);
+  await check.getByRole("button", { name: "Check" }).click();
+  const result = page.getByTestId("check-result");
+  await expect(result).toContainText("Needs review");
+  await expect(result.getByTestId("drift")).toContainText("association became causation");
+  await expect(result.getByTestId("term-findings")).toContainText("désengagement de deuxième année");
+});

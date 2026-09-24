@@ -38,6 +38,12 @@
   - Time-sensitive knowledge flagged REVALIDATION_REQUIRED and surfaced in the attention queue.
   - Cross-project reuse only as a human transferability judgment, labelled and never evidence.
   - Knowledge tab, E2E flow 6, and contracts 0.9.0.
+- #36: Terminology and translation integrity (ADR-018):
+  - Library-wide, versioned canonical terms, where only a methodology steward approves the canonical form.
+  - A deterministic ar/fr/en claim-strength screen that flags association-to-causation, dropped or added hedges, and scope changes between a source and its translation.
+  - A terminology check against approved renderings.
+  - Terminology page with a translation check, and contracts 0.10.0.
+- Next in M4: P4-05, covering the Project Closure Gate, the close/reopen UI and E2E flow 10.
 
 ## Phase 3 progress
 - #21: AI gateway (ADR-010). Anthropic and OpenAI adapters behind a provider-neutral interface, with Anthropic server-side refusal fallback enabled. Configurable model profiles; mock provider only when explicitly enabled. Untrusted-source prompt isolation and secret redaction. PRD §54 disclosure policy, human-set project AI policy (consent, allowed profiles, budgets), `STOPPED_RESOURCE_CONSTRAINT` on budget exhaustion. Append-only disclosure/usage log. Schema validation before any caller can use output. Bounded live provider-contract suite.

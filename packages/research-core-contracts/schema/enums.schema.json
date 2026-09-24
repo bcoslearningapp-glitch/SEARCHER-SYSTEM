@@ -748,6 +748,11 @@
       "type": "string",
       "enum": ["SUPPORTS", "CONTRADICTS", "INCONCLUSIVE", "QUALIFIES"]
     },
+    "TermStatus": {
+      "description": "Terminology record state; only a human approves the canonical form (FR-TERM-001, Core §53).",
+      "type": "string",
+      "enum": ["PROPOSED", "APPROVED", "SUPERSEDED", "REJECTED"]
+    },
     "FoundationalSourceStatus": {
       "description": "Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003).",
       "type": "string",

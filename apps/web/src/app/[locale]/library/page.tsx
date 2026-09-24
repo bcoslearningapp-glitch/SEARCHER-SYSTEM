@@ -34,6 +34,10 @@ export default async function LibraryPage(props: Props) {
           <Link href={`/${locale}/library/foundational`} className="text-sm underline">
             {dict.foundational.link}
           </Link>
+          {" · "}
+          <Link href={`/${locale}/library/terminology`} className="text-sm underline">
+            {dict.terminology.link}
+          </Link>
         </p>
         <Card title={ui.search} testId="search">
           <form method="get" className="flex flex-wrap gap-2" role="search">

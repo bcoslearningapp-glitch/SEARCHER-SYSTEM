@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/terminology.schema.json",
+  "title": "Research Core canonical terminology",
+  "$defs": {
+    "AlternativeTranslation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "text"],
+      "properties": {
+        "language": { "$ref": "enums.schema.json#/$defs/LanguageCode" },
+        "text": { "type": "string", "minLength": 1 },
+        "note": { "type": "string" }
+      }
+    },
+    "Term": {
+      "description": "A versioned canonical terminology record (FR-TERM-001/002, Core §53). A revision appends a version.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "series_id", "version_number", "term", "original_language", "domain", "definition",
+        "translations", "retain_original", "status", "provenance"
+      ],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "series_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "version_number": { "type": "integer", "minimum": 1 },
+        "supersedes_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "term": { "type": "string", "minLength": 1 },
+        "original_language": { "$ref": "enums.schema.json#/$defs/LanguageCode" },
+        "domain": { "type": "string", "minLength": 1 },
+        "definition": { "type": "string", "minLength": 1 },
+        "translations": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ar": { "type": "string", "minLength": 1 },
+            "en": { "type": "string", "minLength": 1 },
+            "fr": { "type": "string", "minLength": 1 }
+          }
+        },
+        "alternatives": { "type": "array", "items": { "$ref": "#/$defs/AlternativeTranslation" } },
+        "retain_original": { "type": "boolean", "description": "Keep the original term in outputs, optionally glossed" },
+        "source_authority": { "type": "string" },
+        "status": { "$ref": "enums.schema.json#/$defs/TermStatus" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      }
+    }
+  }
+}

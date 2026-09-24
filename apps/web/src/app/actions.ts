@@ -648,3 +648,46 @@ export async function reuseKnowledge(_: ActionResult, form: FormData): Promise<A
     }),
   );
 }
+
+// --- Terminology and translation integrity (PRD §36) ---
+
+export async function proposeTerm(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const alternatives = listField(form, "alternatives").map((line) => {
+    const [language = "", ...rest] = line.split(":");
+    return { language: language.trim(), text: rest.join(":").trim() };
+  });
+  return run(() =>
+    apiSend("POST", "/api/v1/terminology", {
+      term: text(form, "term"),
+      original_language: text(form, "original_language"),
+      domain: text(form, "domain"),
+      definition: text(form, "definition"),
+      translations: { ar: optionalText(form, "ar"), en: optionalText(form, "en"), fr: optionalText(form, "fr") },
+      alternatives,
+      retain_original: form.get("retain_original") === "on",
+      source_authority: optionalText(form, "source_authority"),
+    }),
+  );
+}
+
+export async function decideTerm(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `/api/v1/terminology/${text(form, "term_id")}/${text(form, "decision")}`, { reason: optionalText(form, "reason") }),
+  );
+}
+
+export async function checkTranslation(_: ActionResult, form: FormData): Promise<ActionResult> {
+  try {
+    const result = await apiSend<Record<string, unknown>>("POST", "/api/v1/integrity/translation-check", {
+      source_text: text(form, "source_text"),
+      source_language: text(form, "source_language"),
+      translated_text: text(form, "translated_text"),
+      target_language: text(form, "target_language"),
+      domain: optionalText(form, "domain"),
+    });
+    return { ok: true, details: result };
+  } catch (error) {
+    if (error instanceof ApiError) return { ok: false, message: error.message, details: error.details };
+    return { ok: false, message: "The research service is unreachable." };
+  }
+}
