@@ -371,3 +371,48 @@ def validate_output(data: dict[str, Any], schema: dict[str, Any]) -> None:
         first = errors[0]
         where = "/".join(str(p) for p in first.path) or "(root)"
         raise ProviderOutputError(f"structured output failed validation at {where}: {first.message}")
+
+
+def usage_by_model(session: Session) -> list[dict[str, Any]]:
+    """Operational reliability per provider/model/task, straight from the append-only request log."""
+    r = AIRequestRecord
+
+    def count(condition: Any) -> Any:
+        return func.count().filter(condition)
+
+    rows = session.execute(
+        select(
+            r.provider,
+            r.model,
+            r.task,
+            func.count(),
+            count(r.status == SUCCEEDED),
+            count(r.error_kind == ProviderOutputError.kind),
+            count(r.error_kind == "PROVIDER_REFUSAL"),
+            count((r.status == FAILED) & (r.error_kind == "PROVIDER_ERROR")),
+            count(r.status == BLOCKED),
+            count(r.served_by_fallback.is_(True)),
+            func.coalesce(func.sum(r.input_tokens), 0),
+            func.coalesce(func.sum(r.output_tokens), 0),
+            func.coalesce(func.sum(r.estimated_cost_usd), 0),
+        )
+        .where(r.provider != "")
+        .group_by(r.provider, r.model, r.task)
+        .order_by(r.provider, r.model, r.task)
+    ).all()
+    keys = (
+        "provider",
+        "model",
+        "task",
+        "calls",
+        "succeeded",
+        "invalid_output",
+        "refusals",
+        "unavailable",
+        "blocked",
+        "fallback_served",
+        "input_tokens",
+        "output_tokens",
+        "estimated_cost_usd",
+    )
+    return [dict(zip(keys, row, strict=True)) for row in rows]

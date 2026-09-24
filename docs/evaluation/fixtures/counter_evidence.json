@@ -1,0 +1,34 @@
+{
+  "fixture_set": "golden-counter-evidence@1",
+  "note": "Synthetic cases. Seeded counter passages must be proposed as CONTRADICTS, LIMITS or QUALIFIES.",
+  "cases": [
+    {
+      "id": "ce-1",
+      "statement": "Losing a workplace mentor in year two causes apprentices to disengage.",
+      "alternatives": ["Wage stagnation in year two causes disengagement."],
+      "passages": [
+        {"id": "P0", "seeded": "counter", "text": "In the 2021 cohort, sites that removed mentoring in year two saw retention rise by 6%, and engagement surveys did not decline."},
+        {"id": "P1", "seeded": "support", "text": "Apprentices who lost their mentor reported lower engagement in follow-up interviews."},
+        {"id": "P2", "seeded": "irrelevant", "text": "The training centre renovated its welding workshop in 2019."}
+      ]
+    },
+    {
+      "id": "ce-2",
+      "statement": "Daily reading practice improves vocabulary in all primary pupils.",
+      "alternatives": [],
+      "passages": [
+        {"id": "P0", "seeded": "counter", "text": "For pupils with diagnosed dyslexia, daily reading practice showed no vocabulary gain over twelve months without additional phonics support."},
+        {"id": "P1", "seeded": "support", "text": "Across 40 classrooms, daily reading was associated with a moderate vocabulary gain."}
+      ]
+    },
+    {
+      "id": "ce-3",
+      "statement": "Remote work reduces productivity in software teams.",
+      "alternatives": ["Poor onboarding, not remote work, reduces productivity."],
+      "passages": [
+        {"id": "P0", "seeded": "counter", "text": "A two-year study of 14 software teams found no productivity difference between remote and co-located teams once onboarding quality was controlled."},
+        {"id": "P1", "seeded": "irrelevant", "text": "Office lease prices in the city rose 3% last year."}
+      ]
+    }
+  ]
+}

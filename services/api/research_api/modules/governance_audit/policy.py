@@ -104,6 +104,8 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("ai_policy.update", A.FORBIDDEN),
         # Research Orchestrator: humans launch AI tasks; AI never launches or chains them itself
         _p("ai_task.launch", A.FORBIDDEN),
+        # AI reliability registry (PRD §52): the Methodology Steward or an automated golden run records results
+        _p("ai_evaluation.record", A.FORBIDDEN, frozenset({R.METHODOLOGY_STEWARD}), system=True),
         # Research planning (PRD §22, §24, §31): humans own plans and sufficiency; AI may record searches it ran
         _p("research_plan.create", A.FORBIDDEN),
         _p("research_plan.revise", A.FORBIDDEN),

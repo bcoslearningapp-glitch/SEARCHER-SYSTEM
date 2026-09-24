@@ -82,6 +82,11 @@ export default async function DeskPage(props: LocaleParams) {
           </Card>
         </div>
         <StatusPanel result={readiness} dict={dict} />
+        <p>
+          <Link href={`/${locale}/ai-reliability`} className="text-sm underline">
+            {dict.reliability.link}
+          </Link>
+        </p>
       </div>
     </AppShell>
   );

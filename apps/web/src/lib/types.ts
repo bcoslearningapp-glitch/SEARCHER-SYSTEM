@@ -350,3 +350,41 @@ export type Ayah = {
   source_version: string;
   source_sha256: string;
 };
+
+export type Evaluation = {
+  id: string;
+  provider: string;
+  model: string;
+  dimension: string;
+  score: number;
+  threshold: number;
+  comparator: string;
+  passed: boolean;
+  sample_size: number;
+  method: string;
+  fixture_set: string | null;
+  created_at: string;
+};
+export type Reliability = {
+  dimensions: { key: string; label: string; comparator: string; threshold: number; blocking: boolean }[];
+  operational: {
+    provider: string;
+    model: string;
+    task: string;
+    calls: number;
+    succeeded: number;
+    invalid_output: number;
+    refusals: number;
+    unavailable: number;
+    blocked: number;
+    structured_output_reliability: number | null;
+    estimated_cost_usd: string;
+  }[];
+  models: {
+    provider: string;
+    model: string;
+    latest: Record<string, Evaluation>;
+    blocking_failures: string[];
+    blocking_unevaluated: string[];
+  }[];
+};

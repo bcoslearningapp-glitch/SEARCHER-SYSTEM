@@ -7,6 +7,7 @@
 import { aiAr, aiEn, aiFr, type AIStrings } from "@/lib/i18n-ai";
 import { foundationalAr, foundationalEn, foundationalFr, type FoundationalStrings } from "@/lib/i18n-foundational";
 import { labAr, labEn, labFr, type LabStrings } from "@/lib/i18n-lab";
+import { reliabilityAr, reliabilityEn, reliabilityFr, type ReliabilityStrings } from "@/lib/i18n-reliability";
 import { researchAr, researchEn, researchFr, type ResearchStrings } from "@/lib/i18n-research";
 import { ar as uiAr, en as uiEn, fr as uiFr, type UiStrings } from "@/lib/i18n-ui";
 
@@ -32,6 +33,7 @@ export type Dictionary = {
   ai: AIStrings;
   research: ResearchStrings;
   foundational: FoundationalStrings;
+  reliability: ReliabilityStrings;
   spaces: Record<Space, string>;
   spaceDescriptions: Record<Space, string>;
   notYetAvailable: string;
@@ -48,6 +50,7 @@ const en: Dictionary = {
   ai: aiEn,
   research: researchEn,
   foundational: foundationalEn,
+  reliability: reliabilityEn,
   spaces: { desk: "Desk", map: "Map", library: "Library", lab: "Lab", outputs: "Outputs" },
   spaceDescriptions: {
     desk: "Current question, mode, next step, and items that need your attention.",
@@ -70,6 +73,7 @@ const fr: Dictionary = {
   ai: aiFr,
   research: researchFr,
   foundational: foundationalFr,
+  reliability: reliabilityFr,
   spaces: { desk: "Bureau", map: "Carte", library: "Bibliothèque", lab: "Laboratoire", outputs: "Productions" },
   spaceDescriptions: {
     desk: "Question actuelle, mode, prochaine étape et éléments nécessitant votre attention.",
@@ -97,6 +101,7 @@ const ar: Dictionary = {
   ai: aiAr,
   research: researchAr,
   foundational: foundationalAr,
+  reliability: reliabilityAr,
   spaces: { desk: "المكتب", map: "الخريطة", library: "المكتبة", lab: "المختبر", outputs: "المخرجات" },
   spaceDescriptions: {
     desk: "السؤال الحالي، والنمط، والخطوة التالية، والعناصر التي تحتاج إلى انتباهك.",
