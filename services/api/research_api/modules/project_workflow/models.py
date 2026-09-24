@@ -64,6 +64,8 @@ class ProjectClosure(UUIDPrimaryKeyMixin, Base):
     closed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     reopened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     reopen_trigger: Mapped[str | None] = mapped_column(Text)
+    gate_evaluation_id: Mapped[UUID | None]
+    approval_id: Mapped[UUID | None]
 
 
 class ScratchNote(UUIDPrimaryKeyMixin, TimestampMixin, Base):

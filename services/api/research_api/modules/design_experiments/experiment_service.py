@@ -758,3 +758,13 @@ def record_exists(session: Session, project_id: UUID, entity_type: str, entity_i
 
 
 targets.register(DH_TARGET, _dh_exists)
+
+
+IN_PROGRESS = frozenset(
+    {E.APPROVED, E.RUNNING, E.DATA_COLLECTION_COMPLETE, E.ANALYSIS, E.INTERPRETED, E.PAUSED, E.RISK_REVIEW}
+)
+
+
+def experiments_in_progress(session: Session, project_id: UUID) -> list[ExperimentOut]:
+    """Experiments started or approved but not closed, aborted or invalidated (read by the Project Closure Gate)."""
+    return [e for e in list_experiments(session, project_id) if e.state in IN_PROGRESS]

@@ -695,3 +695,11 @@ def _claim_evidence_changed(session: Session, project_id: UUID, claim_id: UUID) 
 
 
 targets.register(EvidenceTargetType.CLAIM, _claim_exists, _claim_evidence_changed)
+
+
+def count_candidates(session: Session, project_id: UUID) -> int:
+    """Evidence candidates still awaiting human assessment (read by the Project Closure Gate)."""
+    rows = session.scalars(
+        select(Evidence.id).where(Evidence.project_id == project_id, Evidence.status == EvidenceStatus.CANDIDATE.value)
+    )
+    return len(list(rows))

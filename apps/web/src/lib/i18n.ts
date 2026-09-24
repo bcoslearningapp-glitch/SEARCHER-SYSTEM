@@ -9,6 +9,7 @@ import { designAr, designEn, designFr, type DesignStrings } from "@/lib/i18n-des
 import { experimentsAr, experimentsEn, experimentsFr, type ExperimentStrings } from "@/lib/i18n-experiments";
 import { knowledgeAr, knowledgeEn, knowledgeFr, type KnowledgeStrings } from "@/lib/i18n-knowledge";
 import { terminologyAr, terminologyEn, terminologyFr, type TerminologyStrings } from "@/lib/i18n-terminology";
+import { closureAr, closureEn, closureFr, type ClosureStrings } from "@/lib/i18n-closure";
 import { foundationalAr, foundationalEn, foundationalFr, type FoundationalStrings } from "@/lib/i18n-foundational";
 import { labAr, labEn, labFr, type LabStrings } from "@/lib/i18n-lab";
 import { reliabilityAr, reliabilityEn, reliabilityFr, type ReliabilityStrings } from "@/lib/i18n-reliability";
@@ -40,6 +41,7 @@ export type Dictionary = {
   experiments: ExperimentStrings;
   knowledge: KnowledgeStrings;
   terminology: TerminologyStrings;
+  closure: ClosureStrings;
   foundational: FoundationalStrings;
   reliability: ReliabilityStrings;
   spaces: Record<Space, string>;
@@ -61,6 +63,7 @@ const en: Dictionary = {
   experiments: experimentsEn,
   knowledge: knowledgeEn,
   terminology: terminologyEn,
+  closure: closureEn,
   foundational: foundationalEn,
   reliability: reliabilityEn,
   spaces: { desk: "Desk", map: "Map", library: "Library", lab: "Lab", outputs: "Outputs" },
@@ -88,6 +91,7 @@ const fr: Dictionary = {
   experiments: experimentsFr,
   knowledge: knowledgeFr,
   terminology: terminologyFr,
+  closure: closureFr,
   foundational: foundationalFr,
   reliability: reliabilityFr,
   spaces: { desk: "Bureau", map: "Carte", library: "Bibliothèque", lab: "Laboratoire", outputs: "Productions" },
@@ -120,6 +124,7 @@ const ar: Dictionary = {
   experiments: experimentsAr,
   knowledge: knowledgeAr,
   terminology: terminologyAr,
+  closure: closureAr,
   foundational: foundationalAr,
   reliability: reliabilityAr,
   spaces: { desk: "المكتب", map: "الخريطة", library: "المكتبة", lab: "المختبر", outputs: "المخرجات" },
