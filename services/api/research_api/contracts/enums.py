@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.9.0"
+CONTRACT_SCHEMA_VERSION = "0.10.0"
 
 
 class ProjectStatus(StrEnum):
@@ -734,6 +734,15 @@ class InterpretationOutcome(StrEnum):
     CONTRADICTS = "CONTRADICTS"
     INCONCLUSIVE = "INCONCLUSIVE"
     QUALIFIES = "QUALIFIES"
+
+
+class TermStatus(StrEnum):
+    """Terminology record state; only a human approves the canonical form (FR-TERM-001, Core §53)."""
+
+    PROPOSED = "PROPOSED"
+    APPROVED = "APPROVED"
+    SUPERSEDED = "SUPERSEDED"
+    REJECTED = "REJECTED"
 
 
 class FoundationalSourceStatus(StrEnum):

@@ -64,3 +64,28 @@ class KnowledgeReuse(UUIDPrimaryKeyMixin, Base):
     differences: Mapped[str | None] = mapped_column(Text)
     assessed_by: Mapped[dict[str, Any]] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Term(UUIDPrimaryKeyMixin, Base):
+    """A canonical terminology version (library-wide). Content is immutable; a revision appends a version."""
+
+    __tablename__ = "terms"
+    __table_args__ = (UniqueConstraint("series_id", "version_number"),)
+
+    series_id: Mapped[UUID] = mapped_column(index=True)
+    version_number: Mapped[int] = mapped_column(Integer)
+    supersedes_id: Mapped[UUID | None] = mapped_column(ForeignKey("terms.id"))
+    term: Mapped[str] = mapped_column(Text)
+    original_language: Mapped[str] = mapped_column(String(5))
+    domain: Mapped[str] = mapped_column(Text, index=True)
+    definition: Mapped[str] = mapped_column(Text)
+    translations: Mapped[dict[str, str]] = mapped_column(JSONB)
+    alternatives: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    retain_original: Mapped[bool] = mapped_column(Boolean)
+    source_authority: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(20), index=True)
+    change_reason: Mapped[str | None] = mapped_column(Text)
+    provenance: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    approved_by: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

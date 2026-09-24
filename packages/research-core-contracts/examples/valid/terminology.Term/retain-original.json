@@ -1,0 +1,31 @@
+{
+  "id": "7a8b9c0d-1e2f-4a3b-8c4d-5e6f7a8b9c01",
+  "series_id": "8b9c0d1e-2f3a-4b4c-9d5e-6f7a8b9c0d12",
+  "version_number": 1,
+  "term": "maqasid al-sharia",
+  "original_language": "ar",
+  "domain": "Islamic jurisprudence",
+  "definition": "The higher objectives of the Sharia",
+  "translations": {
+    "ar": "مقاصد الشريعة",
+    "en": "objectives of the Sharia",
+    "fr": "finalités de la charia"
+  },
+  "alternatives": [
+    {
+      "language": "en",
+      "text": "higher aims of Islamic law"
+    }
+  ],
+  "retain_original": true,
+  "source_authority": "Project methodology steward",
+  "status": "APPROVED",
+  "provenance": {
+    "kind": "HUMAN_INPUT",
+    "actor": {
+      "kind": "HUMAN",
+      "id": "local-owner",
+      "role": "METHODOLOGY_STEWARD"
+    }
+  }
+}

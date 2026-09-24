@@ -39,7 +39,7 @@ from research_api.modules.hypothesis_lab.models import (
     HypothesisVersion,
     Mechanism,
 )
-from research_api.modules.knowledge_memory.models import KnowledgeItem, KnowledgeReuse, KnowledgeVersion
+from research_api.modules.knowledge_memory.models import KnowledgeItem, KnowledgeReuse, KnowledgeVersion, Term
 from research_api.modules.operational_constraints.models import OperationalConstraint
 from research_api.modules.project_workflow.models import (
     ProblemFrameVersion,
@@ -135,4 +135,5 @@ __all__ = [
     "SourcePage",
     "SourceWork",
     "SufficiencyAssessment",
+    "Term",
 ]

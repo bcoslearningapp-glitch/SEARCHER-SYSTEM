@@ -545,3 +545,29 @@ export type KnowledgeReuse = {
   label: string;
   direct_evidence: false;
 };
+
+export type Term = {
+  id: string;
+  series_id: string;
+  version_number: number;
+  term: string;
+  original_language: string;
+  domain: string;
+  definition: string;
+  translations: { ar: string | null; en: string | null; fr: string | null };
+  alternatives: { language: string; text: string; note: string | null }[];
+  retain_original: boolean;
+  source_authority: string | null;
+  status: "PROPOSED" | "APPROVED" | "SUPERSEDED" | "REJECTED";
+  provenance: { kind: string };
+};
+
+export type StrengthProfile = { relation: string; certainty: string; scope: string; markers: Record<string, string[]> };
+
+export type TranslationCheck = {
+  source_profile: StrengthProfile;
+  translation_profile: StrengthProfile;
+  strength_drift: { axis: string; direction: string; source_level: string; translation_level: string; message: string }[];
+  terminology: { term_id: string; term: string; source_form: string; expected: string[]; found: boolean; message: string }[];
+  passed: boolean;
+};
