@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.2.0"
+CONTRACT_SCHEMA_VERSION = "0.3.0"
 
 
 class ProjectStatus(StrEnum):
@@ -594,3 +594,29 @@ class IngestionStatus(StrEnum):
     COMPLETE = "COMPLETE"
     FAILED = "FAILED"
     NOT_APPLICABLE = "NOT_APPLICABLE"
+
+
+class ClaimWorkflowState(StrEnum):
+    """Claim workflow state; independent of epistemic strength (Core §16, §18, FR-CLAIM-002)."""
+
+    PROPOSED = "PROPOSED"
+    ACTIVE = "ACTIVE"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    RETIRED = "RETIRED"
+
+
+class AssumptionStatus(StrEnum):
+    """Assumption review status; SYSTEM_INFERRED assumptions stay UNCONFIRMED until a human acts (Core §19, FR-CLAIM-003)."""
+
+    UNCONFIRMED = "UNCONFIRMED"
+    CONFIRMED = "CONFIRMED"
+    REJECTED = "REJECTED"
+    RECLASSIFIED = "RECLASSIFIED"
+
+
+class OpenQuestionStatus(StrEnum):
+    """Open question lifecycle (Core §15, §37)."""
+
+    OPEN = "OPEN"
+    ANSWERED = "ANSWERED"
+    CLOSED_UNANSWERED = "CLOSED_UNANSWERED"

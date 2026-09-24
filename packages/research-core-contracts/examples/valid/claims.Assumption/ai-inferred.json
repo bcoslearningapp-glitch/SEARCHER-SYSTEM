@@ -1,0 +1,17 @@
+{
+  "id": "5f6a7b8c-9d0e-4f1a-8b2c-3d4e5f6a7b8c",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "statement": "Apprentices value mentoring.",
+  "origin": "SYSTEM_INFERRED",
+  "criticality": "HIGH",
+  "status": "UNCONFIRMED",
+  "provenance": {
+    "kind": "AI_GENERATED",
+    "ai_action": {
+      "provider": "example-provider",
+      "model": "example-model",
+      "template_version": "assumption-detect@1",
+      "timestamp": "2026-09-24T11:05:00Z"
+    }
+  }
+}

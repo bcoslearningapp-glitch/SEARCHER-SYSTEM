@@ -68,6 +68,13 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("decision.recommend", A.AUTONOMOUS),
         _p("decision.resolve", A.FORBIDDEN, ANY_HUMAN_ROLE, approval=True),
         _p("decision.withdraw", A.FORBIDDEN),
+        # Claims, assumptions, questions (AI proposals are labeled and reviewable)
+        _p("claim.create", A.ACT_AND_NOTIFY),
+        _p("claim.update", A.REQUEST_APPROVAL),
+        _p("assumption.create", A.ACT_AND_NOTIFY),
+        _p("assumption.review", A.FORBIDDEN, approval=True),
+        _p("open_question.create", A.ACT_AND_NOTIFY),
+        _p("open_question.close", A.REQUEST_APPROVAL),
         # Sources
         _p("source.catalog", A.ACT_AND_NOTIFY),
         _p("source.catalog_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),

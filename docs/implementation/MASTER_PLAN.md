@@ -55,6 +55,8 @@ GitHub issues: #2 (P1-01/02), #3 (P1-03/04), #4 (P1-05/06/07), #5 (P1-08/09/11),
 
 ## Phase 2 — Reference, claims, evidence, hypothesis (M2)
 
+GitHub issues: #11 (P2-01), #12 (P2-02/03/04), #13 (P2-05/10), #14 (P2-06/09), #15 (P2-07/08), #16 (P2-11).
+
 | Key | Work item | PRD refs |
 |---|---|---|
 | P2-01 | Claims & assumptions (types, epistemic category ⟂ workflow, AI-inferred labeling, criticality, note -> entity capture) | §12 |

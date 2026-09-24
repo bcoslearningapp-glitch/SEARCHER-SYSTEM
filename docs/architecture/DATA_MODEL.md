@@ -42,3 +42,11 @@ Migrations `0003`/`0004` (Phase 1, issues #5/#6):
 | `source_access_requests` | Hybrid Source Access requests | OPEN → PARTIALLY_FULFILLED/FULFILLED/CANCELLED |
 | `source_leads` | Researcher memory of a source | CHECK: VERIFIED ⇒ linked excerpt |
 | `source_pages` / `source_chunks` | Derived page text and retrieval chunks | `tsv` generated column + GIN index |
+
+Migration `0005` (Phase 2, issue #11):
+
+| Table | Purpose | Notes |
+|---|---|---|
+| `claims` | Claims with type, statement origin, workflow state ⟂ epistemic strength | new claims are `UNSUBSTANTIATED`; AI claims enter `PROPOSED` |
+| `assumptions` | Explicit / system-inferred / source-derived assumptions with criticality | CHECK: SYSTEM_INFERRED ⇒ AI_GENERATED provenance; human review confirms/rejects/reclassifies |
+| `open_questions` | Explicit research questions | closing may conclude `INSUFFICIENT_EVIDENCE` ("unknown" is valid) |

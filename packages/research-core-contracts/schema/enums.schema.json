@@ -645,6 +645,35 @@
         "FAILED",
         "NOT_APPLICABLE"
       ]
+    },
+    "ClaimWorkflowState": {
+      "description": "Claim workflow state; independent of epistemic strength (Core §16, §18, FR-CLAIM-002).",
+      "type": "string",
+      "enum": [
+        "PROPOSED",
+        "ACTIVE",
+        "UNDER_REVIEW",
+        "RETIRED"
+      ]
+    },
+    "AssumptionStatus": {
+      "description": "Assumption review status; SYSTEM_INFERRED assumptions stay UNCONFIRMED until a human acts (Core §19, FR-CLAIM-003).",
+      "type": "string",
+      "enum": [
+        "UNCONFIRMED",
+        "CONFIRMED",
+        "REJECTED",
+        "RECLASSIFIED"
+      ]
+    },
+    "OpenQuestionStatus": {
+      "description": "Open question lifecycle (Core §15, §37).",
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "ANSWERED",
+        "CLOSED_UNANSWERED"
+      ]
     }
   }
 }

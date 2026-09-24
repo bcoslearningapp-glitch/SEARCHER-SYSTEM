@@ -1,0 +1,18 @@
+{
+  "id": "4e5f6a7b-8c9d-4e0f-9a1b-2c3d4e5f6a7b",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "statement": "Mentoring declines after year one.",
+  "claim_type": "CAUSAL_CLAIM",
+  "statement_origin": "RESEARCHER_STATED",
+  "workflow_state": "ACTIVE",
+  "epistemic_strength": "UNSUBSTANTIATED",
+  "important": true,
+  "provenance": {
+    "kind": "HUMAN_INPUT",
+    "actor": {
+      "kind": "HUMAN",
+      "id": "local-owner",
+      "role": "RESEARCHER"
+    }
+  }
+}
