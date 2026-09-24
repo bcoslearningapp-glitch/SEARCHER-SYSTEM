@@ -20,9 +20,10 @@ from research_api.platform.db import session_scope
 logger = logging.getLogger(__name__)
 
 JobBody = Callable[[Session, jobs.BackgroundJob], dict[str, Any]]
+FailureHook = Callable[[Session, jobs.BackgroundJob], None]
 
 
-def run_job(job_id: UUID, body: JobBody) -> jobs.JobState:
+def run_job(job_id: UUID, body: JobBody, on_failure: FailureHook | None = None) -> jobs.JobState:
     with session_scope() as session:
         job = jobs.get_job(session, job_id, for_update=True)
         if jobs.JobState(job.state) is not jobs.JobState.QUEUED:
@@ -41,6 +42,8 @@ def run_job(job_id: UUID, body: JobBody) -> jobs.JobState:
             jobs.transition(
                 job, jobs.JobState.FAILED, failure_kind=jobs.JobFailureKind.APPLICATION_ERROR, error=str(exc)
             )
+            if on_failure is not None:
+                on_failure(session, job)
         return jobs.JobState.FAILED
 
     with session_scope() as session:
