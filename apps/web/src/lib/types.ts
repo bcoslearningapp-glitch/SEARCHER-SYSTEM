@@ -571,3 +571,12 @@ export type TranslationCheck = {
   terminology: { term_id: string; term: string; source_form: string; expected: string[]; found: boolean; message: string }[];
   passed: boolean;
 };
+
+export type Closure = {
+  id: string;
+  closure_type: string;
+  record: { resolved: string[]; confidence_scope: string; limitations: string[] };
+  closed_at: string;
+  reopened_at: string | null;
+  reopen_trigger: string | null;
+};

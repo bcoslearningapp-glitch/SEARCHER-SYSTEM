@@ -1,12 +1,22 @@
 import { notFound } from "next/navigation";
 
-import { addNote, approveFrame, captureNote, createDecision, resolveDecision, saveFrameDraft } from "@/app/actions";
+import {
+  addNote,
+  approveFrame,
+  captureNote,
+  closeProject,
+  createDecision,
+  reopenProject,
+  resolveDecision,
+  saveFrameDraft,
+} from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
 import { AITasks } from "@/components/AITasks";
 import { AppShell } from "@/components/AppShell";
 import { Badge, Card, Empty, Field, Select, TextArea, TextInput } from "@/components/fields";
 import { LoadError } from "@/components/LoadError";
 import { ProjectHeader } from "@/components/ProjectHeader";
+import { ClosureTypeValues } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
 import { load } from "@/lib/load";
 import { resolveProjectParams, type ProjectParams } from "@/lib/locale-params";
@@ -15,6 +25,7 @@ import {
   FRAME_TEXT_FIELDS,
   type AIProfile,
   type AttentionItem,
+  type Closure,
   type Decision,
   type Job,
   type Note,
@@ -53,6 +64,7 @@ export default async function ProjectPage(props: ProjectParams) {
       </AppShell>
     );
   }
+  const closures = await load<Closure[]>(`${base}/closures`);
   const [state, frames, notes, decisions, attention, profiles, aiJobs] = await Promise.all([
     load<ResearchState>(`${base}/research-state`),
     load<ProblemFrame[]>(`${base}/problem-frames`),
@@ -258,6 +270,78 @@ export default async function ProjectPage(props: ProjectParams) {
                 </dl>
               )}
             </Card>
+            {project.status === "READY_TO_CLOSE" || project.status === "CLOSED" || closures?.length ? (
+              <Card title={dict.closure.title} testId="closure">
+                <p className="text-sm text-[var(--color-muted)]">{dict.closure.explainer}</p>
+                {project.status === "READY_TO_CLOSE" ? (
+                  <ActionForm action={closeProject} submitLabel={dict.closure.close} pendingLabel={dict.closure.closing} testId="close-form">
+                    <input type="hidden" name="project_id" value={projectId} />
+                    <Field label={dict.closure.closureType}>
+                      <Select name="closure_type" defaultValue="KNOWLEDGE_CONCLUSION">
+                        {ClosureTypeValues.map((v) => (
+                          <option key={v}>{v}</option>
+                        ))}
+                      </Select>
+                    </Field>
+                    <Field label={dict.closure.resolved} hint={dict.closure.listHint}>
+                      <TextArea name="resolved" rows={2} required />
+                    </Field>
+                    <Field label={dict.closure.confidenceScope}>
+                      <TextInput name="confidence_scope" required />
+                    </Field>
+                    {(["unresolved", "limitations", "open_questions", "reopen_triggers"] as const).map((f) => (
+                      <Field
+                        key={f}
+                        label={
+                          {
+                            unresolved: dict.closure.unresolved,
+                            limitations: dict.closure.limitations,
+                            open_questions: dict.closure.openQuestions,
+                            reopen_triggers: dict.closure.reopenTriggers,
+                          }[f]
+                        }
+                        hint={dict.closure.listHint}
+                      >
+                        <TextArea name={f} rows={2} />
+                      </Field>
+                    ))}
+                    <label className="flex items-center gap-2 text-xs">
+                      <input type="checkbox" name="acknowledge_reservations" />
+                      {dict.closure.acknowledge}
+                    </label>
+                    <Field label={dict.closure.overrideReason}>
+                      <TextInput name="override_reason" />
+                    </Field>
+                  </ActionForm>
+                ) : null}
+                {project.status === "CLOSED" ? (
+                  <ActionForm action={reopenProject} submitLabel={dict.closure.reopen} pendingLabel={dict.closure.closing} testId="reopen-form">
+                    <input type="hidden" name="project_id" value={projectId} />
+                    <p className="text-xs text-[var(--color-muted)]">{dict.closure.reopenExplainer}</p>
+                    <Field label={dict.closure.reopenTrigger}>
+                      <TextInput name="trigger" required />
+                    </Field>
+                  </ActionForm>
+                ) : null}
+                {closures?.length ? (
+                  <div data-testid="closure-history">
+                    <p className="text-sm font-medium">{dict.closure.history}</p>
+                    <ul className="space-y-1 text-sm">
+                      {closures.map((c) => (
+                        <li key={c.id}>
+                          <Badge>{c.closure_type}</Badge> <span dir="auto">{c.record.confidence_scope}</span>
+                          {c.reopen_trigger ? (
+                            <span className="block text-xs" dir="auto">
+                              {dict.closure.reopenedBecause}: {c.reopen_trigger}
+                            </span>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </Card>
+            ) : null}
             <Card title={ui.attention} testId="attention">
               {attention === null ? (
                 <LoadError dict={dict} />

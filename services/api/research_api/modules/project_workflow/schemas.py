@@ -68,6 +68,8 @@ class CloseRequest(BaseModel):
     open_questions: StrList = Field(default_factory=list)
     limitations: StrList = Field(default_factory=list)
     reopen_triggers: StrList = Field(default_factory=list)
+    acknowledge_reservations: bool = Field(default=False, exclude=True)
+    override_reason: str | None = Field(default=None, exclude=True, description="Why close despite the gate")
 
 
 class ReopenRequest(BaseModel):
@@ -132,6 +134,8 @@ class ClosureOut(BaseModel):
     closed_at: datetime
     reopened_at: datetime | None
     reopen_trigger: str | None
+    gate_evaluation_id: UUID | None = None
+    approval_id: UUID | None = None
 
 
 # --- Scratch notes (FR-SCRATCH-001..003) ---

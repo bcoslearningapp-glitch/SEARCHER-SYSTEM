@@ -691,3 +691,25 @@ export async function checkTranslation(_: ActionResult, form: FormData): Promise
     return { ok: false, message: "The research service is unreachable." };
   }
 }
+
+// --- Project closure and reopening (Core §66-67) ---
+
+export async function closeProject(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/close`, {
+      closure_type: text(form, "closure_type"),
+      resolved: listField(form, "resolved"),
+      unresolved: listField(form, "unresolved"),
+      confidence_scope: text(form, "confidence_scope"),
+      limitations: listField(form, "limitations"),
+      open_questions: listField(form, "open_questions"),
+      reopen_triggers: listField(form, "reopen_triggers"),
+      acknowledge_reservations: form.get("acknowledge_reservations") === "on",
+      override_reason: optionalText(form, "override_reason"),
+    }),
+  );
+}
+
+export async function reopenProject(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("POST", `${P(form)}/reopen`, { trigger: text(form, "trigger") }));
+}

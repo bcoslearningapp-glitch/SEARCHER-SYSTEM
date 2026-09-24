@@ -363,8 +363,19 @@ def fork_project(session: Session, principal: Principal, project_id: UUID, data:
     return project_out(fork)
 
 
-def close_project(session: Session, principal: Principal, project_id: UUID, data: CloseRequest) -> ClosureOut:
-    """The system proposes readiness; only a human closes (FR-CLOSE-003)."""
+def close_project(
+    session: Session,
+    principal: Principal,
+    project_id: UUID,
+    data: CloseRequest,
+    *,
+    gate_evaluation_id: UUID | None = None,
+    methodology_path: MethodologyPathStatus = MethodologyPathStatus.COMPLIANT,
+) -> ClosureOut:
+    """The system proposes readiness; only a human closes (FR-CLOSE-003).
+
+    Callers run the Project Closure Gate first (project_workflow.closure); the closure is an approval.
+    """
     auth = authorized(principal, "project.close")
     project = _load(session, project_id, lock=True)
     closure = ProjectClosure(
@@ -372,9 +383,23 @@ def close_project(session: Session, principal: Principal, project_id: UUID, data
         closure_type=data.closure_type.value,
         record=data.model_dump(mode="json"),
         closed_by_id=auth.actor.id,
+        gate_evaluation_id=gate_evaluation_id,
     )
     _apply_transition(session, auth, project, ProjectStatus.CLOSED, reason=data.confidence_scope, via="project.close")
     session.add(closure)
+    session.flush()
+    approval = governance.record_approval(
+        session,
+        project_id=project.id,
+        subject_type="ProjectClosure",
+        subject_id=closure.id,
+        actor=auth.actor,
+        outcome=ApprovalOutcome.APPROVED,
+        methodology_path=methodology_path,
+        reason=data.override_reason or data.confidence_scope,
+        gate_evaluation_id=gate_evaluation_id,
+    )
+    closure.approval_id = approval.id
     session.flush()
     _event(
         session,

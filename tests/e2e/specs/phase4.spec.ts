@@ -263,3 +263,48 @@ test("terminology: approved canonical form; translation check flags association 
   await expect(result.getByTestId("drift")).toContainText("association became causation");
   await expect(result.getByTestId("term-findings")).toContainText("désengagement de deuxième année");
 });
+
+test("10. close through the Project Closure Gate, then reopen with a trigger; the closure record survives", async ({ page, request }) => {
+  const api = `${API_URL}/api/v1/projects`;
+  const project = (await (await request.post(api, { data: { title: `Flow ten ${unique()}`, initial_input: "x", input_type: "PROBLEM" } })).json()) as {
+    id: string;
+  };
+  const frame = await request.put(`${api}/${project.id}/problem-frames/draft`, {
+    data: {
+      content: {
+        central_issue: "Year-two disengagement",
+        current_state: "Attendance drops",
+        desired_state: "Sustained engagement",
+        gap: "Drivers unknown",
+        current_explanations: ["Pay plateau"],
+        initial_hypotheses: ["Mentoring declines"],
+        context: "Construction apprenticeships",
+        constraints: ["No budget"],
+        known: ["Drop at month 14"],
+        unknowns: ["Pay progression"],
+        research_questions: ["What drives it?"],
+        reference_review_points: ["Just treatment"],
+      },
+    },
+  });
+  const frameId = ((await frame.json()) as { id: string }).id;
+  expect((await request.post(`${api}/${project.id}/problem-frames/${frameId}/approve`, { data: {} })).ok()).toBeTruthy();
+  expect((await request.post(`${api}/${project.id}/transition`, { data: { target: "READY_TO_CLOSE" } })).ok()).toBeTruthy();
+
+  await page.goto(`/en/projects/${project.id}`);
+  const close = page.getByTestId("close-form");
+  await close.getByLabel("Resolved", { exact: true }).fill("Drivers identified at two sites");
+  await close.getByLabel("Confidence and scope").fill("Moderate; two sites");
+  await close.getByLabel("Limitations", { exact: true }).fill("Two sites only");
+  await close.getByRole("button", { name: "Close project" }).click();
+  await expect(page.getByTestId("project-status")).toHaveText("CLOSED");
+
+  const reopen = page.getByTestId("reopen-form");
+  await reopen.getByLabel("Reopen trigger").fill("New cohort data contradicts the finding");
+  await reopen.getByRole("button", { name: "Reopen project" }).click();
+  await expect(page.getByTestId("project-status")).toHaveText("REOPENED");
+  const history = page.getByTestId("closure-history");
+  await expect(history).toContainText("Moderate; two sites");
+  await expect(history).toContainText("New cohort data contradicts the finding");
+  await expect(page.getByTestId("research-state")).toContainText("Reopen trigger");
+});

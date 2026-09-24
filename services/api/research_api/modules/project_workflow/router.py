@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, status
 
 from research_api.modules.governance_audit.principal import Principal, current_principal
 from research_api.modules.governance_audit.schemas import ApprovalOut, GateEvaluationOut
-from research_api.modules.project_workflow import service
+from research_api.modules.project_workflow import closure, service
 from research_api.modules.project_workflow.schemas import (
     CloseRequest,
     ClosureOut,
@@ -75,7 +75,12 @@ def fork(project_id: UUID, data: ForkRequest, db: DB, who: Who) -> ProjectOut:
 
 @router.post("/{project_id}/close", response_model=ClosureOut)
 def close(project_id: UUID, data: CloseRequest, db: DB, who: Who) -> ClosureOut:
-    return service.close_project(db, who, project_id, data)
+    return closure.close(db, who, project_id, data)
+
+
+@router.post("/{project_id}/closure-readiness", response_model=GateEvaluationOut)
+def closure_readiness(project_id: UUID, data: CloseRequest, db: DB, who: Who) -> GateEvaluationOut:
+    return closure.evaluate(db, who, project_id, data)
 
 
 @router.post("/{project_id}/reopen", response_model=ProjectOut)

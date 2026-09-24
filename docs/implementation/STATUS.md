@@ -1,6 +1,6 @@
 # Status
 
-**Current milestone:** M4 Design, Experiments, Memory (v0.5.0), in progress. M3 AI Research Engine (v0.4.0) is complete (#32), and its tag waits on the owner (#28).
+**Current milestone:** M4 Design, Experiments, Memory (v0.5.0) is feature-complete, and its exit criteria are met (below). Tags for v0.2.0–v0.5.0 wait on the owner (#28). Next: M5 Outputs, portability, cloud workspace.
 
 ## Completed
 - M0 Foundation — #1.
@@ -43,7 +43,18 @@
   - A deterministic ar/fr/en claim-strength screen that flags association-to-causation, dropped or added hedges, and scope changes between a source and its translation.
   - A terminology check against approved renderings.
   - Terminology page with a translation check, and contracts 0.10.0.
-- Next in M4: P4-05, covering the Project Closure Gate, the close/reopen UI and E2E flow 10.
+- #41: Project Closure Gate (ADR-019), which completes all nine gates of PRD §41:
+  - Blocking decisions, unfinished experiments, unassessed evidence and the quality of the closure record are checked, with a risk-aware override.
+  - Closing is recorded as an approval.
+  - Desk close and reopen forms, and E2E flow 10.
+
+## M4 exit criteria (PRD §76 Phase 4)
+- [x] Complete hypothesis → design → experiment → learning workflow. E2E flow 6 runs through the UI: requirement → concept → design hypothesis → experiment (protocol, approval, run, observation, result, interpretation) → learning review → close → local knowledge → promotion → labelled reuse.
+- Deliverables:
+  - Design Requirements and design concepts (#33).
+  - Design Hypothesis, experiments, and observations/results/interpretations (#34).
+  - Local knowledge promotion, operating rules and temporal validity (#35).
+  - Terminology (#36) and the Project Closure Gate (#41).
 
 ## Phase 3 progress
 - #21: AI gateway (ADR-010). Anthropic and OpenAI adapters behind a provider-neutral interface, with Anthropic server-side refusal fallback enabled. Configurable model profiles; mock provider only when explicitly enabled. Untrusted-source prompt isolation and secret redaction. PRD §54 disclosure policy, human-set project AI policy (consent, allowed profiles, budgets), `STOPPED_RESOURCE_CONSTRAINT` on budget exhaustion. Append-only disclosure/usage log. Schema validation before any caller can use output. Bounded live provider-contract suite.
@@ -90,8 +101,8 @@
 ## Reference library
 - KFGQPC developer JSON (e.g. Warsh `warshData_v10.json`) is imported directly, and its SHA-256 is the publisher file's. The Foundational Library screen stages, approves and looks up ayat. It uses a Qur'anic font (Amiri Quran, OFL, with an optional local publisher font). The server-action upload limit was raised to match the API (100 MB). A rehearsal on a disposable stack checked all 6214 Warsh ayat byte-for-byte against the source.
 
-## Blocked (needs a human)
-- Tag `v0.2.0` on `5b7e7a2` (M1) and `v0.3.0` after this PR merges (M2): this session can only push its working branch.
+## Blocked (needs a human) — tracked in #28
+- Tag `v0.2.0` on `5b7e7a2` (M1), `v0.3.0` on `c56dd92` (M2), `v0.4.0` on `8f1fdba` (M3), and `v0.5.0` on the merge commit of the M4 exit PR. This session can only push its working branch.
 - Import and approve the Qur'an text dataset (Constitutional Authority) — see ADR-009.
 - Add `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` as secrets of the protected `integration` environment so the provider-contract workflow can run; set them in your local `.env` to use cloud AI.
 - P0-12 protect `main` with required checks (repository admin settings).
