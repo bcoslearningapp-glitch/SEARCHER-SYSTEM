@@ -68,6 +68,8 @@ class Settings(BaseSettings):
     ai_request_timeout_seconds: float = 300.0
     # Deterministic mock provider for CI/E2E/demos. Never enabled implicitly.
     ai_mock_enabled: bool = False
+    # Simulated behaviour of the mock provider (E2E provider-outage flow, PRD §73 flow 9).
+    ai_mock_mode: Literal["ok", "unavailable", "invalid"] = "ok"
 
 
 @lru_cache(maxsize=1)

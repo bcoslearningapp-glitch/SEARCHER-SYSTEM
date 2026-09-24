@@ -71,3 +71,54 @@ def test_cancel_requested_while_running_ends_cancelled() -> None:
         return {"done": True}
 
     assert run_job(job_id, body) is jobs.JobState.CANCELLED
+
+
+def test_provider_and_budget_failures_keep_their_kind() -> None:
+    from research_api.modules.ai_gateway.base import ProviderUnavailableError  # noqa: PLC0415
+    from research_api.modules.ai_gateway.service import ResourceConstraintError  # noqa: PLC0415
+
+    for exc, kind in (
+        (ProviderUnavailableError("down"), "PROVIDER_ERROR"),
+        (ResourceConstraintError("budget"), "STOPPED_RESOURCE_CONSTRAINT"),
+    ):
+        job_id = _new_job()
+
+        def body(session: Session, job: jobs.BackgroundJob, error: Exception = exc) -> dict[str, Any]:
+            raise error
+
+        assert run_job(job_id, body) is jobs.JobState.FAILED
+        assert _state(job_id).failure_kind == kind
+
+
+def test_broken_failure_hook_still_ends_the_job_failed() -> None:
+    job_id = _new_job()
+
+    def body(session: Session, job: jobs.BackgroundJob) -> dict[str, Any]:
+        raise RuntimeError("boom")
+
+    def hook(session: Session, job: jobs.BackgroundJob) -> None:
+        raise RuntimeError("hook also broke")
+
+    assert run_job(job_id, body, hook) is jobs.JobState.FAILED
+    assert _state(job_id).state == "FAILED"
+
+
+def test_cooperative_cancellation_rolls_back_and_cancels() -> None:
+    job_id = _new_job()
+    marker = "CancelWrite" + "".join(chr(ord("a") + int(c, 16)) for c in job_id.hex[:8])
+
+    def body(session: Session, job: jobs.BackgroundJob) -> dict[str, Any]:
+        audit.record_research_event(
+            session, ResearchEventEntry(event_type=marker, actor=Actor(kind=ActorKind.SYSTEM, id="worker"))
+        )
+        with session_scope() as other:
+            jobs.request_cancel(jobs.get_job(other, job_id))
+        jobs.raise_if_cancelled(session, job)
+        return {}
+
+    assert run_job(job_id, body) is jobs.JobState.CANCELLED
+    with session_scope() as session:
+        count = session.scalar(
+            select(func.count()).select_from(ResearchEventRecord).where(ResearchEventRecord.event_type == marker)
+        )
+    assert count == 0

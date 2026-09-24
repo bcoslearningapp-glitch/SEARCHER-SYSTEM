@@ -29,7 +29,7 @@ from research_api.contracts.enums import (
 from research_api.modules.governance_audit import service as governance
 from research_api.modules.governance_audit.context import Authorized, authorized
 from research_api.modules.governance_audit.principal import Principal
-from research_api.modules.governance_audit.schemas import AuditEntry, ResearchEventEntry
+from research_api.modules.governance_audit.schemas import AIActionRecord, AuditEntry, ResearchEventEntry
 from research_api.modules.project_workflow import lifecycle
 from research_api.modules.project_workflow import service as projects
 from research_api.modules.sources_library import rules
@@ -730,14 +730,21 @@ def search(session: Session, query: str, *, project_id: UUID | None = None, limi
 # --- excerpts from ingested text (exact-quote protection, Core §29, FR-INGEST-004) ---
 
 
-def create_page_excerpt(session: Session, principal: Principal, asset_id: UUID, data: PageExcerptIn) -> ExcerptOut:
+def create_page_excerpt(
+    session: Session,
+    principal: Principal,
+    asset_id: UUID,
+    data: PageExcerptIn,
+    *,
+    ai_action: AIActionRecord | None = None,
+) -> ExcerptOut:
     """Chunks are discovery units; quotes come from the exact page span of the stored source.
 
     The text is copied server-side from the extracted page. Native digital text from a
     checksummed asset is MACHINE_VERIFIED; OCR text can be excerpted but never as an
     exact quote until verified (DB check).
     """
-    auth = authorized(principal, "source.excerpt")
+    auth = authorized(principal, "source.excerpt", ai_action=ai_action)
     asset = session.get(SourceAsset, asset_id)
     if asset is None:
         raise NotFoundError("source asset not found")
@@ -808,3 +815,11 @@ def work_ids_for_excerpts(session: Session, excerpt_ids: list[UUID]) -> dict[UUI
 def require_work(session: Session, work_id: UUID) -> None:
     if session.get(SourceWork, work_id) is None:
         raise NotFoundError("source work not found", work_id=str(work_id))
+
+
+def chunk_texts(session: Session, chunk_ids: list[UUID]) -> dict[UUID, str]:
+    """Full text of discovery chunks, for analysis only. Quotes still come from page spans."""
+    if not chunk_ids:
+        return {}
+    rows = session.execute(select(SourceChunk.id, SourceChunk.text).where(SourceChunk.id.in_(chunk_ids))).all()
+    return {chunk_id: text for chunk_id, text in rows}

@@ -8,7 +8,9 @@ Principle: the LLM may propose; the application decides whether a proposal can m
 - Prompts: instructions in the system prompt; retrieved sources and tool output wrapped as escaped `<untrusted_source>` data; secrets redacted.
 - HTTP: `GET /api/v1/ai/profiles`, `GET|PUT /api/v1/projects/{id}/ai-policy`, `GET /api/v1/projects/{id}/ai-requests`.
 
-## Research Orchestrator (planned — issue #22)
-- Controlled tools (FR-AI-TOOL-003) run server-side with policy checks; providers never get DB credentials or filesystem access.
-- Structured proposals are validated before any mutation; failures surface or retry without partial writes (FR-ORCH-001/002, NFR-REL-003). Background execution uses the job runner (ADR-003).
-- Every material AI action records provider, model, template version, supplied entity IDs and timestamp; the audit layer enforces this for AI actors (ADR-004).
+## Research Orchestrator (implemented — ADR-011)
+- `modules/research_orchestrator`: versioned templates and strict schemas. Tasks: `draft_problem_frame`, `detect_assumptions`, `challenge` ("Challenge this"). Each runs as a durable job (`orchestrator.run`), launched by a human through `POST /api/v1/projects/{id}/ai-tasks`.
+- The model only proposes. Writes go through domain services with the AI principal and gateway provenance: frames as DRAFT, assumptions UNCONFIRMED, evidence CANDIDATE (quote text copied server-side from page spans), competing hypotheses SIGNAL.
+- Invalid output is retried once, then surfaced. A job body is one transaction, so there are no partial writes. Provider failures and budget stops are distinct job failure kinds. A failed challenge records RESEARCH_EXECUTION_FAILURE on its tracks, never "no evidence".
+- Cooperative cancellation (`jobs.raise_if_cancelled`). The UI follows job status from the API while a task is active.
+- Controlled tool registry for agent loops (FR-AI-TOOL-003) is still planned; the current tasks call domain services directly and give the model no tools.

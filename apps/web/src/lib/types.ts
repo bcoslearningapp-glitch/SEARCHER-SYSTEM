@@ -253,3 +253,18 @@ export type Standing = {
   operational: { execution_ready: boolean; researchable: boolean; blocking: { description: string }[] };
   summary: string;
 };
+
+export type Job = {
+  id: string;
+  kind: string;
+  state: "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
+  project_id: string | null;
+  params: Record<string, unknown>;
+  result: Record<string, unknown> | null;
+  failure_kind: string | null;
+  error: string | null;
+  created_at: string;
+  finished_at: string | null;
+};
+
+export type AIProfile = { name: string; provider: string; model: string; local: boolean; configured: boolean; default: boolean };
