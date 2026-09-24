@@ -9,7 +9,8 @@
 - #7 — #10: Desk (projects, Problem Frame drafting with gate feedback and explicit approval, Research State, notes with explicit capture, decisions, attention queue), Library (catalog, upload, verification/availability, search), project Sources (Hybrid Source Access requests and responses); en/fr/ar with RTL and `dir="auto"` for mixed-direction content; E2E flows 1-3 of PRD §73.
 
 ## Phase 2 progress
-- #11 (this PR): claims, assumptions (AI-inferred labeled until human review), open questions, capture from notes.
+- #11 — #17: claims, assumptions (AI-inferred labeled until human review), open questions, capture from notes.
+- #14, #15 (this PR): evidence pipeline (candidate → human assessment → evidence), exact quotes copied from verified page spans, lineage-based independence, counter-evidence tracks, hypotheses with immutable versions / Hypothesis Gate / automatic downgrade on new evidence, mechanisms.
 
 ## M1 exit criteria (PRD §76 Phase 1)
 - [x] full create → frame → approve flow (E2E 1)

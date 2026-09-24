@@ -50,3 +50,16 @@ Migration `0005` (Phase 2, issue #11):
 | `claims` | Claims with type, statement origin, workflow state ⟂ epistemic strength | new claims are `UNSUBSTANTIATED`; AI claims enter `PROPOSED` |
 | `assumptions` | Explicit / system-inferred / source-derived assumptions with criticality | CHECK: SYSTEM_INFERRED ⇒ AI_GENERATED provenance; human review confirms/rejects/reclassifies |
 | `open_questions` | Explicit research questions | closing may conclude `INSUFFICIENT_EVIDENCE` ("unknown" is valid) |
+
+Migration `0006` (Phase 2, issues #14/#15):
+
+| Table | Purpose | Notes |
+|---|---|---|
+| `evidence` | Source-derived finding ↔ claim/hypothesis/mechanism with role and track | must reference a `source_excerpts` row; CHECK accepted ⇒ assessment; immutable once assessed (trigger) |
+| `source_lineage` | Dependency between works | CITES/REPLICATES don't merge origins; DERIVED_FROM/USES_DATA_FROM/SUMMARIZES/REANALYZES/TRANSLATES do |
+| `research_track_runs` | Support / challenge / alternative searches with bounded outcome and scope | failures never count as "searched" |
+| `hypotheses` | Current pointer (lifecycle ⟂ epistemic state) | |
+| `hypothesis_versions` | Immutable snapshots | append-only (trigger) |
+| `mechanisms`, `hypothesis_mechanisms`, `hypothesis_competitions` | First-class mechanisms; links; competing hypotheses | |
+
+Evidence aggregation rules live in `claims_evidence/aggregation.py` (pure, unit-tested): single origin caps at PROMISING; CONTESTED only for meaningful conflict; accepted evidence can downgrade a hypothesis automatically, upgrades need a human.

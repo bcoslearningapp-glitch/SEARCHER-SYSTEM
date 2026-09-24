@@ -674,6 +674,24 @@
         "ANSWERED",
         "CLOSED_UNANSWERED"
       ]
+    },
+    "EvidenceStatus": {
+      "description": "Evidence pipeline: candidate -> assessment -> accepted evidence (Core §32).",
+      "type": "string",
+      "enum": [
+        "CANDIDATE",
+        "ACCEPTED",
+        "REJECTED"
+      ]
+    },
+    "EvidenceTargetType": {
+      "description": "What evidence can bear on (FR-EVID-001).",
+      "type": "string",
+      "enum": [
+        "CLAIM",
+        "HYPOTHESIS",
+        "MECHANISM"
+      ]
     }
   }
 }

@@ -8,8 +8,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
+from research_api.contracts.enums import EvidenceTargetType
 from research_api.modules.claims_evidence import service
 from research_api.modules.claims_evidence.schemas import (
+    AssessmentIn,
     AssumptionIn,
     AssumptionOut,
     AssumptionReview,
@@ -17,9 +19,16 @@ from research_api.modules.claims_evidence.schemas import (
     ClaimIn,
     ClaimOut,
     ClaimUpdate,
+    EvidenceIn,
+    EvidenceMap,
+    EvidenceOut,
+    LineageIn,
+    LineageOut,
     OpenQuestionClose,
     OpenQuestionIn,
     OpenQuestionOut,
+    TrackRunIn,
+    TrackRunOut,
 )
 from research_api.modules.governance_audit.principal import Principal, current_principal
 from research_api.platform.db import get_session
@@ -89,3 +98,36 @@ def capture_note(
     project_id: UUID, note_id: UUID, data: CaptureIn, db: DB, who: Who
 ) -> ClaimOut | AssumptionOut | OpenQuestionOut:
     return service.capture_note(db, who, project_id, note_id, data)
+
+
+@router.post("/evidence", response_model=EvidenceOut, status_code=status.HTTP_201_CREATED)
+def propose_evidence(project_id: UUID, data: EvidenceIn, db: DB, who: Who) -> EvidenceOut:
+    return service.propose_evidence(db, who, project_id, data)
+
+
+@router.post("/evidence/{evidence_id}/assess", response_model=EvidenceOut)
+def assess_evidence(project_id: UUID, evidence_id: UUID, data: AssessmentIn, db: DB, who: Who) -> EvidenceOut:
+    return service.assess_evidence(db, who, project_id, evidence_id, data)
+
+
+@router.get("/evidence-map/{target_type}/{target_id}", response_model=EvidenceMap)
+def evidence_map(project_id: UUID, target_type: EvidenceTargetType, target_id: UUID, db: DB) -> EvidenceMap:
+    return service.evidence_map(db, project_id, target_type, target_id)
+
+
+@router.post("/research-tracks", response_model=TrackRunOut, status_code=status.HTTP_201_CREATED)
+def record_track_run(project_id: UUID, data: TrackRunIn, db: DB, who: Who) -> TrackRunOut:
+    return service.record_track_run(db, who, project_id, data)
+
+
+lineage_router = APIRouter(prefix="/api/v1/sources/lineage", tags=["evidence"])
+
+
+@lineage_router.post("", response_model=LineageOut, status_code=status.HTTP_201_CREATED)
+def add_lineage(data: LineageIn, db: DB, who: Who) -> LineageOut:
+    return service.add_lineage(db, who, data)
+
+
+@lineage_router.get("", response_model=list[LineageOut])
+def list_lineage(db: DB, work_id: UUID | None = None) -> list[LineageOut]:
+    return service.list_lineage(db, work_id)

@@ -22,6 +22,7 @@ from research_api.modules.sources_library.schemas import (
     CatalogIn,
     EditionOut,
     ExcerptOut,
+    PageExcerptIn,
     ReverifyIn,
     SearchResponse,
     SourceLeadIn,
@@ -102,6 +103,16 @@ async def upload_asset(edition_id: UUID, db: DB, who: Who, file: Annotated[Uploa
 @library.get("/assets/{asset_id}", response_model=AssetOut)
 def get_asset(asset_id: UUID, db: DB) -> AssetOut:
     return service.get_asset(db, asset_id)
+
+
+@library.post("/assets/{asset_id}/excerpts", response_model=ExcerptOut, status_code=status.HTTP_201_CREATED)
+def create_page_excerpt(asset_id: UUID, data: PageExcerptIn, db: DB, who: Who) -> ExcerptOut:
+    return service.create_page_excerpt(db, who, asset_id, data)
+
+
+@library.get("/excerpts/{excerpt_id}", response_model=ExcerptOut)
+def get_excerpt(excerpt_id: UUID, db: DB) -> ExcerptOut:
+    return service.get_excerpt(db, excerpt_id)
 
 
 @library.post("/editions/{edition_id}/reverify", response_model=EditionOut)

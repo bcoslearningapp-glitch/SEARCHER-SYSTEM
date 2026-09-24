@@ -1,0 +1,23 @@
+{
+  "id": "6a7b8c9d-0e1f-4a2b-9c3d-4e5f6a7b8c9d",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "target_type": "HYPOTHESIS",
+  "target_id": "7b8c9d0e-1f2a-4b3c-8d4e-5f6a7b8c9d0e",
+  "role": "CONTRADICTS",
+  "status": "ACCEPTED",
+  "finding": "Retention rose where mentoring was cut.",
+  "excerpt_id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+  "track": "CHALLENGE",
+  "assessment": {
+    "strength": "PROMISING",
+    "limitations": "Single region"
+  },
+  "provenance": {
+    "kind": "HUMAN_INPUT",
+    "actor": {
+      "kind": "HUMAN",
+      "id": "local-owner",
+      "role": "RESEARCHER"
+    }
+  }
+}

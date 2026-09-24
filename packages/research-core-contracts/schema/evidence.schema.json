@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/evidence.schema.json",
+  "title": "Research Core evidence and lineage",
+  "$defs": {
+    "Assessment": {
+      "description": "Qualitative evidence assessment; no numeric truth score (Core §33-34, FR-EVID-003/004).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strength"],
+      "properties": {
+        "strength": { "$ref": "enums.schema.json#/$defs/EvidenceStrength" },
+        "quality": { "type": "string" },
+        "relevance": { "type": "string" },
+        "context_fit": { "type": "string" },
+        "directness": { "type": "string" },
+        "limitations": { "type": "string" },
+        "temporal_relevance": { "type": "string" }
+      }
+    },
+    "Evidence": {
+      "description": "A relationship between a source-derived finding and a target (FR-EVID-001). Source is not evidence by existence (Core §32).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "target_type", "target_id", "role", "status", "finding", "excerpt_id", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "target_type": { "$ref": "enums.schema.json#/$defs/EvidenceTargetType" },
+        "target_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "role": { "$ref": "enums.schema.json#/$defs/EvidenceRole" },
+        "status": { "$ref": "enums.schema.json#/$defs/EvidenceStatus" },
+        "finding": { "type": "string", "minLength": 1 },
+        "excerpt_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "track": { "$ref": "enums.schema.json#/$defs/ResearchTrack" },
+        "assessment": { "$ref": "#/$defs/Assessment" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "const": "ACCEPTED" } }, "required": ["status"] }, "then": { "required": ["assessment"] } }
+      ]
+    },
+    "EvidenceLineage": {
+      "description": "Dependency between source works (Core §35, FR-LINEAGE-001).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from_work_id", "relation", "to_work_id"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "from_work_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "relation": { "$ref": "enums.schema.json#/$defs/LineageRelation" },
+        "to_work_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}
