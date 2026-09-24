@@ -12,6 +12,10 @@ x-backend: &backend
     DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-research}:${POSTGRES_PASSWORD:-research}@postgres:5432/${POSTGRES_DB:-research}
     REDIS_URL: redis://redis:6379/0
     STORAGE_ROOT: /data/storage
+    # Deterministic local mock AI provider; off unless explicitly enabled (ADR-010).
+    AI_MOCK_ENABLED: ${AI_MOCK_ENABLED:-false}
+    AI_MOCK_MODE: ${AI_MOCK_MODE:-ok}
+    AI_DEFAULT_PROFILE: ${AI_DEFAULT_PROFILE:-anthropic-default}
 
 services:
   postgres:

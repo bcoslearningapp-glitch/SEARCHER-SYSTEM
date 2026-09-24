@@ -12,6 +12,7 @@ import {
   transitionHypothesis,
 } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
+import { AITasks } from "@/components/AITasks";
 import { AppShell } from "@/components/AppShell";
 import { Badge, Card, Empty, Field, Select, TextArea, TextInput } from "@/components/fields";
 import { ProjectHeader } from "@/components/ProjectHeader";
@@ -31,7 +32,16 @@ import { getDictionary } from "@/lib/i18n";
 import { load } from "@/lib/load";
 import { resolveLocale } from "@/lib/locale-params";
 import { projectExcerpts } from "@/lib/project-data";
-import type { EvidenceMap, Hypothesis, HypothesisVersion, Project, ReferenceReview, Standing } from "@/lib/types";
+import type {
+  AIProfile,
+  EvidenceMap,
+  Hypothesis,
+  HypothesisVersion,
+  Job,
+  Project,
+  ReferenceReview,
+  Standing,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -51,13 +61,16 @@ export default async function HypothesisPage(props: Props) {
     load<Hypothesis>(`${base}/hypotheses/${hypothesisId}`),
   ]);
   if (project === null || hypothesis === null) notFound();
-  const [versions, map, reviews, standing, excerpts] = await Promise.all([
+  const [versions, map, reviews, standing, excerpts, profiles, aiJobs] = await Promise.all([
     load<HypothesisVersion[]>(`${base}/hypotheses/${hypothesisId}/versions`),
     load<EvidenceMap>(`${base}/evidence-map/HYPOTHESIS/${hypothesisId}`),
     load<ReferenceReview[]>(`${base}/reference-reviews`),
     load<Standing>(`${base}/standing/HYPOTHESIS/${hypothesisId}`),
     projectExcerpts(projectId),
+    load<AIProfile[]>("/api/v1/ai/profiles"),
+    load<Job[]>(`${base}/ai-tasks`),
   ]);
+  const challengeJobs = (aiJobs ?? []).filter((j) => j.params.target_id === hypothesisId);
   const ids = (
     <>
       <input type="hidden" name="project_id" value={projectId} />
@@ -193,6 +206,19 @@ export default async function HypothesisPage(props: Props) {
               ) : (
                 <Empty>{lab.noExcerpts}</Empty>
               )}
+            </Card>
+
+            <Card title={dict.ai.challenge} testId="challenge">
+              <AITasks
+                ai={dict.ai}
+                projectId={projectId}
+                profiles={profiles}
+                jobs={challengeJobs}
+                explainer={dict.ai.challengeExplainer}
+                launchers={[
+                  { task: "challenge", label: dict.ai.challenge, targetType: "HYPOTHESIS", targetId: hypothesisId },
+                ]}
+              />
             </Card>
 
             <Card title={lab.searches} testId="searches">

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { addNote, approveFrame, captureNote, createDecision, resolveDecision, saveFrameDraft } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
+import { AITasks } from "@/components/AITasks";
 import { AppShell } from "@/components/AppShell";
 import { Badge, Card, Empty, Field, Select, TextArea, TextInput } from "@/components/fields";
 import { LoadError } from "@/components/LoadError";
@@ -12,8 +13,10 @@ import { resolveProjectParams, type ProjectParams } from "@/lib/locale-params";
 import {
   FRAME_LIST_FIELDS,
   FRAME_TEXT_FIELDS,
+  type AIProfile,
   type AttentionItem,
   type Decision,
+  type Job,
   type Note,
   type ProblemFrame,
   type Project,
@@ -50,12 +53,14 @@ export default async function ProjectPage(props: ProjectParams) {
       </AppShell>
     );
   }
-  const [state, frames, notes, decisions, attention] = await Promise.all([
+  const [state, frames, notes, decisions, attention, profiles, aiJobs] = await Promise.all([
     load<ResearchState>(`${base}/research-state`),
     load<ProblemFrame[]>(`${base}/problem-frames`),
     load<Note[]>(`${base}/notes`),
     load<Decision[]>(`${base}/decisions`),
     load<AttentionItem[]>(`${base}/attention`),
+    load<AIProfile[]>("/api/v1/ai/profiles"),
+    load<Job[]>(`${base}/ai-tasks`),
   ]);
   const draft = frames?.find((f) => f.status === "DRAFT");
   const approved = frames?.find((f) => f.status === "APPROVED");
@@ -67,6 +72,19 @@ export default async function ProjectPage(props: ProjectParams) {
         <ProjectHeader project={project} dict={dict} locale={locale} active="desk" />
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-6">
+            <Card title={dict.ai.title} testId="ai-assistance">
+              <AITasks
+                ai={dict.ai}
+                projectId={project.id}
+                profiles={profiles}
+                jobs={aiJobs}
+                launchers={[
+                  { task: "draft_problem_frame", label: dict.ai.draftFrame },
+                  { task: "detect_assumptions", label: dict.ai.detectAssumptions },
+                ]}
+              />
+            </Card>
+
             <Card title={ui.problemFrame} testId="problem-frame">
               <ActionForm action={saveFrameDraft} submitLabel={ui.saveDraft} pendingLabel={ui.saving} successMessage={ui.saved} testId="frame-form">
                 <input type="hidden" name="project_id" value={project.id} />

@@ -68,7 +68,7 @@ def _build(settings: Settings, provider: str) -> AIProvider:
         return OpenAIProvider(settings.openai_api_key.get_secret_value(), timeout=timeout)
     from research_api.modules.ai_gateway.mock_adapter import MockProvider  # noqa: PLC0415
 
-    return MockProvider()
+    return MockProvider(settings.ai_mock_mode)
 
 
 def reset_cache() -> None:

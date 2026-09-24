@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from research_api.modules.research_orchestrator import service as orchestrator
 from research_api.modules.sources_library import ingestion
 from research_api.platform import jobs
 from research_api.platform.queue import get_celery
@@ -37,3 +38,8 @@ def _ingest_failed(session: Session, job: jobs.BackgroundJob) -> None:
 @celery_app.task(name="sources.ingest_asset")  # type: ignore[untyped-decorator]
 def ingest_asset(job_id: str) -> str:
     return run_job(UUID(job_id), _ingest_body, _ingest_failed).value
+
+
+@celery_app.task(name=orchestrator.WORKER_TASK)  # type: ignore[untyped-decorator]
+def run_ai_task(job_id: str) -> str:
+    return run_job(UUID(job_id), orchestrator.run, orchestrator.on_failure).value

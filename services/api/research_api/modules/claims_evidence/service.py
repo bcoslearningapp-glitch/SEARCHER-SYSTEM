@@ -628,9 +628,16 @@ def list_lineage(session: Session, work_id: UUID | None = None) -> list[LineageO
     return [LineageOut.model_validate(e) for e in session.scalars(query.order_by(SourceLineage.created_at))]
 
 
-def record_track_run(session: Session, principal: Principal, project_id: UUID, data: TrackRunIn) -> TrackRunOut:
+def record_track_run(
+    session: Session,
+    principal: Principal,
+    project_id: UUID,
+    data: TrackRunIn,
+    *,
+    ai_action: AIActionRecord | None = None,
+) -> TrackRunOut:
     """Record what was searched and the bounded outcome (FR-WEB-005, FR-BIAS-002)."""
-    auth = authorized(principal, "research_track.record")
+    auth = authorized(principal, "research_track.record", ai_action=ai_action)
     projects.require_editable_project(session, project_id)
     targets.require(session, project_id, data.target_type, data.target_id)
     run = ResearchTrackRun(

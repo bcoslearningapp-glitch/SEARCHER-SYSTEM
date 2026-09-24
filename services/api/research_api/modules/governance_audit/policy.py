@@ -102,6 +102,8 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("operational.constraint_resolve", A.REQUEST_APPROVAL),
         # AI gateway: only humans set disclosure consent, providers and budgets (PRD §54, §64)
         _p("ai_policy.update", A.FORBIDDEN),
+        # Research Orchestrator: humans launch AI tasks; AI never launches or chains them itself
+        _p("ai_task.launch", A.FORBIDDEN),
         # Sources
         _p("source.catalog", A.ACT_AND_NOTIFY),
         _p("source.catalog_foundational", A.FORBIDDEN, frozenset({R.CONSTITUTIONAL_AUTHORITY}), approval=True),

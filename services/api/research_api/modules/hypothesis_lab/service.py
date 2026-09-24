@@ -404,9 +404,15 @@ def assess(
 
 
 def compete(
-    session: Session, principal: Principal, project_id: UUID, hypothesis_id: UUID, data: CompeteIn
+    session: Session,
+    principal: Principal,
+    project_id: UUID,
+    hypothesis_id: UUID,
+    data: CompeteIn,
+    *,
+    ai_action: AIActionRecord | None = None,
 ) -> HypothesisOut:
-    auth = authorized(principal, "hypothesis.link")
+    auth = authorized(principal, "hypothesis.link", ai_action=ai_action)
     a = _load(session, project_id, hypothesis_id)
     b = _load(session, project_id, data.other_hypothesis_id)
     if a.id == b.id:

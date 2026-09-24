@@ -56,6 +56,10 @@ class JobNotFoundError(Exception):
     pass
 
 
+class JobCancelledError(Exception):
+    """Raised by a job body that noticed a cancellation request; its changes roll back (FR-ORCH-004)."""
+
+
 class BackgroundJob(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "background_jobs"
 
@@ -136,3 +140,10 @@ def request_cancel(job: BackgroundJob) -> None:
         transition(job, JobState.CANCELLED)
     elif JobState(job.state) is JobState.RUNNING:
         job.cancel_requested = True
+
+
+def raise_if_cancelled(session: Session, job: BackgroundJob) -> None:
+    """Cooperative cancellation point for long job bodies: re-reads the committed flag."""
+    session.refresh(job, attribute_names=["cancel_requested"])
+    if job.cancel_requested:
+        raise JobCancelledError(str(job.id))

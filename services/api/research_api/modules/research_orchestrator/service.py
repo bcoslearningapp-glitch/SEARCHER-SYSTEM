@@ -1,0 +1,509 @@
+"""Research Orchestrator (PRD §48, ADR-011).
+
+Humans launch AI tasks; each runs as a durable background job. The model only
+returns schema-validated structured output, and every change to canonical
+state goes through the owning domain service with an AI principal and full
+provenance, so it lands as DRAFT / UNCONFIRMED / CANDIDATE for a human to judge.
+A failing task rolls back as a whole (NFR-REL-003); its disclosure log and, for
+"Challenge this", an explicit execution-failure track record survive.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+from dataclasses import dataclass, field
+from typing import Any, Literal
+from uuid import UUID
+
+from pydantic import BaseModel, model_validator
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from research_api.contracts.enums import (
+    ActorKind,
+    Criticality,
+    EvidenceRole,
+    EvidenceTargetType,
+    HypothesisLifecycleState,
+    ProblemFrameStatus,
+    ResearchOutcomeKind,
+    ResearchTrack,
+    SensitivityLevel,
+)
+from research_api.modules import targets
+from research_api.modules.ai_gateway import service as gateway
+from research_api.modules.ai_gateway.base import ProviderOutputError, Section, StructuredRequest
+from research_api.modules.claims_evidence import service as claims
+from research_api.modules.claims_evidence.schemas import AssumptionIn, EvidenceIn, TrackRunIn
+from research_api.modules.governance_audit.context import authorized
+from research_api.modules.governance_audit.principal import Principal, ai_principal, system_principal
+from research_api.modules.governance_audit.schemas import AIActionRecord
+from research_api.modules.hypothesis_lab import service as hypotheses
+from research_api.modules.hypothesis_lab.schemas import CompeteIn, HypothesisContent, HypothesisIn
+from research_api.modules.project_workflow import service as projects
+from research_api.modules.project_workflow.schemas import ProblemFrameContent
+from research_api.modules.research_orchestrator import templates
+from research_api.modules.research_orchestrator.templates import Template
+from research_api.modules.sources_library import service as sources
+from research_api.modules.sources_library.schemas import PageExcerptIn, SearchHit
+from research_api.platform import jobs
+from research_api.platform.errors import RuleViolationError
+
+logger = logging.getLogger(__name__)
+
+WORKER_TASK = "orchestrator.run"
+KIND_PREFIX = "orchestrator."
+AI = ai_principal("research_orchestrator")
+SYSTEM = system_principal("research_orchestrator")
+
+TaskName = Literal["draft_problem_frame", "detect_assumptions", "challenge"]
+CHALLENGEABLE = frozenset({EvidenceTargetType.CLAIM, EvidenceTargetType.HYPOTHESIS})
+MAX_ASSUMPTIONS = 8
+MAX_CHALLENGE_QUERIES = 4
+MAX_ALTERNATIVES = 3
+MAX_QUERIES_PER_ALTERNATIVE = 3
+HITS_PER_QUERY = 5
+MAX_PASSAGES = 12
+PASSAGE_CHARS = 2000
+MAX_COMPETING = 3
+COUNTER_TRACKS = (ResearchTrack.CHALLENGE, ResearchTrack.ALTERNATIVE_EXPLANATION)
+_CHALLENGING_ROLES = frozenset({EvidenceRole.CONTRADICTS, EvidenceRole.LIMITS, EvidenceRole.QUALIFIES})
+
+
+class AITaskIn(BaseModel):
+    task: TaskName
+    target_type: EvidenceTargetType | None = None
+    target_id: UUID | None = None
+    profile: str | None = None
+
+    @model_validator(mode="after")
+    def _target_for_challenge(self) -> AITaskIn:
+        if self.task == "challenge":
+            if self.target_type is None or self.target_id is None:
+                raise ValueError("challenge needs target_type and target_id")
+            if self.target_type not in CHALLENGEABLE:
+                raise ValueError("challenge supports claims and hypotheses")
+        return self
+
+
+# -- launching -------------------------------------------------------------------
+
+
+def launch(session: Session, principal: Principal, project_id: UUID, data: AITaskIn) -> jobs.BackgroundJob:
+    """Create the durable job. The router commits and dispatches (the worker must see the row)."""
+    authorized(principal, "ai_task.launch")
+    projects.require_editable_project(session, project_id)
+    if data.target_type is not None and data.target_id is not None:
+        targets.require(session, project_id, data.target_type, data.target_id)
+    params: dict[str, Any] = {
+        "task": data.task,
+        "profile": data.profile,
+        "requested_by": principal.id,
+        "target_type": data.target_type.value if data.target_type else None,
+        "target_id": str(data.target_id) if data.target_id else None,
+    }
+    return jobs.create_job(session, KIND_PREFIX + data.task, params=params, project_id=project_id)
+
+
+def list_tasks(session: Session, project_id: UUID, *, limit: int = 50) -> list[jobs.JobOut]:
+    projects.get_project(session, project_id)
+    rows = session.scalars(
+        select(jobs.BackgroundJob)
+        .where(jobs.BackgroundJob.project_id == project_id, jobs.BackgroundJob.kind.startswith(KIND_PREFIX))
+        .order_by(jobs.BackgroundJob.created_at.desc())
+        .limit(limit)
+    )
+    return [jobs.JobOut.model_validate(r) for r in rows]
+
+
+# -- job body ----------------------------------------------------------------------
+
+
+def run(session: Session, job: jobs.BackgroundJob) -> dict[str, Any]:
+    if job.project_id is None:
+        raise RuleViolationError("orchestrator jobs belong to a project")
+    task = job.params["task"]
+    runner = _TASKS.get(task)
+    if runner is None:
+        raise RuleViolationError("unknown orchestrator task", task=task)
+    return runner(session, job, job.project_id)
+
+
+def on_failure(session: Session, job: jobs.BackgroundJob) -> None:
+    """A failed or stopped challenge is recorded as such: failure is never 'no evidence' (Core §72)."""
+    if job.params.get("task") != "challenge" or job.project_id is None:
+        return
+    outcome = (
+        ResearchOutcomeKind.STOPPED_RESOURCE_CONSTRAINT
+        if job.failure_kind == jobs.JobFailureKind.STOPPED_RESOURCE_CONSTRAINT.value
+        else ResearchOutcomeKind.RESEARCH_EXECUTION_FAILURE
+    )
+    target_type = EvidenceTargetType(job.params["target_type"])
+    target_id = UUID(job.params["target_id"])
+    for track in COUNTER_TRACKS:
+        claims.record_track_run(
+            session,
+            SYSTEM,
+            job.project_id,
+            TrackRunIn(
+                target_type=target_type,
+                target_id=target_id,
+                track=track,
+                outcome=outcome,
+                scope=f"Challenge this (job {job.id}) did not complete: {job.failure_kind}",
+            ),
+        )
+
+
+def _context(
+    session: Session, job: jobs.BackgroundJob, project_id: UUID, entity_ids: list[UUID]
+) -> gateway.CallContext:
+    project = projects.get_project(session, project_id)
+    return gateway.CallContext(
+        project_id=project_id,
+        sensitivity=SensitivityLevel(project.sensitivity),
+        principal_id=str(job.params.get("requested_by") or "unknown"),
+        entity_ids=entity_ids,
+    )
+
+
+def _call(
+    session: Session, ctx: gateway.CallContext, template: Template, sections: list[Section], profile: str | None
+) -> gateway.AIOutcome:
+    request = StructuredRequest(
+        task=template.task,
+        template_version=template.version,
+        instructions=template.instructions,
+        sections=sections,
+        output_schema=template.output_schema,
+    )
+    try:
+        return gateway.run_structured(session, ctx, request, profile_name=profile)
+    except ProviderOutputError:
+        # One retry, then surface (FR-ORCH-002). Nothing has been written yet.
+        logger.info("retrying %s after invalid structured output", template.task)
+        return gateway.run_structured(session, ctx, request, profile_name=profile)
+
+
+def _frame_context(session: Session, project_id: UUID) -> Section | None:
+    frames = projects.list_frames(session, project_id)
+    if not frames:
+        return None
+    latest = max(frames, key=lambda f: f.version_number)
+    body = "\n".join(f"{k}: {v}" for k, v in latest.content.model_dump().items() if v)
+    return Section("context", f"Problem Frame v{latest.version_number} ({latest.status.value})", body)
+
+
+# -- draft Problem Frame ----------------------------------------------------------------
+
+
+def _draft_problem_frame(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> dict[str, Any]:
+    project = projects.get_project(session, project_id)
+    open_draft = next(
+        (f for f in projects.list_frames(session, project_id) if f.status is ProblemFrameStatus.DRAFT), None
+    )
+    if open_draft is not None and open_draft.provenance.get("actor", {}).get("kind") != ActorKind.AI.value:
+        raise RuleViolationError("a researcher's draft is open; AI will not overwrite it")
+    state = projects.get_research_state(session, project_id)
+    sections = [
+        Section("user_input", "Project title", project.title),
+        Section("user_input", f"Project input ({project.input_type.value})", project.initial_input),
+    ]
+    if state.current_question:
+        sections.append(Section("context", "Current question", state.current_question))
+    outcome = _call(
+        session,
+        _context(session, job, project_id, [project_id]),
+        templates.DRAFT_PROBLEM_FRAME,
+        sections,
+        job.params.get("profile"),
+    )
+    cleaned = {
+        k: [x.strip() for x in v if x.strip()] if isinstance(v, list) else str(v).strip()
+        for k, v in outcome.result.data.items()
+    }
+    content = ProblemFrameContent.model_validate(cleaned)
+    jobs.raise_if_cancelled(session, job)
+    frame = projects.save_draft(session, AI, project_id, content, ai_action=outcome.ai_action)
+    return {"frame_version_id": str(frame.id), "status": frame.status.value}
+
+
+# -- detect assumptions -----------------------------------------------------------------
+
+
+def _normalize(text: str) -> str:
+    return re.sub(r"\W+", " ", text).strip().casefold()
+
+
+def _detect_assumptions(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> dict[str, Any]:
+    project = projects.get_project(session, project_id)
+    existing = claims.list_assumptions(session, project_id)
+    sections = [Section("user_input", "Project input", project.initial_input)]
+    frame = _frame_context(session, project_id)
+    if frame is not None:
+        sections.append(frame)
+    claim_list = claims.list_claims(session, project_id)
+    if claim_list:
+        sections.append(Section("context", "Claims", "\n".join(f"- {c.statement}" for c in claim_list)))
+    hypothesis_list = hypotheses.list_hypotheses(session, project_id)
+    if hypothesis_list:
+        sections.append(
+            Section("context", "Hypotheses", "\n".join(f"- {h.content.statement}" for h in hypothesis_list))
+        )
+    if existing:
+        sections.append(
+            Section("context", "Assumptions already recorded", "\n".join(f"- {a.statement}" for a in existing))
+        )
+    ids = [project_id, *(c.id for c in claim_list), *(h.id for h in hypothesis_list)]
+    outcome = _call(
+        session,
+        _context(session, job, project_id, ids),
+        templates.DETECT_ASSUMPTIONS,
+        sections,
+        job.params.get("profile"),
+    )
+    jobs.raise_if_cancelled(session, job)
+    seen = {_normalize(a.statement) for a in existing}
+    created: list[str] = []
+    for item in outcome.result.data["assumptions"][:MAX_ASSUMPTIONS]:
+        key = _normalize(item["statement"])
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        assumption = claims.create_assumption(
+            session,
+            AI,
+            project_id,
+            AssumptionIn(statement=item["statement"].strip(), criticality=Criticality(item["criticality"])),
+            ai_action=outcome.ai_action,
+        )
+        created.append(str(assumption.id))
+    return {"assumption_ids": created, "proposed": len(outcome.result.data["assumptions"])}
+
+
+# -- Challenge this -----------------------------------------------------------------------
+
+
+def _or_query(query: str) -> str:
+    """Keyword queries match any term; ranking favours passages matching more of them."""
+    words = [w for w in re.findall(r"\w+", query) if len(w) > 2]
+    return " or ".join(words) if words else query
+
+
+def _target_statement(session: Session, project_id: UUID, target_type: EvidenceTargetType, target_id: UUID) -> str:
+    if target_type is EvidenceTargetType.HYPOTHESIS:
+        h = hypotheses.get_hypothesis(session, project_id, target_id)
+        return h.content.statement + (f"\nContext: {h.content.context}" if h.content.context else "")
+    return claims.get_claim(session, project_id, target_id).statement
+
+
+@dataclass
+class _Challenge:
+    """Working state of one "Challenge this" run."""
+
+    project_id: UUID
+    target_type: EvidenceTargetType
+    target_id: UUID
+    statement: str
+    challenge_queries: list[str] = field(default_factory=list)
+    alternatives: list[dict[str, Any]] = field(default_factory=list)
+    alternative_queries: list[str] = field(default_factory=list)
+    passages: list[SearchHit] = field(default_factory=list)
+    scope: str = "project library"
+    searched_assets: int = 0
+    found: dict[ResearchTrack, bool] = field(default_factory=lambda: dict.fromkeys(COUNTER_TRACKS, False))
+    evidence_ids: list[str] = field(default_factory=list)
+    competing_ids: list[str] = field(default_factory=list)
+
+
+def _challenge(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> dict[str, Any]:
+    target_type = EvidenceTargetType(job.params["target_type"])
+    target_id = UUID(job.params["target_id"])
+    profile = job.params.get("profile")
+    run = _Challenge(project_id, target_type, target_id, _target_statement(session, project_id, target_type, target_id))
+    ctx = _context(session, job, project_id, [target_id])
+
+    plan = _call(
+        session,
+        ctx,
+        templates.PLAN_CHALLENGE,
+        [Section("context", "Statement under challenge", run.statement)],
+        profile,
+    )
+    _apply_plan(run, plan.result.data)
+    _search(session, run)
+    assessment = None
+    if run.passages:
+        assessment = _call(session, ctx, templates.ASSESS_PASSAGES, _passage_sections(session, run), profile)
+    jobs.raise_if_cancelled(session, job)
+
+    if assessment is not None:
+        _propose_candidates(session, run, assessment)
+    _record_tracks(session, run, (assessment or plan).ai_action)
+    if assessment is not None and target_type is EvidenceTargetType.HYPOTHESIS:
+        _propose_competitors(session, run, assessment)
+    return {
+        "queries": [*run.challenge_queries, *run.alternative_queries],
+        "passages_considered": len(run.passages),
+        "searched_assets": run.searched_assets,
+        "evidence_candidate_ids": run.evidence_ids,
+        "competing_hypothesis_ids": run.competing_ids,
+        "tracks": {t.value: run.found[t] for t in COUNTER_TRACKS},
+    }
+
+
+def _apply_plan(run: _Challenge, data: dict[str, Any]) -> None:
+    run.challenge_queries = [q for q in data["challenge_queries"] if q.strip()][:MAX_CHALLENGE_QUERIES]
+    run.alternatives = [a for a in data["alternative_explanations"] if a["statement"].strip()][:MAX_ALTERNATIVES]
+    run.alternative_queries = [
+        q for a in run.alternatives for q in a["queries"][:MAX_QUERIES_PER_ALTERNATIVE] if q.strip()
+    ]
+
+
+def _search(session: Session, run: _Challenge) -> None:
+    hits: dict[UUID, SearchHit] = {}
+    for query in [*run.challenge_queries, *run.alternative_queries]:
+        response = sources.search(session, _or_query(query), project_id=run.project_id, limit=HITS_PER_QUERY)
+        run.scope, run.searched_assets = response.scope, response.searched_assets
+        for hit in response.hits:
+            hits.setdefault(hit.chunk_id, hit)
+    run.passages = sorted(hits.values(), key=lambda h: -h.rank)[:MAX_PASSAGES]
+
+
+def _passage_sections(session: Session, run: _Challenge) -> list[Section]:
+    texts = sources.chunk_texts(session, [p.chunk_id for p in run.passages])
+    framing = (
+        run.statement
+        + "\n\nAlternative explanations:\n"
+        + "\n".join(f"[{i}] {a['statement']}" for i, a in enumerate(run.alternatives))
+    )
+    return [Section("context", "Statement under challenge", framing)] + [
+        Section(
+            "retrieved_source",
+            f"{p.work_title}, p. {p.page_number}",
+            texts.get(p.chunk_id, p.snippet)[:PASSAGE_CHARS],
+            source_id=f"P{i}",
+        )
+        for i, p in enumerate(run.passages)
+    ]
+
+
+def _track_for(run: _Challenge, role: EvidenceRole, alternative_index: int) -> ResearchTrack | None:
+    if 0 <= alternative_index < len(run.alternatives):
+        return ResearchTrack.ALTERNATIVE_EXPLANATION
+    if role in _CHALLENGING_ROLES:
+        return ResearchTrack.CHALLENGE
+    if role is EvidenceRole.SUPPORTS:
+        return ResearchTrack.SUPPORT
+    return None
+
+
+def _propose_candidates(session: Session, run: _Challenge, assessment: gateway.AIOutcome) -> None:
+    by_id = {f"P{i}": p for i, p in enumerate(run.passages)}
+    excerpt_ids: dict[str, UUID] = {}
+    for candidate in assessment.result.data["candidates"]:
+        passage = by_id.get(candidate["passage_id"])
+        if passage is None:
+            continue  # the model referred to a passage it was not given
+        role = EvidenceRole(candidate["role"])
+        track = _track_for(run, role, candidate["alternative_index"])
+        if candidate["passage_id"] not in excerpt_ids:
+            excerpt_ids[candidate["passage_id"]] = _excerpt(session, passage, assessment)
+        evidence = claims.propose_evidence(
+            session,
+            AI,
+            run.project_id,
+            EvidenceIn(
+                target_type=run.target_type,
+                target_id=run.target_id,
+                role=role,
+                finding=candidate["finding"].strip() or "See passage.",
+                excerpt_id=excerpt_ids[candidate["passage_id"]],
+                track=track,
+            ),
+            ai_action=assessment.ai_action,
+        )
+        run.evidence_ids.append(str(evidence.id))
+        if track in run.found:
+            run.found[track] = True
+
+
+def _record_tracks(session: Session, run: _Challenge, ai_action: AIActionRecord) -> None:
+    """Bounded outcomes per counter track (Core §41, §72): what was searched, and what came of it."""
+    queries = {
+        ResearchTrack.CHALLENGE: run.challenge_queries,
+        ResearchTrack.ALTERNATIVE_EXPLANATION: run.alternative_queries,
+    }
+    for track in COUNTER_TRACKS:
+        if run.searched_assets == 0:
+            outcome = ResearchOutcomeKind.INSUFFICIENT_SEARCH_COVERAGE
+        elif run.found[track]:
+            outcome = ResearchOutcomeKind.RESULTS_FOUND
+        else:
+            outcome = ResearchOutcomeKind.NO_RELEVANT_EVIDENCE_FOUND
+        claims.record_track_run(
+            session,
+            AI,
+            run.project_id,
+            TrackRunIn(
+                target_type=run.target_type,
+                target_id=run.target_id,
+                track=track,
+                outcome=outcome,
+                scope=f"{run.scope}: lexical search over {run.searched_assets} ingested source file(s)",
+                queries=queries[track],
+            ),
+            ai_action=ai_action,
+        )
+
+
+def _propose_competitors(session: Session, run: _Challenge, assessment: gateway.AIOutcome) -> None:
+    """Strong alternative explanations become competing hypotheses in SIGNAL state (FR-BIAS-003)."""
+    strong = {
+        s["alternative_index"]
+        for s in assessment.result.data["alternative_support"]
+        if s["strength"] == "STRONG" and 0 <= s["alternative_index"] < len(run.alternatives)
+    }
+    for index in sorted(strong)[:MAX_COMPETING]:
+        created = hypotheses.create_hypothesis(
+            session,
+            AI,
+            run.project_id,
+            HypothesisIn(
+                content=HypothesisContent(
+                    statement=run.alternatives[index]["statement"].strip(),
+                    context=f"Alternative explanation raised by Challenge this against: {run.statement}",
+                ),
+                lifecycle_state=HypothesisLifecycleState.SIGNAL,
+            ),
+            ai_action=assessment.ai_action,
+        )
+        hypotheses.compete(
+            session,
+            AI,
+            run.project_id,
+            created.id,
+            CompeteIn(other_hypothesis_id=run.target_id, note="Proposed by Challenge this"),
+            ai_action=assessment.ai_action,
+        )
+        run.competing_ids.append(str(created.id))
+
+
+def _excerpt(session: Session, passage: SearchHit, assessment: gateway.AIOutcome) -> UUID:
+    """The quoted text is copied server-side from the page span; the model never supplies it."""
+    span = PageExcerptIn(page_number=passage.page_number, char_start=passage.char_start, char_end=passage.char_end)
+    try:
+        excerpt = sources.create_page_excerpt(session, AI, passage.asset_id, span, ai_action=assessment.ai_action)
+    except RuleViolationError:
+        # OCR text: excerpt it, but never as an exact quote until verified (Core §28).
+        span = span.model_copy(update={"is_exact_quote": False})
+        excerpt = sources.create_page_excerpt(session, AI, passage.asset_id, span, ai_action=assessment.ai_action)
+    return excerpt.id
+
+
+_TASKS = {
+    "draft_problem_frame": _draft_problem_frame,
+    "detect_assumptions": _detect_assumptions,
+    "challenge": _challenge,
+}

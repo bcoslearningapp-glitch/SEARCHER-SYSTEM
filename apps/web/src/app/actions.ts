@@ -311,3 +311,14 @@ export async function judgeReview(_: ActionResult, form: FormData): Promise<Acti
     }),
   );
 }
+
+export async function launchAITask(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const targetId = optionalText(form, "target_id");
+  return run(() =>
+    apiSend("POST", `${P(form)}/ai-tasks`, {
+      task: text(form, "task"),
+      target_type: targetId ? text(form, "target_type") : null,
+      target_id: targetId ?? null,
+    }),
+  );
+}
