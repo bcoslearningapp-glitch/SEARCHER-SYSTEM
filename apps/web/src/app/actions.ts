@@ -386,3 +386,28 @@ export async function assessSufficiency(_: ActionResult, form: FormData): Promis
     }),
   );
 }
+
+export async function importQuranDataset(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Choose the dataset file to import." };
+  return run(async () => {
+    // The Qur'an text is catalogued in its own authority layer, then staged; nothing is served until approved.
+    const work = await apiSend<{ editions: { id: string }[]; id: string }>("POST", "/api/v1/sources", {
+      work: { title: text(form, "title"), authors: [], authority_layer: "QURAN" },
+      edition: { edition_label: text(form, "edition_version"), language: "ar", publisher: optionalText(form, "publisher") },
+    });
+    const payload = new FormData();
+    payload.set("work_id", work.id);
+    payload.set("edition_version", text(form, "edition_version"));
+    payload.set("file", file, file.name);
+    await apiUpload("/api/v1/reference/quran-datasets", payload);
+  });
+}
+
+export async function approveFoundational(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `/api/v1/reference/foundational-sources/${text(form, "source_id")}/approve`, {
+      reason: text(form, "reason"),
+    }),
+  );
+}

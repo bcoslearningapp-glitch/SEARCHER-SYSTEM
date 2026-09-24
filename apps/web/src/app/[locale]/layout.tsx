@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import "@fontsource/amiri-quran/arabic-400.css";
 import "../globals.css";
 
 import { LOCALES, dirFor, getDictionary } from "@/lib/i18n";

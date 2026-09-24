@@ -39,6 +39,9 @@
 - [x] add metadata-only physical source (E2E 3)
 - [x] audit state changes (integration tests assert audit/research events)
 
+## Reference library
+- KFGQPC developer JSON (e.g. Warsh `warshData_v10.json`) is imported directly, and its SHA-256 is the publisher file's. The Foundational Library screen stages, approves and looks up ayat. It uses a Qur'anic font (Amiri Quran, OFL, with an optional local publisher font). The server-action upload limit was raised to match the API (100 MB). A rehearsal on a disposable stack checked all 6214 Warsh ayat byte-for-byte against the source.
+
 ## Blocked (needs a human)
 - Tag `v0.2.0` on `5b7e7a2` (M1) and `v0.3.0` after this PR merges (M2): this session can only push its working branch.
 - Import and approve the Qur'an text dataset (Constitutional Authority) — see ADR-009.

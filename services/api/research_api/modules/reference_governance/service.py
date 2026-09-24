@@ -207,7 +207,7 @@ def stage_quran_dataset(
         status=FoundationalSourceStatus.STAGED.value,
         sha256=parsed.sha256,
         staged_by_id=auth.actor.id,
-        dataset_summary={"surahs": parsed.surah_count, "ayat": len(parsed.ayat)},
+        dataset_summary={"surahs": parsed.surah_count, "ayat": len(parsed.ayat), "format": parsed.format},
     )
     session.add(source)
     session.flush()

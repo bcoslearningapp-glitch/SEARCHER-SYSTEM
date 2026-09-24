@@ -74,7 +74,7 @@ def approved_quran(client: TestClient) -> dict[str, Any]:
 def test_quran_is_served_only_after_human_approval(client: TestClient, session: Session) -> None:
     staged = _stage(client, _quran_work(client), DATASET_V1, "test-v1")
     assert staged["status"] == "STAGED"
-    assert staged["dataset_summary"] == {"surahs": 1, "ayat": 3}
+    assert staged["dataset_summary"] == {"surahs": 1, "ayat": 3, "format": "lines"}
     assert client.get("/api/v1/reference/quran/1/1").status_code == 404, "staged text is not served"
 
     for principal in (AI, Principal(ActorKind.HUMAN, "r", frozenset({ActorRole.RESEARCHER}))):
