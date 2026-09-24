@@ -48,9 +48,7 @@ def test_failed_body_rolls_back_partial_state() -> None:
     assert "exploded" in (job.error or "")
     with session_scope() as session:
         count = session.scalar(
-            select(func.count())
-            .select_from(ResearchEventRecord)
-            .where(ResearchEventRecord.event_type == marker)
+            select(func.count()).select_from(ResearchEventRecord).where(ResearchEventRecord.event_type == marker)
         )
     assert count == 0
 

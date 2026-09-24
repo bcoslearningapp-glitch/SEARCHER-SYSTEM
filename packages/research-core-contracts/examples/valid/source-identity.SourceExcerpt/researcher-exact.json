@@ -1,0 +1,17 @@
+{
+  "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+  "edition_id": "7e1c4b2a-3d5f-4a6b-8c9d-0e1f2a3b4c5d",
+  "location": "vol. 1, p. 45",
+  "text": "Exact passage supplied by the researcher.",
+  "text_origin": "HUMAN_TRANSCRIBED",
+  "verification_state": "RESEARCHER_SUPPLIED_EXACT",
+  "is_exact_quote": true,
+  "provenance": {
+    "kind": "HUMAN_INPUT",
+    "actor": {
+      "kind": "HUMAN",
+      "id": "local-owner",
+      "role": "RESEARCHER"
+    }
+  }
+}

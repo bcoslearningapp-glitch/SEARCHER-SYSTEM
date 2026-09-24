@@ -1,0 +1,65 @@
+"""Domain error types and their HTTP mapping.
+
+Domain services raise these; routers never translate errors by hand.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+
+from research_api.modules.governance_audit.policy import PolicyViolationError
+
+
+class DomainError(Exception):
+    status_code = status.HTTP_400_BAD_REQUEST
+    code = "domain_error"
+
+    def __init__(self, message: str, **details: Any) -> None:
+        super().__init__(message)
+        self.message = message
+        self.details = details
+
+
+class NotFoundError(DomainError):
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "not_found"
+
+
+class ConflictError(DomainError):
+    """The request is valid but conflicts with current state (illegal transition, immutability)."""
+
+    status_code = status.HTTP_409_CONFLICT
+    code = "conflict"
+
+
+class RuleViolationError(DomainError):
+    """A methodology rule blocks the action (e.g. a BLOCKED quality gate)."""
+
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    code = "rule_violation"
+
+
+def install_error_handlers(app: FastAPI) -> None:
+    @app.exception_handler(DomainError)
+    async def _domain(_: Request, exc: DomainError) -> JSONResponse:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": {"code": exc.code, "message": exc.message, "details": exc.details}},
+        )
+
+    @app.exception_handler(PolicyViolationError)
+    async def _policy(_: Request, exc: PolicyViolationError) -> JSONResponse:
+        decision = exc.decision
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={
+                "error": {
+                    "code": "policy_denied",
+                    "message": decision.reason,
+                    "details": {"action": decision.action, "requires_approval": decision.requires_approval},
+                }
+            },
+        )

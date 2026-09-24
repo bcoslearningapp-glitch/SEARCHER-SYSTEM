@@ -16,3 +16,16 @@ Conventions:
 - Epistemically meaningful entities will prefer archival over deletion (PRD §60.7); approved major versions are immutable rows (Problem Frame, Hypothesis versions).
 
 The Research Core entity list (Core §15) will be added module by module per the Master Plan; the canonical shapes live in `packages/research-core-contracts`.
+
+Migration `0002` (Phase 1, issues #3/#4):
+
+| Table | Purpose | Notes |
+|---|---|---|
+| `projects` | Project aggregate | status ⟂ research_mode; version stamps; `forked_from_project_id` lineage |
+| `research_states` | Durable Research State (1:1 project) | pending decisions computed from `decisions` |
+| `project_closures` | Closure records | kept on reopen (`reopened_at`, `reopen_trigger`) |
+| `scratch_notes` | Free-thinking notes | only explicit capture changes formal state |
+| `problem_frame_versions` | Versioned Problem Frames | one DRAFT and one APPROVED per project (partial unique indexes); approved/superseded rows immutable (trigger) |
+| `approvals` | Explicit human approvals | append-only; CHECK approver is HUMAN |
+| `quality_gate_evaluations` | Gate results with findings | append-only |
+| `decisions` | Decisions with AI recommendation kept separate | CHECK: DECIDED ⇒ human + decision + justification; immutable once resolved (trigger) |

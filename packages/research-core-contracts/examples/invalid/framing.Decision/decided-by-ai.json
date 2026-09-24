@@ -1,0 +1,20 @@
+{
+  "id": "9c0d1e2f-3a4b-4c5d-8e6f-7a8b9c0d1e2f",
+  "project_id": "0b8f3c3e-6f0e-4d5e-9c43-5b1f7a0f2a11",
+  "question": "Proceed with interviews or survey first?",
+  "options": [
+    "interviews",
+    "survey"
+  ],
+  "required_role": "PROJECT_LEAD",
+  "blocking": true,
+  "status": "DECIDED",
+  "final_decision": "interviews",
+  "human_justification": "Richer causal signal early.",
+  "methodology_path": "COMPLIANT",
+  "decided_by": {
+    "kind": "AI",
+    "id": "orchestrator"
+  },
+  "decided_at": "2026-09-24T12:00:00Z"
+}

@@ -17,9 +17,7 @@ from research_api.modules.governance_audit.schemas import (
 
 HUMAN = Actor(kind=ActorKind.HUMAN, id="local-owner", role=ActorRole.RESEARCHER)
 AI = Actor(kind=ActorKind.AI, id="research-orchestrator")
-AI_ACTION = AIActionRecord(
-    provider="mock", model="mock-1", template_version="t@1", timestamp=datetime.now(UTC)
-)
+AI_ACTION = AIActionRecord(provider="mock", model="mock-1", template_version="t@1", timestamp=datetime.now(UTC))
 
 
 def test_ai_actor_requires_provenance() -> None:
@@ -49,9 +47,7 @@ def _out(actor: Actor, ai_action: AIActionRecord | None) -> AuditEventOut:
         entity_id=uuid4(),
         occurred_at=datetime.now(UTC),
         actor=actor,
-        versions=VersionContext(
-            core_schema_version="0.1.0", methodology_version="1.0.0", constitution_version="1.0.0"
-        ),
+        versions=VersionContext(core_schema_version="0.1.0", methodology_version="1.0.0", constitution_version="1.0.0"),
         previous_state={"status": "DRAFT"},
         new_state={"status": "APPROVED"},
         reason=None,
@@ -60,9 +56,7 @@ def _out(actor: Actor, ai_action: AIActionRecord | None) -> AuditEventOut:
 
 
 @pytest.mark.parametrize(("actor", "ai_action"), [(HUMAN, None), (AI, AI_ACTION)])
-def test_serialized_audit_event_conforms_to_canonical_contract(
-    actor: Actor, ai_action: AIActionRecord | None
-) -> None:
+def test_serialized_audit_event_conforms_to_canonical_contract(actor: Actor, ai_action: AIActionRecord | None) -> None:
     assert contract_errors("event.AuditEvent", _out(actor, ai_action).to_contract()) == []
 
 

@@ -2,7 +2,7 @@
 // Regenerate with: python scripts/contracts/generate_bindings.py
 
 export const RESEARCH_CORE_VERSION = "1.0.0";
-export const CONTRACT_SCHEMA_VERSION = "0.1.0";
+export const CONTRACT_SCHEMA_VERSION = "0.2.0";
 
 /** Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode. */
 export const ProjectStatusValues = ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"] as const;
@@ -207,3 +207,27 @@ export type OutputMode = (typeof OutputModeValues)[number];
 /** First-class research/output languages (PRD §3.1, Core §40). */
 export const LanguageCodeValues = ["ar", "en", "fr"] as const;
 export type LanguageCode = (typeof LanguageCodeValues)[number];
+
+/** Hybrid Source Access request lifecycle (Core §26, FR-HYBRID-001). */
+export const SourceAccessRequestStatusValues = ["OPEN", "PARTIALLY_FULFILLED", "FULFILLED", "CANCELLED"] as const;
+export type SourceAccessRequestStatus = (typeof SourceAccessRequestStatusValues)[number];
+
+/** Accepted forms of a researcher response to a source access request (FR-HYBRID-003). */
+export const AccessResponseFormValues = ["EXACT_TEXT", "PAGE_IMAGES", "RESEARCHER_SUMMARY", "RESEARCHER_ATTESTATION", "DIGITAL_ASSET"] as const;
+export type AccessResponseForm = (typeof AccessResponseFormValues)[number];
+
+/** Priority of requests and work items. */
+export const PriorityValues = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
+export type Priority = (typeof PriorityValues)[number];
+
+/** Decision record lifecycle; AI recommendation stays distinct from the human decision (FR-DEC-001/002). */
+export const DecisionStatusValues = ["OPEN", "DECIDED", "WITHDRAWN"] as const;
+export type DecisionStatus = (typeof DecisionStatusValues)[number];
+
+/** Outcome of an explicit human approval action (FR-APPROVAL-001). */
+export const ApprovalOutcomeValues = ["APPROVED", "REJECTED"] as const;
+export type ApprovalOutcome = (typeof ApprovalOutcomeValues)[number];
+
+/** Source asset ingestion state (PRD §17). */
+export const IngestionStatusValues = ["NOT_STARTED", "QUEUED", "RUNNING", "COMPLETE", "FAILED", "NOT_APPLICABLE"] as const;
+export type IngestionStatus = (typeof IngestionStatusValues)[number];
