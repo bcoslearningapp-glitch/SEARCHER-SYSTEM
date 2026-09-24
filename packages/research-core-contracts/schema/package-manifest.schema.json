@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/package-manifest.schema.json",
+  "title": "Research Core Package manifest",
+  "description": "Manifest of a portable Research Core Package (Core §68-69, FR-PORT-001..006, SEC-010). Checksums are validated before import; import never upgrades trust.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["package_format", "package_id", "project_id", "exported_at", "exported_by", "producer", "versions", "entries"],
+  "properties": {
+    "package_format": { "const": "research-core-package" },
+    "package_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+    "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+    "exported_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+    "exported_by": { "$ref": "common.schema.json#/$defs/Actor" },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product", "version"],
+      "properties": {
+        "product": { "type": "string", "enum": ["PRODUCT_A", "PRODUCT_B", "PRODUCT_C"] },
+        "version": { "type": "string" }
+      }
+    },
+    "versions": { "$ref": "common.schema.json#/$defs/VersionContext" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256", "content_type"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^(?!/)(?!.*\\.\\.)[A-Za-z0-9._/-]+$" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "content_type": { "type": "string", "enum": ["entities", "audit", "asset"] },
+          "entity_type": { "type": "string" }
+        }
+      }
+    },
+    "excluded_assets": {
+      "description": "Assets withheld by rights/policy; their sources become METADATA_ONLY in the target environment, never deleted (FR-PORT-004).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asset_id", "reason"],
+        "properties": {
+          "asset_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/event.schema.json",
+  "title": "Research Core events",
+  "description": "ResearchEvent (meaningful research change, Core §56) and AuditEvent (who did what, PRD §67) are append-only and conceptually distinct from Actions (FR-EVENT-002).",
+  "$defs": {
+    "ResearchEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "event_type", "occurred_at", "actor", "versions"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "event_type": {
+          "description": "PascalCase past-tense event name, e.g. ProblemFrameApproved, HypothesisCreated.",
+          "type": "string",
+          "pattern": "^[A-Z][A-Za-z]+$"
+        },
+        "entity_type": { "type": "string" },
+        "entity_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "occurred_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+        "actor": { "$ref": "common.schema.json#/$defs/Actor" },
+        "versions": { "$ref": "common.schema.json#/$defs/VersionContext" },
+        "payload": { "type": "object" }
+      }
+    },
+    "AuditEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "action", "occurred_at", "actor", "versions"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "action": { "type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$" },
+        "entity_type": { "type": "string" },
+        "entity_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "occurred_at": { "$ref": "common.schema.json#/$defs/Timestamp" },
+        "actor": { "$ref": "common.schema.json#/$defs/Actor" },
+        "versions": { "$ref": "common.schema.json#/$defs/VersionContext" },
+        "previous_state": { "type": ["object", "null"] },
+        "new_state": { "type": ["object", "null"] },
+        "reason": { "type": "string" },
+        "ai_action": { "$ref": "common.schema.json#/$defs/AIActionRecord" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "actor": { "properties": { "kind": { "const": "AI" } } } } },
+          "then": { "required": ["ai_action"] }
+        }
+      ]
+    }
+  }
+}

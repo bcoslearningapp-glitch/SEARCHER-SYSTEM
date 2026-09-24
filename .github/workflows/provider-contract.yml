@@ -1,0 +1,33 @@
+name: provider-contract
+
+# Live AI provider contract tests. Never runs on ordinary PRs (GITHUB_SETUP §12, §14).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  provider-contract:
+    runs-on: ubuntu-latest
+    environment: integration
+    timeout-minutes: 15
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      # Hard budget for the bounded live suite; the test harness must enforce it.
+      PROVIDER_CONTRACT_MAX_REQUESTS: "20"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "3.12", enable-cache: true }
+      - run: uv sync --frozen --all-packages
+      - name: Run live provider contract suite
+        run: |
+          if [ ! -d services/api/tests/provider_contract ]; then
+            echo "::notice::No provider adapters yet (Phase 3); nothing to run."
+            exit 0
+          fi
+          uv run pytest services/api/tests/provider_contract -m provider_contract

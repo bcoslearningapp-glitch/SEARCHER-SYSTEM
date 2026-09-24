@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/enums.schema.json",
+  "title": "Research Core v1.0 canonical enumerations",
+  "description": "Every enumeration here is normative Research Core vocabulary. Section references point to docs/product/RESEARCH_CORE_V1.md (Core) and docs/product/PRD_PRODUCT_B.md (PRD).",
+  "$defs": {
+    "ProjectStatus": {
+      "description": "Project lifecycle (Core §17, PRD §9). Distinct from ResearchMode.",
+      "type": "string",
+      "enum": ["DRAFT", "FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE", "CLOSED", "REOPENED"]
+    },
+    "ResearchMode": {
+      "description": "Current research mode (Core §17, PRD §9). Distinct from ProjectStatus.",
+      "type": "string",
+      "enum": ["EXPLORATION", "SCRUTINY", "REFERENCE_REVIEW", "RESEARCH", "SYNTHESIS", "DESIGN", "EXPERIMENT", "LEARNING", "EVALUATION"]
+    },
+    "ProjectInputType": {
+      "description": "Kinds of research starting input (Core §10, FR-PROJ-001).",
+      "type": "string",
+      "enum": ["RAW_QUESTION", "IDEA", "PROBLEM", "HYPOTHESIS", "METHOD", "TOOL", "MODEL", "FULL_SYSTEM", "EXPERIMENTAL_RESULT", "EXISTING_PROJECT"]
+    },
+    "SensitivityLevel": {
+      "description": "Project data sensitivity (PRD §54).",
+      "type": "string",
+      "enum": ["PUBLIC", "NORMAL", "CONFIDENTIAL", "RESTRICTED", "CRITICAL"]
+    },
+    "RiskLevel": {
+      "description": "Operational risk levels (Core §61, PRD §42).",
+      "type": "string",
+      "enum": ["L1_EXPLORATORY", "L2_APPLIED", "L3_HIGH_IMPACT", "L4_CRITICAL"]
+    },
+    "ReferenceAuthorityLayer": {
+      "description": "Governing source hierarchy, top-down (Core §4, PRD §5.1). Order is normative: earlier values govern later ones.",
+      "type": "string",
+      "enum": ["QURAN", "SUNNAH", "APPROVED_FOUNDATIONAL", "HISTORICAL_CIVILIZATIONAL", "SCIENTIFIC_EXPERIMENTAL", "PROFESSIONAL_FIELD", "PROJECT_LOCAL"]
+    },
+    "ReferenceAnalyticalCategory": {
+      "description": "Six governing analytical categories; lenses, not sources (Core §6, PRD §5.2).",
+      "type": "string",
+      "enum": ["FOUNDATIONAL_CONCEPTIONS_AND_TRUTHS", "PURPOSES_AND_GOALS", "VALUES_AND_EVALUATIVE_STANDARDS", "SUNAN_GOVERNING_PATTERNS", "GOVERNING_UNIVERSALS_AND_RULES", "BINDING_RULINGS_AND_LIMITS"]
+    },
+    "ReferenceReasoningLayer": {
+      "description": "Separation of source text, approved interpretation, system inference and practical judgment (Core §7, FR-REF-001, FR-REF-006).",
+      "type": "string",
+      "enum": ["SOURCE_TEXT", "APPROVED_INTERPRETATION", "SYSTEM_SYNTHESIS", "PRACTICAL_JUDGMENT"]
+    },
+    "ReferenceJudgmentState": {
+      "description": "Reference judgment states (Core §8, FR-REF-002). NOT_IN_CONFLICT must never be represented as REFERENCE_SUPPORTED.",
+      "type": "string",
+      "enum": ["REFERENCE_SUPPORTED", "REFERENCE_CONSISTENT", "NOT_IN_CONFLICT", "REQUIRES_MODIFICATION", "REJECTED", "RESERVED"]
+    },
+    "ReservationType": {
+      "description": "Reservation kinds for RESERVED judgments (Core §8, FR-REF-004).",
+      "type": "string",
+      "enum": ["BLOCKING_RESERVATION", "NON_BLOCKING_RESERVATION"]
+    },
+    "Directness": {
+      "description": "Directness of a reference judgment (Core §8, FR-REF-003).",
+      "type": "string",
+      "enum": ["DIRECT", "CLOSE", "INFERENTIAL", "EXPLORATORY"]
+    },
+    "OperationalConstraintState": {
+      "description": "Operational reality constraints; distinct from reference judgment (Core §5, PRD §5.3).",
+      "type": "string",
+      "enum": ["INFORMATIONAL", "REQUIRES_REDESIGN", "REQUIRES_EXTERNAL_APPROVAL", "BLOCKS_CURRENT_EXECUTION"]
+    },
+    "EpistemicCategory": {
+      "description": "Epistemic categories of statements (Core §14, FR-FRAME-004).",
+      "type": "string",
+      "enum": ["OBSERVATION", "FACTUAL_CLAIM", "INTERPRETATION", "ASSUMPTION", "HYPOTHESIS", "UNKNOWN"]
+    },
+    "StatementOrigin": {
+      "description": "Who asserted a statement (Core §14).",
+      "type": "string",
+      "enum": ["RESEARCHER_STATED", "SYSTEM_INFERRED", "SOURCE_STATED", "EXPERIMENT_OBSERVED"]
+    },
+    "ClaimType": {
+      "description": "Claim types (Core §18, FR-CLAIM-001).",
+      "type": "string",
+      "enum": ["OBSERVATION", "FACTUAL_CLAIM", "CAUSAL_CLAIM", "INTERPRETATION", "NORMATIVE_CLAIM", "MECHANISM_CLAIM", "DESIGN_CLAIM"]
+    },
+    "AssumptionOrigin": {
+      "description": "Assumption origin (Core §19, FR-CLAIM-003). SYSTEM_INFERRED stays labeled until confirmed/reclassified.",
+      "type": "string",
+      "enum": ["EXPLICIT", "SYSTEM_INFERRED", "SOURCE_DERIVED"]
+    },
+    "Criticality": {
+      "description": "Assumption criticality (Core §19, FR-CLAIM-004).",
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "FOUNDATIONAL"]
+    },
+    "ProblemFrameStatus": {
+      "description": "Problem Frame version status (Core §12-13, FR-FRAME-006/007).",
+      "type": "string",
+      "enum": ["DRAFT", "APPROVED", "SUPERSEDED"]
+    },
+    "HypothesisLifecycleState": {
+      "description": "Hypothesis workflow lifecycle (Core §20, FR-HYP-001).",
+      "type": "string",
+      "enum": ["SIGNAL", "IDEA", "FORMULATED_HYPOTHESIS", "UNDER_REFERENCE_REVIEW", "UNDER_SCRUTINY", "UNDER_RESEARCH", "ASSESSED", "ELIGIBLE_FOR_DESIGN", "USED_IN_DESIGN", "TESTED_IN_PRACTICE"]
+    },
+    "HypothesisEpistemicState": {
+      "description": "Hypothesis epistemic assessment (Core §20, FR-HYP-002).",
+      "type": "string",
+      "enum": ["PROMISING", "SUPPORTED", "WEAKENED", "CONTESTED", "REFUTED", "UNRESOLVED"]
+    },
+    "MechanismStatus": {
+      "description": "Mechanism states (Core §22, FR-MECH-002).",
+      "type": "string",
+      "enum": ["PROPOSED", "UNDER_INVESTIGATION", "PLAUSIBLE", "SUPPORTED", "DISPUTED", "WEAKENED", "REJECTED", "CONTEXT_DEPENDENT"]
+    },
+    "SourceAccessMode": {
+      "description": "Source access modes (Core §24, FR-SRC-004). Metadata presence never implies asset availability.",
+      "type": "string",
+      "enum": ["DIRECT_DIGITAL", "PHYSICAL", "RESEARCHER_MEDIATED", "RESTRICTED", "METADATA_ONLY"]
+    },
+    "SourceVerificationState": {
+      "description": "Source verification states (Core §25, FR-SRC-005). Import never raises this; only an explicit ReverificationEvent may.",
+      "type": "string",
+      "enum": ["MACHINE_VERIFIED", "RESEARCHER_SUPPLIED_EXACT", "RESEARCHER_REPORTED_SOURCE_CONTENT", "METADATA_ONLY", "UNVERIFIED"]
+    },
+    "SourceAssetKind": {
+      "description": "Concrete asset kinds (PRD §15).",
+      "type": "string",
+      "enum": ["PDF", "EPUB", "HTML_CAPTURE", "IMAGE", "SCAN", "AUDIO", "LOCAL_TEXT", "REMOTE_URL", "OTHER"]
+    },
+    "TextOrigin": {
+      "description": "Origin of source text (Core §28, FR-INGEST-002). OCR is never automatically exact.",
+      "type": "string",
+      "enum": ["NATIVE_DIGITAL", "OCR_EXTRACTED", "HUMAN_TRANSCRIBED"]
+    },
+    "SourceLeadState": {
+      "description": "Researcher memory of a source is a lead until verified (Core §27).",
+      "type": "string",
+      "enum": ["SOURCE_LEAD", "VERIFIED", "DISCARDED"]
+    },
+    "EvidenceRole": {
+      "description": "Evidence roles (Core §33, FR-EVID-002).",
+      "type": "string",
+      "enum": ["SUPPORTS", "CONTRADICTS", "LIMITS", "QUALIFIES", "CONTEXTUALIZES"]
+    },
+    "EvidenceStrength": {
+      "description": "Qualitative evidence strength; no 0-100 truth score (Core §34, FR-EVID-004/005).",
+      "type": "string",
+      "enum": ["UNSUBSTANTIATED", "WEAK", "PROMISING", "SUPPORTED", "STRONG", "ESTABLISHED_WITHIN_SCOPE"]
+    },
+    "LineageRelation": {
+      "description": "Evidence lineage/dependency relations (Core §35, FR-LINEAGE-001).",
+      "type": "string",
+      "enum": ["CITES", "REPLICATES", "USES_DATA_FROM", "DERIVED_FROM", "SUMMARIZES", "REANALYZES", "TRANSLATES"]
+    },
+    "ProvenanceKind": {
+      "description": "Who/what produced a piece of content (Core §7, §36, §71). AI_GENERATED content is never independent evidence.",
+      "type": "string",
+      "enum": ["HUMAN_INPUT", "SOURCE_DERIVED", "AI_GENERATED", "EXPERIMENT_DERIVED", "SYSTEM_COMPUTED", "IMPORTED"]
+    },
+    "ResearchQuestionType": {
+      "description": "Question routing types (Core §37, FR-RSCH-003).",
+      "type": "string",
+      "enum": ["REFERENCE", "EMPIRICAL", "HISTORICAL", "MECHANISM", "IMPLEMENTATION", "TECHNICAL", "CONTEXTUAL"]
+    },
+    "ResearchTrack": {
+      "description": "Counter-evidence architecture tracks (Core §41, FR-BIAS-001).",
+      "type": "string",
+      "enum": ["SUPPORT", "CHALLENGE", "ALTERNATIVE_EXPLANATION"]
+    },
+    "ResearchLayer": {
+      "description": "Retrieval layers (Core §38).",
+      "type": "string",
+      "enum": ["APPROVED_REFERENCE_LIBRARY", "PROJECT_LIBRARY", "RESEARCH_MEMORY", "EXTERNAL_KNOWLEDGE"]
+    },
+    "ResearchOutcomeKind": {
+      "description": "Search/tool outcome; failure is never evidence absence (Core §72, FR-WEB-004).",
+      "type": "string",
+      "enum": ["RESULTS_FOUND", "NO_RELEVANT_EVIDENCE_FOUND", "RESEARCH_EXECUTION_FAILURE", "INSUFFICIENT_SEARCH_COVERAGE", "SOURCE_INACCESSIBLE", "STOPPED_RESOURCE_CONSTRAINT"]
+    },
+    "SufficiencyResult": {
+      "description": "Research sufficiency conclusions (Core §46, FR-SUFF-003).",
+      "type": "string",
+      "enum": ["SUFFICIENTLY_ANSWERED", "PARTIALLY_ANSWERED", "CONTESTED", "INSUFFICIENT_EVIDENCE", "RESEARCH_ROUTE_EXHAUSTED"]
+    },
+    "TransferabilityState": {
+      "description": "Cross-context transferability (Core §44, FR-TRANS-002).",
+      "type": "string",
+      "enum": ["DIRECTLY_RELEVANT", "PARTIALLY_TRANSFERABLE", "ANALOGICAL_ONLY", "NOT_TRANSFERABLE"]
+    },
+    "TemporalProfile": {
+      "description": "Temporal validity profiles (Core §45, FR-TIME-001).",
+      "type": "string",
+      "enum": ["STABLE", "SLOW_CHANGING", "DYNAMIC", "HIGHLY_VOLATILE"]
+    },
+    "DesignOrigin": {
+      "description": "Design/idea origin (Core §48, FR-DESIGN-004).",
+      "type": "string",
+      "enum": ["RESEARCHER", "AI", "SOURCE", "JOINT_SYNTHESIS", "PRIOR_PROJECT"]
+    },
+    "ExperimentState": {
+      "description": "Experiment workflow (Core §50, FR-EXP-002).",
+      "type": "string",
+      "enum": ["PROPOSED", "PROTOCOL_DEFINED", "RISK_REVIEW", "APPROVED", "RUNNING", "DATA_COLLECTION_COMPLETE", "ANALYSIS", "INTERPRETED", "CLOSED", "PAUSED", "ABORTED", "INVALIDATED"]
+    },
+    "KnowledgeLifecycleStage": {
+      "description": "Local knowledge lifecycle; promotion is never automatic (Core §52, FR-KNOW-001).",
+      "type": "string",
+      "enum": ["PROJECT_FINDING", "LOCAL_RESULT", "REPEATED_LOCAL_RESULT", "ACCUMULATED_LOCAL_KNOWLEDGE", "CANDIDATE_OPERATING_RULE", "OPERATING_RULE"]
+    },
+    "KnowledgeStatus": {
+      "description": "Knowledge standing independent of lifecycle stage (Core §52, FR-KNOW-004, FR-TIME-003).",
+      "type": "string",
+      "enum": ["ACTIVE", "DOWNGRADED", "CONTESTED", "SUSPENDED", "REVALIDATION_REQUIRED"]
+    },
+    "ActionAuthorizationClass": {
+      "description": "AI action authority classes; policy lives in the system, not prompts (Core §57, FR-ACTION-001).",
+      "type": "string",
+      "enum": ["AUTONOMOUS", "ACT_AND_NOTIFY", "REQUEST_APPROVAL", "FORBIDDEN"]
+    },
+    "MethodologyPathStatus": {
+      "description": "Whether a path is within the methodology (Core §59, §62, FR-OVERRIDE-002, FR-DEGRADED-002).",
+      "type": "string",
+      "enum": ["COMPLIANT", "OVERRIDDEN_WITH_REASON", "DECISION_UNDER_INCOMPLETE_EVIDENCE", "OUTSIDE_METHODOLOGY_PATH"]
+    },
+    "QualityGateType": {
+      "description": "Quality gates (Core §60, PRD §41).",
+      "type": "string",
+      "enum": ["FRAMING", "HYPOTHESIS", "REFERENCE", "EVIDENCE_SUFFICIENCY", "DESIGN_READINESS", "EXPERIMENT_READINESS", "LEARNING_INTEGRITY", "KNOWLEDGE_PROMOTION", "PROJECT_CLOSURE"]
+    },
+    "QualityGateResult": {
+      "description": "Quality gate results (Core §60, PRD §41).",
+      "type": "string",
+      "enum": ["PASS", "PASS_WITH_RESERVATIONS", "NEEDS_HUMAN_DECISION", "BLOCKED"]
+    },
+    "ClosureType": {
+      "description": "Project closure types (Core §66, FR-CLOSE-001).",
+      "type": "string",
+      "enum": ["KNOWLEDGE_CONCLUSION", "HYPOTHESIS_CONCLUSION", "DECISION", "DESIGN", "EXPERIMENT_CONCLUSION", "PRODUCTION_DELIVERABLE", "JUSTIFIED_STOP"]
+    },
+    "ActorKind": {
+      "description": "Kind of actor behind an event/approval (PRD §62, §67).",
+      "type": "string",
+      "enum": ["HUMAN", "AI", "SYSTEM"]
+    },
+    "ActorRole": {
+      "description": "Role-aware domain; v1 may be single-user but must not assume one actor (PRD §62).",
+      "type": "string",
+      "enum": ["RESEARCHER", "PROJECT_LEAD", "METHODOLOGY_STEWARD", "CONSTITUTIONAL_AUTHORITY", "SYSTEM"]
+    },
+    "NotificationLevel": {
+      "description": "Human attention levels (PRD §65).",
+      "type": "string",
+      "enum": ["INFO", "ATTENTION", "DECISION_REQUIRED", "BLOCKING"]
+    },
+    "OutputMode": {
+      "description": "Output modes (FR-OUT-001).",
+      "type": "string",
+      "enum": ["READABLE", "REFERENCED", "AUDIT"]
+    },
+    "LanguageCode": {
+      "description": "First-class research/output languages (PRD §3.1, Core §40).",
+      "type": "string",
+      "enum": ["ar", "en", "fr"]
+    }
+  }
+}

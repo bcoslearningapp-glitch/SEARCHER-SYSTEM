@@ -1,0 +1,151 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
+
+jobs:
+  frontend-lint:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/web } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm, cache-dependency-path: apps/web/package-lock.json }
+      - run: npm ci
+      - run: npm run lint
+
+  frontend-typecheck:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/web } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm, cache-dependency-path: apps/web/package-lock.json }
+      - run: npm ci
+      - run: npm run typecheck
+
+  frontend-unit:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/web } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm, cache-dependency-path: apps/web/package-lock.json }
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "${{ env.PYTHON_VERSION }}", enable-cache: true }
+      - run: uv sync --frozen --all-packages
+      - run: uv run ruff format --check .
+      - run: uv run ruff check .
+
+  backend-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "${{ env.PYTHON_VERSION }}", enable-cache: true }
+      - run: uv sync --frozen --all-packages
+      - run: uv run mypy services/api/research_api services/worker/research_worker scripts/contracts
+
+  backend-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "${{ env.PYTHON_VERSION }}", enable-cache: true }
+      - run: uv sync --frozen --all-packages
+      - run: uv run pytest services/api/tests/unit
+
+  backend-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env: { POSTGRES_USER: research, POSTGRES_PASSWORD: research, POSTGRES_DB: research }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U research" --health-interval 5s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql+psycopg://research:research@localhost:5432/research
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "${{ env.PYTHON_VERSION }}", enable-cache: true }
+      - run: uv sync --frozen --all-packages
+      - name: API integration tests
+        working-directory: services/api
+        run: uv run pytest tests/integration
+      - name: Worker tests
+        working-directory: services/worker
+        run: uv run pytest
+
+  migration-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env: { POSTGRES_USER: research, POSTGRES_PASSWORD: research, POSTGRES_DB: research }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U research" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql+psycopg://research:research@localhost:5432/research
+    defaults: { run: { working-directory: services/api } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "${{ env.PYTHON_VERSION }}", enable-cache: true }
+      - run: uv sync --frozen --all-packages
+      - name: Upgrade, roll back, re-upgrade
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+      - name: Models match migrations
+        run: uv run alembic check
+      - name: Single migration head
+        run: test "$(uv run alembic heads | wc -l)" -eq 1
+
+  contract-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "${{ env.PYTHON_VERSION }}", enable-cache: true }
+      - run: uv sync --frozen --all-packages
+      - run: uv run python scripts/contracts/check_contracts.py
+      - run: uv run python scripts/contracts/generate_bindings.py --check
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - run: docker compose build

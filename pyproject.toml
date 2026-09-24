@@ -1,0 +1,51 @@
+[project]
+name = "product-b-workspace"
+version = "0.1.0"
+description = "Product B workspace root (not a distributable package)."
+requires-python = ">=3.12,<3.14"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["services/api", "services/worker"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "httpx>=0.28",
+    "ruff>=0.13",
+    "mypy>=1.18",
+    "jsonschema>=4.25",
+    "referencing>=0.36",
+    "pip-audit>=2.9",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["services/api/research_api/contracts/enums.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "BLE", "N", "SIM", "RUF", "PL", "T20"]
+ignore = ["PLR0913", "PLR2004"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["research_api", "research_worker", "tests", "_common"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "PLR2004", "S105", "S106"]
+"**/alembic/versions/*.py" = ["N999"]
+"scripts/**" = ["T201", "PLR0912"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = "scripts/contracts"
+
+[[tool.mypy.overrides]]
+module = ["celery", "celery.*", "kombu", "kombu.*", "jsonschema", "jsonschema.*"]
+ignore_missing_imports = true
