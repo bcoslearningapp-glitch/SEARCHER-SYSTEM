@@ -150,3 +150,106 @@ export type SearchResponse = {
   searched_assets: number;
   hits: SearchHit[];
 };
+
+export type Claim = {
+  id: string;
+  statement: string;
+  claim_type: string;
+  statement_origin: string;
+  workflow_state: string;
+  epistemic_strength: string;
+  important: boolean;
+};
+
+export type Assumption = {
+  id: string;
+  statement: string;
+  origin: string;
+  criticality: string;
+  status: string;
+};
+
+export type OpenQuestion = { id: string; question: string; question_type: string; status: string; conclusion: string | null };
+
+export type HypothesisContent = {
+  statement: string;
+  context: string;
+  expected_outcome: string;
+  proposed_mechanism: string;
+  assumptions: string[];
+  boundary_conditions: string[];
+  falsification_conditions: string[];
+};
+
+export type Hypothesis = {
+  id: string;
+  current_version: number;
+  lifecycle_state: string;
+  epistemic_state: string;
+  suggested_epistemic_state: string;
+  counter_evidence_search_complete: boolean;
+  content: HypothesisContent;
+  mechanism_ids: string[];
+  competing_hypothesis_ids: string[];
+};
+
+export type HypothesisVersion = {
+  version_number: number;
+  lifecycle_state: string;
+  epistemic_state: string;
+  change_reason: string;
+  actor: Actor;
+  created_at: string;
+};
+
+export type Mechanism = { id: string; name: string; description: string; status: string };
+
+export type EvidenceItem = {
+  id: string;
+  role: string;
+  status: string;
+  finding: string;
+  excerpt_id: string;
+  track: string | null;
+  assessment: { strength?: string; limitations?: string } | null;
+  provenance: { kind: string };
+};
+
+export type TrackStatus = { track: string; searched: boolean; last_outcome: string | null; execution_failed: boolean };
+
+export type EvidenceMap = {
+  by_role: Record<string, EvidenceItem[]>;
+  candidates: EvidenceItem[];
+  support_origins: number;
+  contra_origins: number;
+  meaningful_conflict: boolean;
+  suggested_strength: string;
+  tracks: TrackStatus[];
+  counter_evidence_search_complete: boolean;
+};
+
+export type ReferenceEntry = { id: string; layer: string; content: string; quran_ref: string | null; provenance: { kind: string } };
+export type ReferenceJudgment = {
+  id: string;
+  state: string;
+  directness: string;
+  reservation_type: string | null;
+  rationale: string;
+  decision_id: string | null;
+};
+export type ReferenceReview = {
+  id: string;
+  target_type: string;
+  target_id: string;
+  question: string;
+  analytical_category: string;
+  entries: ReferenceEntry[];
+  judgments: ReferenceJudgment[];
+  current_judgment: ReferenceJudgment | null;
+};
+
+export type Standing = {
+  reference: { result: string; findings: { code: string; message: string }[] };
+  operational: { execution_ready: boolean; researchable: boolean; blocking: { description: string }[] };
+  summary: string;
+};

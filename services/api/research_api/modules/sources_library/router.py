@@ -32,7 +32,7 @@ from research_api.modules.sources_library.schemas import (
     WorkOut,
 )
 from research_api.platform import queue
-from research_api.platform.db import get_session
+from research_api.platform.db import DBSession
 from research_api.platform.storage import TooLargeError
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 library = APIRouter(prefix="/api/v1/sources", tags=["sources"])
 project_sources = APIRouter(prefix="/api/v1/projects/{project_id}", tags=["sources"])
 
-DB = Annotated[Session, Depends(get_session)]
+DB = DBSession
 Who = Annotated[Principal, Depends(current_principal)]
 
 

@@ -39,3 +39,14 @@ describe("workflow UI strings", () => {
     expect(untranslated).toEqual([]);
   });
 });
+
+describe("lab strings", () => {
+  it("translates every Arabic and French lab string", () => {
+    const en = getDictionary("en").lab;
+    for (const locale of ["ar", "fr"] as const) {
+      const other = getDictionary(locale).lab;
+      const same = (Object.keys(en) as (keyof typeof en)[]).filter((k) => en[k] === other[k]);
+      expect({ locale, same }).toEqual({ locale, same: [] });
+    }
+  });
+});

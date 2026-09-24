@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
 from research_api.platform import jobs, queue
-from research_api.platform.db import get_session
+from research_api.platform.db import DBSession
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/system", tags=["system"])
@@ -19,7 +17,7 @@ PING_TASK = "system.ping"
 
 
 @router.post("/jobs/ping", response_model=jobs.JobOut, status_code=status.HTTP_202_ACCEPTED)
-def enqueue_ping(session: Annotated[Session, Depends(get_session)]) -> jobs.JobOut:
+def enqueue_ping(session: DBSession) -> jobs.JobOut:
     """Round-trip API -> queue -> worker -> database. Used by smoke tests."""
     job = jobs.create_job(session, PING_TASK)
     session.commit()
@@ -37,7 +35,7 @@ def enqueue_ping(session: Annotated[Session, Depends(get_session)]) -> jobs.JobO
 
 
 @router.get("/jobs/{job_id}", response_model=jobs.JobOut)
-def get_job(job_id: UUID, session: Annotated[Session, Depends(get_session)]) -> jobs.JobOut:
+def get_job(job_id: UUID, session: DBSession) -> jobs.JobOut:
     try:
         return jobs.JobOut.model_validate(jobs.get_job(session, job_id))
     except jobs.JobNotFoundError as exc:
@@ -45,7 +43,7 @@ def get_job(job_id: UUID, session: Annotated[Session, Depends(get_session)]) -> 
 
 
 @router.post("/jobs/{job_id}/cancel", response_model=jobs.JobOut)
-def cancel_job(job_id: UUID, session: Annotated[Session, Depends(get_session)]) -> jobs.JobOut:
+def cancel_job(job_id: UUID, session: DBSession) -> jobs.JobOut:
     try:
         job = jobs.get_job(session, job_id, for_update=True)
     except jobs.JobNotFoundError as exc:

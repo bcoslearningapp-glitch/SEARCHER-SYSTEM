@@ -5,10 +5,9 @@ Aggregates other modules through their public services only.
 
 from __future__ import annotations
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -21,7 +20,7 @@ from research_api.contracts.enums import (
 from research_api.modules.governance_audit import service as governance
 from research_api.modules.project_workflow import service as projects
 from research_api.modules.sources_library import service as sources
-from research_api.platform.db import get_session
+from research_api.platform.db import DBSession
 
 router = APIRouter(prefix="/api/v1/projects/{project_id}", tags=["attention"])
 
@@ -75,5 +74,5 @@ def attention_queue(session: Session, project_id: UUID) -> list[AttentionItem]:
 
 
 @router.get("/attention", response_model=list[AttentionItem])
-def get_attention(project_id: UUID, db: Annotated[Session, Depends(get_session)]) -> list[AttentionItem]:
+def get_attention(project_id: UUID, db: DBSession) -> list[AttentionItem]:
     return attention_queue(db, project_id)

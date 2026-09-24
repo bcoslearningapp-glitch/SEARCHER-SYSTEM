@@ -6,7 +6,6 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
-from sqlalchemy.orm import Session
 
 from research_api.config import get_settings
 from research_api.modules.governance_audit.principal import Principal, current_principal
@@ -25,13 +24,13 @@ from research_api.modules.reference_governance.schemas import (
     ReviewIn,
     ReviewOut,
 )
-from research_api.platform.db import get_session
+from research_api.platform.db import DBSession
 from research_api.platform.storage import TooLargeError
 
 library = APIRouter(prefix="/api/v1/reference", tags=["reference"])
 reviews = APIRouter(prefix="/api/v1/projects/{project_id}/reference-reviews", tags=["reference"])
 
-DB = Annotated[Session, Depends(get_session)]
+DB = DBSession
 Who = Annotated[Principal, Depends(current_principal)]
 
 

@@ -6,8 +6,10 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from functools import lru_cache
+from typing import Annotated
 from uuid import UUID, uuid4
 
+from fastapi import Depends
 from sqlalchemy import DateTime, Engine, MetaData, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
@@ -62,6 +64,12 @@ def get_session() -> Iterator[Session]:
         raise
     finally:
         session.close()
+
+
+# Commit before the response is sent (scope="function"): with the default request
+# scope a client could observe 2xx before the transaction is durable, and a
+# failed commit would surface after success was already reported.
+DBSession = Annotated[Session, Depends(get_session, scope="function")]
 
 
 @contextmanager
