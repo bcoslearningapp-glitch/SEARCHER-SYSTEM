@@ -18,6 +18,11 @@
 ## Phase 3 progress
 - #21: AI gateway (ADR-010). Anthropic and OpenAI adapters behind a provider-neutral interface, with Anthropic server-side refusal fallback enabled. Configurable model profiles; mock provider only when explicitly enabled. Untrusted-source prompt isolation and secret redaction. PRD §54 disclosure policy, human-set project AI policy (consent, allowed profiles, budgets), `STOPPED_RESOURCE_CONSTRAINT` on budget exhaustion. Append-only disclosure/usage log. Schema validation before any caller can use output. Bounded live provider-contract suite.
 - Fix: request transactions now commit before the HTTP response is sent (a race seen in E2E under parallel workers).
+- #29: Controlled AI tool registry (ADR-013):
+  - 14 registered tools with closed schemas.
+  - Task allow-lists, provenance required for proposals, project-scoped reads, proposals only as reviewable states.
+  - Append-only log of every tool call, refused calls included.
+  - The orchestrator acts only through tools.
 - #25: Research planning and search (ADR-012):
   - Versioned research plans, which must cover all three tracks.
   - Local library search, audited, with bounded outcomes.

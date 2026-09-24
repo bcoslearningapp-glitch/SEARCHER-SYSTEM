@@ -870,6 +870,46 @@ def require_work(session: Session, work_id: UUID) -> None:
         raise NotFoundError("source work not found", work_id=str(work_id))
 
 
+def project_passages(session: Session, project_id: UUID, chunk_ids: list[UUID]) -> list[dict[str, Any]]:
+    """Discovery chunks readable in a project: only from works linked to that project's library."""
+    if not chunk_ids:
+        return []
+    rows = session.execute(
+        select(SourceChunk, SourceWork.id, SourceWork.title)
+        .join(SourceAsset, SourceAsset.id == SourceChunk.asset_id)
+        .join(SourceEdition, SourceEdition.id == SourceAsset.edition_id)
+        .join(SourceWork, SourceWork.id == SourceEdition.work_id)
+        .join(ProjectSource, ProjectSource.work_id == SourceWork.id)
+        .where(SourceChunk.id.in_(chunk_ids), ProjectSource.project_id == project_id)
+    ).all()
+    return [
+        {
+            "chunk_id": str(chunk.id),
+            "asset_id": str(chunk.asset_id),
+            "work_id": str(work_id),
+            "work_title": title,
+            "page_number": chunk.page_number,
+            "char_start": chunk.char_start,
+            "char_end": chunk.char_end,
+            "text": chunk.text,
+        }
+        for chunk, work_id, title in rows
+    ]
+
+
+def excerpt_in_project(session: Session, project_id: UUID, excerpt_id: UUID) -> ExcerptOut:
+    """An excerpt is readable in a project only if its work is in that project's library."""
+    excerpt = get_excerpt(session, excerpt_id)
+    linked = session.scalar(
+        select(ProjectSource.work_id)
+        .join(SourceEdition, SourceEdition.work_id == ProjectSource.work_id)
+        .where(SourceEdition.id == excerpt.edition_id, ProjectSource.project_id == project_id)
+    )
+    if linked is None:
+        raise NotFoundError("source excerpt not found in this project's library")
+    return excerpt
+
+
 def chunk_texts(session: Session, chunk_ids: list[UUID]) -> dict[UUID, str]:
     """Full text of discovery chunks, for analysis only. Quotes still come from page spans."""
     if not chunk_ids:

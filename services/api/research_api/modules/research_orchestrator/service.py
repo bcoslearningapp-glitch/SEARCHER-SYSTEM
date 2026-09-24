@@ -21,33 +21,28 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from research_api.contracts.enums import (
-    ActorKind,
-    Criticality,
     EvidenceRole,
     EvidenceTargetType,
-    HypothesisLifecycleState,
-    ProblemFrameStatus,
     ResearchOutcomeKind,
     ResearchTrack,
     SensitivityLevel,
 )
 from research_api.modules import targets
 from research_api.modules.ai_gateway import service as gateway
-from research_api.modules.ai_gateway.base import ProviderOutputError, Section, StructuredRequest, WebSearchRequest
+from research_api.modules.ai_gateway.base import ProviderOutputError, Section, StructuredRequest
+from research_api.modules.ai_tools import registry as tool_registry
+from research_api.modules.ai_tools import tools as ai_tools
+from research_api.modules.ai_tools.registry import ToolContext
 from research_api.modules.claims_evidence import service as claims
-from research_api.modules.claims_evidence.schemas import AssumptionIn, EvidenceIn, TrackRunIn
+from research_api.modules.claims_evidence.schemas import TrackRunIn
 from research_api.modules.governance_audit.context import authorized
 from research_api.modules.governance_audit.principal import Principal, ai_principal, system_principal
 from research_api.modules.governance_audit.schemas import AIActionRecord
 from research_api.modules.hypothesis_lab import service as hypotheses
-from research_api.modules.hypothesis_lab.schemas import CompeteIn, HypothesisContent, HypothesisIn
 from research_api.modules.project_workflow import service as projects
-from research_api.modules.project_workflow.schemas import ProblemFrameContent
 from research_api.modules.research_orchestrator import templates
 from research_api.modules.research_orchestrator.templates import Template
 from research_api.modules.research_planning import service as planning
-from research_api.modules.sources_library import service as sources
-from research_api.modules.sources_library.schemas import PageExcerptIn, SearchHit
 from research_api.platform import jobs
 from research_api.platform.errors import RuleViolationError
 
@@ -164,7 +159,7 @@ def on_failure(session: Session, job: jobs.BackgroundJob) -> None:
         else ResearchOutcomeKind.RESEARCH_EXECUTION_FAILURE
     )
     if job.params.get("task") == "web_search":
-        _record_web(session, SYSTEM, job, outcome, 0, f"web search (job {job.id}) did not complete: {job.error}")
+        _record_web_failure(session, job, outcome)
         return
     if job.params.get("task") != "challenge":
         return
@@ -194,6 +189,28 @@ def _context(
         sensitivity=SensitivityLevel(project.sensitivity),
         principal_id=str(job.params.get("requested_by") or "unknown"),
         entity_ids=entity_ids,
+    )
+
+
+# Each task may use only these tools, whatever a model asks for (FR-AI-TOOL-003..005).
+TASK_TOOLS: dict[str, frozenset[str]] = {
+    "draft_problem_frame": frozenset({"get_project_state", "draft_problem_frame"}),
+    "detect_assumptions": frozenset({"get_project_state", "propose_assumption"}),
+    "challenge": frozenset({"search_sources", "read_passages", "propose_evidence", "propose_hypothesis"}),
+    "web_search": frozenset({"search_external_web"}),
+}
+
+
+def _tools(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> ToolContext:
+    project = projects.get_project(session, project_id)
+    return ToolContext(
+        project_id=project_id,
+        sensitivity=SensitivityLevel(project.sensitivity),
+        principal=AI,
+        requested_by=str(job.params.get("requested_by") or "unknown"),
+        allowed=TASK_TOOLS[job.params["task"]],
+        job_id=job.id,
+        profile=job.params.get("profile"),
     )
 
 
@@ -228,19 +245,17 @@ def _frame_context(session: Session, project_id: UUID) -> Section | None:
 
 
 def _draft_problem_frame(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> dict[str, Any]:
-    project = projects.get_project(session, project_id)
-    open_draft = next(
-        (f for f in projects.list_frames(session, project_id) if f.status is ProblemFrameStatus.DRAFT), None
-    )
-    if open_draft is not None and open_draft.provenance.get("actor", {}).get("kind") != ActorKind.AI.value:
+    if ai_tools.open_researcher_draft(session, project_id):
+        # Checked before spending on a model call; the tool enforces it again at write time.
         raise RuleViolationError("a researcher's draft is open; AI will not overwrite it")
-    state = projects.get_research_state(session, project_id)
+    tctx = _tools(session, job, project_id)
+    state = tool_registry.invoke(session, tctx, "get_project_state", {})
     sections = [
-        Section("user_input", "Project title", project.title),
-        Section("user_input", f"Project input ({project.input_type.value})", project.initial_input),
+        Section("user_input", "Project title", state["title"]),
+        Section("user_input", f"Project input ({state['input_type']})", state["initial_input"]),
     ]
-    if state.current_question:
-        sections.append(Section("context", "Current question", state.current_question))
+    if state["current_question"]:
+        sections.append(Section("context", "Current question", state["current_question"]))
     outcome = _call(
         session,
         _context(session, job, project_id, [project_id]),
@@ -252,10 +267,10 @@ def _draft_problem_frame(session: Session, job: jobs.BackgroundJob, project_id: 
         k: [x.strip() for x in v if x.strip()] if isinstance(v, list) else str(v).strip()
         for k, v in outcome.result.data.items()
     }
-    content = ProblemFrameContent.model_validate(cleaned)
     jobs.raise_if_cancelled(session, job)
-    frame = projects.save_draft(session, AI, project_id, content, ai_action=outcome.ai_action)
-    return {"frame_version_id": str(frame.id), "status": frame.status.value}
+    return tool_registry.invoke(
+        session, tctx.with_action(outcome.ai_action), "draft_problem_frame", {"content": cleaned}
+    )
 
 
 # -- detect assumptions -----------------------------------------------------------------
@@ -266,9 +281,10 @@ def _normalize(text: str) -> str:
 
 
 def _detect_assumptions(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> dict[str, Any]:
-    project = projects.get_project(session, project_id)
+    tctx = _tools(session, job, project_id)
+    state = tool_registry.invoke(session, tctx, "get_project_state", {})
     existing = claims.list_assumptions(session, project_id)
-    sections = [Section("user_input", "Project input", project.initial_input)]
+    sections = [Section("user_input", "Project input", state["initial_input"])]
     frame = _frame_context(session, project_id)
     if frame is not None:
         sections.append(frame)
@@ -293,6 +309,7 @@ def _detect_assumptions(session: Session, job: jobs.BackgroundJob, project_id: U
         job.params.get("profile"),
     )
     jobs.raise_if_cancelled(session, job)
+    propose = tctx.with_action(outcome.ai_action)
     seen = {_normalize(a.statement) for a in existing}
     created: list[str] = []
     for item in outcome.result.data["assumptions"][:MAX_ASSUMPTIONS]:
@@ -300,14 +317,8 @@ def _detect_assumptions(session: Session, job: jobs.BackgroundJob, project_id: U
         if not key or key in seen:
             continue
         seen.add(key)
-        assumption = claims.create_assumption(
-            session,
-            AI,
-            project_id,
-            AssumptionIn(statement=item["statement"].strip(), criticality=Criticality(item["criticality"])),
-            ai_action=outcome.ai_action,
-        )
-        created.append(str(assumption.id))
+        args = {"statement": item["statement"].strip(), "criticality": item["criticality"]}
+        created.append(tool_registry.invoke(session, propose, "propose_assumption", args)["assumption_id"])
     return {"assumption_ids": created, "proposed": len(outcome.result.data["assumptions"])}
 
 
@@ -331,26 +342,31 @@ def _target_statement(session: Session, project_id: UUID, target_type: EvidenceT
 class _Challenge:
     """Working state of one "Challenge this" run."""
 
-    project_id: UUID
+    tools: ToolContext
     target_type: EvidenceTargetType
     target_id: UUID
     statement: str
     challenge_queries: list[str] = field(default_factory=list)
     alternatives: list[dict[str, Any]] = field(default_factory=list)
     alternative_queries: list[str] = field(default_factory=list)
-    passages: list[SearchHit] = field(default_factory=list)
+    passages: list[dict[str, Any]] = field(default_factory=list)
     scope: str = "project library"
     searched_assets: int = 0
     found: dict[ResearchTrack, bool] = field(default_factory=lambda: dict.fromkeys(COUNTER_TRACKS, False))
     evidence_ids: list[str] = field(default_factory=list)
     competing_ids: list[str] = field(default_factory=list)
 
+    @property
+    def project_id(self) -> UUID:
+        return self.tools.project_id
+
 
 def _challenge(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> dict[str, Any]:
     target_type = EvidenceTargetType(job.params["target_type"])
     target_id = UUID(job.params["target_id"])
     profile = job.params.get("profile")
-    run = _Challenge(project_id, target_type, target_id, _target_statement(session, project_id, target_type, target_id))
+    statement = _target_statement(session, project_id, target_type, target_id)
+    run = _Challenge(_tools(session, job, project_id), target_type, target_id, statement)
     ctx = _context(session, job, project_id, [target_id])
 
     plan = _call(
@@ -364,7 +380,7 @@ def _challenge(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> d
     _search(session, run)
     assessment = None
     if run.passages:
-        assessment = _call(session, ctx, templates.ASSESS_PASSAGES, _passage_sections(session, run), profile)
+        assessment = _call(session, ctx, templates.ASSESS_PASSAGES, _passage_sections(run), profile)
     jobs.raise_if_cancelled(session, job)
 
     if assessment is not None:
@@ -391,17 +407,22 @@ def _apply_plan(run: _Challenge, data: dict[str, Any]) -> None:
 
 
 def _search(session: Session, run: _Challenge) -> None:
-    hits: dict[UUID, SearchHit] = {}
+    hits: dict[str, dict[str, Any]] = {}
     for query in [*run.challenge_queries, *run.alternative_queries]:
-        response = sources.search(session, _or_query(query), project_id=run.project_id, limit=HITS_PER_QUERY)
-        run.scope, run.searched_assets = response.scope, response.searched_assets
-        for hit in response.hits:
-            hits.setdefault(hit.chunk_id, hit)
-    run.passages = sorted(hits.values(), key=lambda h: -h.rank)[:MAX_PASSAGES]
+        found = tool_registry.invoke(
+            session, run.tools, "search_sources", {"query": _or_query(query)[:300], "limit": HITS_PER_QUERY}
+        )
+        run.scope, run.searched_assets = found["scope"], found["searched_assets"]
+        for hit in found["hits"]:
+            hits.setdefault(hit["chunk_id"], hit)
+    top = sorted(hits.values(), key=lambda h: -h["rank"])[:MAX_PASSAGES]
+    if top:
+        read = tool_registry.invoke(session, run.tools, "read_passages", {"chunk_ids": [h["chunk_id"] for h in top]})
+        by_id = {p["chunk_id"]: p for p in read["passages"]}
+        run.passages = [by_id[h["chunk_id"]] for h in top if h["chunk_id"] in by_id]
 
 
-def _passage_sections(session: Session, run: _Challenge) -> list[Section]:
-    texts = sources.chunk_texts(session, [p.chunk_id for p in run.passages])
+def _passage_sections(run: _Challenge) -> list[Section]:
     framing = (
         run.statement
         + "\n\nAlternative explanations:\n"
@@ -410,8 +431,8 @@ def _passage_sections(session: Session, run: _Challenge) -> list[Section]:
     return [Section("context", "Statement under challenge", framing)] + [
         Section(
             "retrieved_source",
-            f"{p.work_title}, p. {p.page_number}",
-            texts.get(p.chunk_id, p.snippet)[:PASSAGE_CHARS],
+            f"{p['work_title']}, p. {p['page_number']}",
+            p["text"][:PASSAGE_CHARS],
             source_id=f"P{i}",
         )
         for i, p in enumerate(run.passages)
@@ -430,30 +451,23 @@ def _track_for(run: _Challenge, role: EvidenceRole, alternative_index: int) -> R
 
 def _propose_candidates(session: Session, run: _Challenge, assessment: gateway.AIOutcome) -> None:
     by_id = {f"P{i}": p for i, p in enumerate(run.passages)}
-    excerpt_ids: dict[str, UUID] = {}
+    propose = run.tools.with_action(assessment.ai_action)
     for candidate in assessment.result.data["candidates"]:
         passage = by_id.get(candidate["passage_id"])
         if passage is None:
             continue  # the model referred to a passage it was not given
         role = EvidenceRole(candidate["role"])
         track = _track_for(run, role, candidate["alternative_index"])
-        if candidate["passage_id"] not in excerpt_ids:
-            excerpt_ids[candidate["passage_id"]] = _excerpt(session, passage, assessment)
-        evidence = claims.propose_evidence(
-            session,
-            AI,
-            run.project_id,
-            EvidenceIn(
-                target_type=run.target_type,
-                target_id=run.target_id,
-                role=role,
-                finding=candidate["finding"].strip() or "See passage.",
-                excerpt_id=excerpt_ids[candidate["passage_id"]],
-                track=track,
-            ),
-            ai_action=assessment.ai_action,
-        )
-        run.evidence_ids.append(str(evidence.id))
+        args: dict[str, Any] = {
+            "target_type": run.target_type.value,
+            "target_id": str(run.target_id),
+            "role": role.value,
+            "finding": candidate["finding"].strip() or "See passage.",
+            "chunk_id": passage["chunk_id"],
+        }
+        if track is not None:
+            args["track"] = track.value
+        run.evidence_ids.append(tool_registry.invoke(session, propose, "propose_evidence", args)["evidence_id"])
         if track in run.found:
             run.found[track] = True
 
@@ -494,118 +508,54 @@ def _propose_competitors(session: Session, run: _Challenge, assessment: gateway.
         for s in assessment.result.data["alternative_support"]
         if s["strength"] == "STRONG" and 0 <= s["alternative_index"] < len(run.alternatives)
     }
+    propose = run.tools.with_action(assessment.ai_action)
     for index in sorted(strong)[:MAX_COMPETING]:
-        created = hypotheses.create_hypothesis(
-            session,
-            AI,
-            run.project_id,
-            HypothesisIn(
-                content=HypothesisContent(
-                    statement=run.alternatives[index]["statement"].strip(),
-                    context=f"Alternative explanation raised by Challenge this against: {run.statement}",
-                ),
-                lifecycle_state=HypothesisLifecycleState.SIGNAL,
-            ),
-            ai_action=assessment.ai_action,
-        )
-        hypotheses.compete(
-            session,
-            AI,
-            run.project_id,
-            created.id,
-            CompeteIn(other_hypothesis_id=run.target_id, note="Proposed by Challenge this"),
-            ai_action=assessment.ai_action,
-        )
-        run.competing_ids.append(str(created.id))
-
-
-def _excerpt(session: Session, passage: SearchHit, assessment: gateway.AIOutcome) -> UUID:
-    """The quoted text is copied server-side from the page span; the model never supplies it."""
-    span = PageExcerptIn(page_number=passage.page_number, char_start=passage.char_start, char_end=passage.char_end)
-    try:
-        excerpt = sources.create_page_excerpt(session, AI, passage.asset_id, span, ai_action=assessment.ai_action)
-    except RuleViolationError:
-        # OCR text: excerpt it, but never as an exact quote until verified (Core §28).
-        span = span.model_copy(update={"is_exact_quote": False})
-        excerpt = sources.create_page_excerpt(session, AI, passage.asset_id, span, ai_action=assessment.ai_action)
-    return excerpt.id
+        args = {
+            "statement": run.alternatives[index]["statement"].strip(),
+            "context": f"Alternative explanation raised by Challenge this against: {run.statement}"[:4000],
+            "competes_with": str(run.target_id),
+            "note": "Proposed by Challenge this",
+        }
+        run.competing_ids.append(tool_registry.invoke(session, propose, "propose_hypothesis", args)["hypothesis_id"])
 
 
 # -- web search ---------------------------------------------------------------------------
 
 
-def _record_web(
-    session: Session,
-    principal: Principal,
-    job: jobs.BackgroundJob,
-    outcome: ResearchOutcomeKind,
-    count: int,
-    scope: str,
-    outcome_ids: tuple[UUID, AIActionRecord] | None = None,
-) -> UUID:
+def _record_web_failure(session: Session, job: jobs.BackgroundJob, outcome: ResearchOutcomeKind) -> None:
     params = job.params
     assert job.project_id is not None  # noqa: S101 - orchestrator jobs always carry a project
-    record = planning.record_search(
+    planning.record_search(
         session,
-        principal,
+        SYSTEM,
         job.project_id,
         provider=planning.WEB,
         question=params["question"],
         queries=params["queries"],
         outcome=outcome,
-        result_count=count,
-        scope=scope,
+        result_count=0,
+        scope=f"web search (job {job.id}) did not complete: {job.error}",
         plan_id=UUID(params["plan_id"]) if params.get("plan_id") else None,
         track=ResearchTrack(params["track"]) if params.get("track") else None,
         languages=params.get("languages") or [],
-        ai_request_id=outcome_ids[0] if outcome_ids else None,
-        ai_action=outcome_ids[1] if outcome_ids else None,
     )
-    return record.id
 
 
 def _web_search(session: Session, job: jobs.BackgroundJob, project_id: UUID) -> dict[str, Any]:
-    """External search after the local library (FR-RET-001). Results become source leads only (FR-WEB-003)."""
+    """External search through the controlled tool; results become source leads only (FR-WEB-003)."""
     params = job.params
-    queries: list[str] = params["queries"]
-    if params.get("plan_id"):
-        remaining = planning.web_budget_remaining(session, project_id, UUID(params["plan_id"]))
-        if remaining is not None:
-            if remaining == 0:
-                raise gateway.ResourceConstraintError("the plan's web search budget is used up")
-            queries = queries[:remaining]
-    ctx = _context(session, job, project_id, [UUID(params["plan_id"])] if params.get("plan_id") else [project_id])
-    request = WebSearchRequest(queries=queries, max_searches=len(queries), languages=params.get("languages") or [])
-    outcome = gateway.run_web_search(session, ctx, request, profile_name=params.get("profile"))
+    args: dict[str, Any] = {"queries": params["queries"], "languages": params.get("languages") or []}
+    for key in ("plan_id", "track", "question"):
+        if params.get(key):
+            args[key] = params[key]
+    found = tool_registry.invoke(session, _tools(session, job, project_id), "search_external_web", args)
     jobs.raise_if_cancelled(session, job)
-    result = outcome.result
-    unique = {r.url: r for r in result.results}
-    if unique:
-        kind = ResearchOutcomeKind.RESULTS_FOUND
-    elif result.failed_queries:
-        kind = ResearchOutcomeKind.INSUFFICIENT_SEARCH_COVERAGE
-    else:
-        kind = ResearchOutcomeKind.NO_RELEVANT_EVIDENCE_FOUND
-    job.params = {**params, "queries": queries}
-    scope = f"web search via {result.provider}: {len(result.queries_run)} query(ies) run"
-    if result.failed_queries:
-        scope += f", {len(result.failed_queries)} failed"
-    record_id = _record_web(session, AI, job, kind, len(unique), scope, (outcome.request_record_id, outcome.ai_action))
-    leads = []
-    for item in unique.values():
-        lead = sources.create_web_lead(
-            session,
-            AI,
-            project_id,
-            url=item.url,
-            title=item.title,
-            query=item.query,
-            search_record_id=record_id,
-            ai_action=outcome.ai_action,
-        )
-        if lead is not None:
-            leads.append(str(lead.id))
-    return {"search_record_id": str(record_id), "outcome": kind.value, "results": len(unique), "lead_ids": leads}
+    return {
+        "search_record_id": found["search_record_id"],
+        "outcome": found["outcome"],
+        "results": len(found["results"]),
+        "lead_ids": found["lead_ids"],
+    }
 
 
 _TASKS = {
