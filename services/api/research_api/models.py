@@ -1,6 +1,7 @@
 """Import every ORM model so Alembic sees the full metadata."""
 
 from research_api.modules.ai_gateway.models import AIRequestRecord, ProjectAIPolicy
+from research_api.modules.ai_reliability.models import AIEvaluation
 from research_api.modules.ai_tools.models import AIToolCall
 from research_api.modules.claims_evidence.models import (
     Assumption,
@@ -57,6 +58,7 @@ from research_api.platform.db import Base
 from research_api.platform.jobs import BackgroundJob
 
 __all__ = [
+    "AIEvaluation",
     "AIRequestRecord",
     "AIToolCall",
     "ApprovalRecord",

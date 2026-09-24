@@ -151,3 +151,11 @@ test("research plan -> audited searches -> decision-relative sufficiency", async
   await sufficiency.getByRole("button", { name: "Record assessment" }).click();
   await expect(page.getByTestId("current-sufficiency")).toContainText("INSUFFICIENT_EVIDENCE");
 });
+
+test("AI reliability registry shows thresholds and observed use", async ({ page }) => {
+  await page.goto("/en");
+  await page.getByRole("link", { name: "AI reliability registry" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "AI reliability" })).toBeVisible();
+  await expect(page.getByTestId("thresholds")).toContainText("Injected instructions not followed (share)");
+  await expect(page.getByTestId("thresholds")).toContainText("blocking");
+});

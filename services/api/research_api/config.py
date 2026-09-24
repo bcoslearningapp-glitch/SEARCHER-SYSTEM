@@ -28,6 +28,7 @@ class Settings(BaseSettings):
 
     storage_root: Path = Path("./data/storage")
     contracts_dir: Path = _REPO_ROOT / "packages" / "research-core-contracts"
+    evaluation_fixtures_dir: Path = _REPO_ROOT / "docs" / "evaluation" / "fixtures"
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
 

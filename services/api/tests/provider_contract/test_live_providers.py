@@ -85,3 +85,29 @@ def test_anthropic_web_search_returns_attributed_results() -> None:
     assert result.queries_run, "the model ran the search it was given"
     assert result.usage.web_search_requests >= 1
     assert all(r.url.startswith("http") for r in result.results)
+
+
+@pytest.mark.parametrize("name", ["anthropic-default", "openai-default"])
+def test_golden_suite_blocking_dimensions(name: str) -> None:
+    """FR-EVAL-002: run before changing a default model; blocking dimensions must pass."""
+    from research_api.modules.ai_reliability import golden  # noqa: PLC0415
+    from research_api.modules.ai_reliability.dimensions import DIMENSIONS  # noqa: PLC0415
+
+    settings, profile = _profile(name)
+    provider = registry.provider_for(settings, profile)
+
+    def call(request: StructuredRequest) -> dict[str, object]:
+        if _calls["n"] >= MAX_REQUESTS:
+            pytest.skip("provider contract request budget exhausted")
+        _calls["n"] += 1
+        result = provider.generate_structured(request, replace(profile, max_tokens=8000))
+        validate_output(result.data, request.output_schema)
+        return result.data
+
+    results = golden.run(golden.load(settings.evaluation_fixtures_dir), call)
+    report = {r.dimension: round(r.score, 3) for r in results}
+    print(f"{name} golden: {report}")  # noqa: T201 - shown in the protected workflow log
+    for result in results:
+        dimension = DIMENSIONS[result.dimension]
+        if dimension.blocking:
+            assert dimension.passes(result.score), (result.dimension, result.score, result.details)

@@ -1,6 +1,6 @@
 # Status
 
-**Current milestone:** M3 AI Research Engine (v0.4.0) — in progress. M2 is feature-complete.
+**Current milestone:** M3 AI Research Engine (v0.4.0): feature-complete, and all exit criteria are met (below). The tag waits on the owner (#28). Next: M4 Design, Experiments, Memory.
 
 ## Completed
 - M0 Foundation — #1.
@@ -32,6 +32,19 @@
   - Research tab UI.
   - Contracts 0.6.0.
 - #22: Research Orchestrator (ADR-011). Draft Problem Frame, detect assumptions, and "Challenge this" (counter-evidence and alternative-explanation search over the local library, evidence candidates from exact page spans, competing hypotheses) run as background jobs. Output is validated and retried once. Results are proposals only, with no partial writes. Failures are classified, and failed challenges are recorded as execution failures. Cooperative cancellation. Desk and hypothesis UI with live task status. E2E flow 9 (provider outage).
+
+- #30: AI reliability registry (ADR-014):
+  - Operational metrics from the request log.
+  - Append-only evaluation results with the Methodology Steward's thresholds.
+  - Synthetic golden fixtures with a deterministic harness, run live in the protected workflow.
+  - Reliability page.
+
+## M3 exit criteria (PRD §76 Phase 3)
+- [x] Same research task can run with either provider: the provider-neutral gateway with Anthropic and OpenAI adapters (live provider-contract suite), and `test_m3_exit.py` runs one task on two provider profiles.
+- [x] A provider switch does not alter the stored schema. The records from both runs validate against the same contract; the model appears only in provenance.
+- [x] No provider receives DB credentials. There are no SQL, file or shell tools, tool schemas are closed, and outbound prompts redact connection-string credentials (`test_m3_exit.py`, ADR-013).
+- [x] The counter-evidence track demonstrably runs. "Challenge this" records bounded CHALLENGE and ALTERNATIVE_EXPLANATION outcomes (integration tests, E2E flow 9).
+- Deliverables: OpenAI and Anthropic adapters, provider profiles, tool registry, Research Orchestrator, Policy Engine, structured outputs, web/search adapters, support/challenge/alternative tracks, research audit, cost tracking.
 
 ## M2 exit criteria (PRD §76 Phase 2)
 - [x] reference review trace is source → interpretation → system inference → judgment (layers, ADR-009)

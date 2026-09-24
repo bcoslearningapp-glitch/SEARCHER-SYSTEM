@@ -15,6 +15,9 @@ Principle: the LLM may propose; the application decides whether a proposal can m
 - Invalid output is retried once, then surfaced. A job body is one transaction, so there are no partial writes. Provider failures and budget stops are distinct job failure kinds. A failed challenge records RESEARCH_EXECUTION_FAILURE on its tracks, never "no evidence".
 - Cooperative cancellation (`jobs.raise_if_cancelled`). The UI follows job status from the API while a task is active.
 
+## Reliability registry and golden evaluation (implemented — ADR-014)
+- Operational metrics per provider/model/task from `ai_requests`; append-only evaluation results per dimension against QUALITY_GATES thresholds; synthetic golden fixtures and a deterministic harness run in CI (fake), against live providers in the protected workflow, or through the gateway.
+
 ## Controlled tools (implemented — ADR-013)
 - `modules/ai_tools`: READ / PROPOSE / EXTERNAL tools with closed schemas; `invoke` enforces the task allow-list, model provenance for proposals, schema validation and project scoping, and logs every call (append-only `ai_tool_calls`, refused calls included).
 - The orchestrator acts only through the registry; HTTP: `GET /api/v1/ai/tools`, `GET /api/v1/projects/{id}/ai-tool-calls`.

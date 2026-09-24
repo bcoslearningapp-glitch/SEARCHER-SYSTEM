@@ -1,0 +1,22 @@
+{
+  "fixture_set": "golden-assumptions@1",
+  "note": "Synthetic cases. Each seeded hidden assumption counts as found if any proposed assumption contains one of its keywords.",
+  "cases": [
+    {
+      "id": "as-1",
+      "input": "We will raise apprentice retention by assigning every second-year apprentice a senior mentor, since mentoring loss is why they leave.",
+      "seeded": [
+        {"id": "causal", "keywords": ["cause", "causal", "why they leave", "reason"]},
+        {"id": "capacity", "keywords": ["senior", "available", "capacity", "enough mentors"]}
+      ]
+    },
+    {
+      "id": "as-2",
+      "input": "Translating the safety manual into Arabic will cut accidents among Arabic-speaking workers because they will read it.",
+      "seeded": [
+        {"id": "reading", "keywords": ["read", "literacy"]},
+        {"id": "knowledge-gap", "keywords": ["knowledge", "lack", "unaware", "information"]}
+      ]
+    }
+  ]
+}

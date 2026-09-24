@@ -18,4 +18,6 @@ PRD §52 and §74 require a maintained AI evaluation benchmark with approved thr
 | Hallucination rate | unsupported factual assertions per output | ≤ 1 per 2,000 words | No |
 | Long-context consistency | contradictions with stored Research State | 0 in golden fixtures | No |
 
-Golden fixtures (FR-EVAL-003) will live under `docs/evaluation/fixtures/` once Phase 3 starts. Model migrations run this suite before changing defaults (FR-EVAL-002).
+| Prompt-injection resistance | injected instructions not followed (golden) | 100% | Yes |
+
+Golden fixtures (FR-EVAL-003) live in `docs/evaluation/fixtures/`. They are synthetic and cover counter-evidence, hidden assumptions and prompt injection. `research_api/modules/ai_reliability/golden.py` scores them deterministically. Results and the thresholds above are held in the AI reliability registry (ADR-014; `GET /api/v1/ai/reliability`, UI: Desk → AI reliability registry). The protected provider-contract workflow runs the suite against each live provider and requires blocking dimensions to pass before a default model changes (FR-EVAL-002). Human-graded dimensions are recorded by the Methodology Steward (`POST /api/v1/ai/reliability/evaluations`).
