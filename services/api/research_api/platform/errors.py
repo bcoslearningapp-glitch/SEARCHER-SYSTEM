@@ -9,6 +9,7 @@ from typing import Any
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError
 
 from research_api.modules.governance_audit.policy import PolicyViolationError
 
@@ -48,6 +49,21 @@ def install_error_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=exc.status_code,
             content={"error": {"code": exc.code, "message": exc.message, "details": exc.details}},
+        )
+
+    @app.exception_handler(IntegrityError)
+    async def _integrity(_: Request, exc: IntegrityError) -> JSONResponse:
+        # Constraint names are stable and safe to expose; values and SQL are not echoed.
+        constraint = getattr(getattr(exc.orig, "diag", None), "constraint_name", None)
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "error": {
+                    "code": "conflict",
+                    "message": "the change conflicts with existing records",
+                    "details": {"constraint": constraint},
+                }
+            },
         )
 
     @app.exception_handler(PolicyViolationError)

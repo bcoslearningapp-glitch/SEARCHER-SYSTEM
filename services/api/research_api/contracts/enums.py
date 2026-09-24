@@ -8,7 +8,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 RESEARCH_CORE_VERSION = "1.0.0"
-CONTRACT_SCHEMA_VERSION = "0.4.0"
+CONTRACT_SCHEMA_VERSION = "0.5.0"
 
 
 class ProjectStatus(StrEnum):
@@ -636,3 +636,23 @@ class EvidenceTargetType(StrEnum):
     CLAIM = "CLAIM"
     HYPOTHESIS = "HYPOTHESIS"
     MECHANISM = "MECHANISM"
+
+
+class FoundationalSourceStatus(StrEnum):
+    """Foundational source approval state; only APPROVED sources are served (FR-REFSRC-001..003)."""
+
+    STAGED = "STAGED"
+    APPROVED = "APPROVED"
+    RETIRED = "RETIRED"
+
+
+class ConstraintKind(StrEnum):
+    """Kind of human-made operational constraint (Core §5, PRD §5.3)."""
+
+    LAW = "LAW"
+    REGULATION = "REGULATION"
+    CONTRACT = "CONTRACT"
+    LICENSE = "LICENSE"
+    INSTITUTIONAL_POLICY = "INSTITUTIONAL_POLICY"
+    AUTHORIZATION = "AUTHORIZATION"
+    OTHER = "OTHER"

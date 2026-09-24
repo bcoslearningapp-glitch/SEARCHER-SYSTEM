@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://research-suite.local/contracts/reference.schema.json",
+  "title": "Research Core foundational sources, reference review and operational constraints",
+  "$defs": {
+    "FoundationalSource": {
+      "description": "Foundational library record (FR-REFSRC-001). Adoption requires authorized human approval.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "work_id", "authority_layer", "edition_version", "status", "sha256"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "work_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "authority_layer": { "$ref": "enums.schema.json#/$defs/ReferenceAuthorityLayer" },
+        "edition_version": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "enums.schema.json#/$defs/FoundationalSourceStatus" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "approved_by": { "$ref": "common.schema.json#/$defs/Actor" },
+        "approved_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "const": "APPROVED" } }, "required": ["status"] },
+          "then": { "required": ["approved_by", "approved_at"], "properties": { "approved_by": { "properties": { "kind": { "const": "HUMAN" } } } } } }
+      ]
+    },
+    "QuranAyah": {
+      "description": "Exact ayah from an approved structured source; never regenerated (Core §30, FR-QURAN-001/002).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["surah_number", "surah_name", "ayah_number", "text", "source_id", "source_version", "source_sha256"],
+      "properties": {
+        "surah_number": { "type": "integer", "minimum": 1, "maximum": 114 },
+        "surah_name": { "type": "string", "minLength": 1 },
+        "ayah_number": { "type": "integer", "minimum": 1 },
+        "text": { "type": "string", "minLength": 1 },
+        "source_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "source_version": { "type": "string", "minLength": 1 },
+        "source_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "HadithRecord": {
+      "description": "One narration with edition-specific numbering (Core §31, FR-HADITH-001..003).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "foundational_source_id", "collection", "number", "numbering_scheme", "exact_text"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "foundational_source_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "collection": { "type": "string", "minLength": 1 },
+        "book": { "type": "string" },
+        "chapter": { "type": "string" },
+        "number": { "type": "string", "minLength": 1 },
+        "numbering_scheme": { "type": "string", "minLength": 1 },
+        "narrator": { "type": "string" },
+        "exact_text": { "type": "string", "minLength": 1 },
+        "location": { "type": "string" }
+      }
+    },
+    "ReferenceEntry": {
+      "description": "One layer of a reference review: source text, approved interpretation, system synthesis or practical judgment (Core §7, FR-REF-001/006).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "review_id", "layer", "content", "provenance"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "review_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "layer": { "$ref": "enums.schema.json#/$defs/ReferenceReasoningLayer" },
+        "content": { "type": "string", "minLength": 1 },
+        "source_excerpt_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "quran_ref": { "type": "string", "pattern": "^[0-9]{1,3}:[0-9]{1,3}(-[0-9]{1,3})?$" },
+        "hadith_record_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+      },
+      "allOf": [
+        { "if": { "properties": { "provenance": { "properties": { "kind": { "const": "AI_GENERATED" } } } } },
+          "then": { "properties": { "layer": { "const": "SYSTEM_SYNTHESIS" } } } }
+      ]
+    },
+    "ReferenceJudgment": {
+      "description": "Reference judgment (Core §8-9, FR-REF-002..005). NOT_IN_CONFLICT is not REFERENCE_SUPPORTED.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "review_id", "state", "directness", "rationale", "judged_by", "created_at"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "review_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "state": { "$ref": "enums.schema.json#/$defs/ReferenceJudgmentState" },
+        "directness": { "$ref": "enums.schema.json#/$defs/Directness" },
+        "reservation_type": { "$ref": "enums.schema.json#/$defs/ReservationType" },
+        "divergence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["interpretation_a", "interpretation_b", "implications", "required_authority"],
+          "properties": {
+            "interpretation_a": { "type": "string", "minLength": 1 },
+            "source_a": { "type": "string" },
+            "interpretation_b": { "type": "string", "minLength": 1 },
+            "source_b": { "type": "string" },
+            "implications": { "type": "string", "minLength": 1 },
+            "required_authority": { "$ref": "enums.schema.json#/$defs/ActorRole" }
+          }
+        },
+        "rationale": { "type": "string", "minLength": 1 },
+        "judged_by": {
+          "allOf": [ { "$ref": "common.schema.json#/$defs/Actor" }, { "properties": { "kind": { "const": "HUMAN" } } } ]
+        },
+        "created_at": { "$ref": "common.schema.json#/$defs/Timestamp" }
+      },
+      "allOf": [
+        { "if": { "properties": { "state": { "const": "RESERVED" } }, "required": ["state"] }, "then": { "required": ["reservation_type"] },
+          "else": { "not": { "required": ["reservation_type"] } } }
+      ]
+    },
+    "OperationalConstraint": {
+      "description": "Operational reality (law, policy, contract, license). Logically separate from reference judgment (Core §5, §51).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "project_id", "target_type", "target_id", "kind", "state", "description"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "project_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "target_type": { "type": "string" },
+        "target_id": { "$ref": "common.schema.json#/$defs/EntityId" },
+        "kind": { "$ref": "enums.schema.json#/$defs/ConstraintKind" },
+        "state": { "$ref": "enums.schema.json#/$defs/OperationalConstraintState" },
+        "description": { "type": "string", "minLength": 1 },
+        "jurisdiction": { "type": "string" },
+        "source_reference": { "type": "string" },
+        "required_change": { "type": "string" },
+        "resolved": { "type": "boolean" }
+      }
+    }
+  }
+}

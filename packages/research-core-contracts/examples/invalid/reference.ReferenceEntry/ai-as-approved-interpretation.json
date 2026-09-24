@@ -1,0 +1,15 @@
+{
+  "id": "1f2a3b4c-5d6e-4f7a-8b9c-0d1e2f3a4b5c",
+  "review_id": "9d0e1f2a-3b4c-4d5e-8f6a-7b8c9d0e1f2a",
+  "layer": "APPROVED_INTERPRETATION",
+  "content": "Candidate connection between the goal and the principle of justice.",
+  "provenance": {
+    "kind": "AI_GENERATED",
+    "ai_action": {
+      "provider": "example-provider",
+      "model": "example-model",
+      "template_version": "ref-synthesis@1",
+      "timestamp": "2026-09-24T11:05:00Z"
+    }
+  }
+}

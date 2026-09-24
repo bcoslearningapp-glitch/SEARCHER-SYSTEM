@@ -22,12 +22,22 @@ from research_api.modules.hypothesis_lab.models import (
     HypothesisVersion,
     Mechanism,
 )
+from research_api.modules.operational_constraints.models import OperationalConstraint
 from research_api.modules.project_workflow.models import (
     ProblemFrameVersion,
     Project,
     ProjectClosure,
     ResearchState,
     ScratchNote,
+)
+from research_api.modules.reference_governance.models import (
+    FoundationalSource,
+    HadithRecord,
+    QuranAyah,
+    QuranSurah,
+    ReferenceEntry,
+    ReferenceJudgmentRecord,
+    ReferenceReview,
 )
 from research_api.modules.sources_library.models import (
     ProjectSource,
@@ -52,17 +62,25 @@ __all__ = [
     "Claim",
     "DecisionRecord",
     "Evidence",
+    "FoundationalSource",
+    "HadithRecord",
     "Hypothesis",
     "HypothesisCompetition",
     "HypothesisMechanism",
     "HypothesisVersion",
     "Mechanism",
     "OpenQuestion",
+    "OperationalConstraint",
     "ProblemFrameVersion",
     "Project",
     "ProjectClosure",
     "ProjectSource",
     "QualityGateEvaluationRecord",
+    "QuranAyah",
+    "QuranSurah",
+    "ReferenceEntry",
+    "ReferenceJudgmentRecord",
+    "ReferenceReview",
     "ResearchEventRecord",
     "ResearchState",
     "ResearchTrackRun",
