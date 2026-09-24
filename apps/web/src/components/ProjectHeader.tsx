@@ -6,9 +6,11 @@ import { Badge, Select } from "@/components/fields";
 import type { Dictionary, Locale } from "@/lib/i18n";
 import type { Project } from "@/lib/types";
 
+export type ProjectTab = "desk" | "map" | "lab" | "sources";
+
 const MANUAL_TARGETS = ["FRAMING", "ACTIVE_RESEARCH", "ON_HOLD", "FROZEN", "READY_TO_CLOSE"] as const;
 
-export function ProjectHeader({ project, dict, locale, active }: { project: Project; dict: Dictionary; locale: Locale; active: "desk" | "sources" }) {
+export function ProjectHeader({ project, dict, locale, active }: { project: Project; dict: Dictionary; locale: Locale; active: ProjectTab }) {
   const ui = dict.ui;
   const base = `/${locale}/projects/${project.id}`;
   return (
@@ -25,12 +27,23 @@ export function ProjectHeader({ project, dict, locale, active }: { project: Proj
       </div>
       <p dir="auto" className="text-sm text-[var(--color-muted)]">{project.initial_input}</p>
       <nav aria-label="Project" className="flex gap-4 text-sm">
-        <Link href={base} aria-current={active === "desk" ? "page" : undefined} className={active === "desk" ? "font-semibold underline" : "underline-offset-2 hover:underline"}>
-          {dict.spaces.desk}
-        </Link>
-        <Link href={`${base}/sources`} aria-current={active === "sources" ? "page" : undefined} className={active === "sources" ? "font-semibold underline" : "underline-offset-2 hover:underline"}>
-          {ui.sources}
-        </Link>
+        {(
+          [
+            ["desk", base, dict.spaces.desk],
+            ["map", `${base}/map`, dict.spaces.map],
+            ["lab", `${base}/lab`, dict.spaces.lab],
+            ["sources", `${base}/sources`, ui.sources],
+          ] as const
+        ).map(([tab, href, label]) => (
+          <Link
+            key={tab}
+            href={href}
+            aria-current={active === tab ? "page" : undefined}
+            className={active === tab ? "font-semibold underline" : "underline-offset-2 hover:underline"}
+          >
+            {label}
+          </Link>
+        ))}
       </nav>
       <ActionForm action={transitionProject} submitLabel={ui.moveTo} pendingLabel={ui.saving} className="flex flex-wrap items-end gap-2">
         <input type="hidden" name="project_id" value={project.id} />

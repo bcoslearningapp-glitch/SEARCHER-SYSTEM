@@ -1,6 +1,6 @@
 # Status
 
-**Current milestone:** M2 Reference, Evidence, Hypothesis (v0.3.0) — in progress. M1 complete (#10); tag `v0.2.0` pending.
+**Current milestone:** M2 Reference, Evidence, Hypothesis (v0.3.0) — feature-complete with this PR. Next: M3 AI Research Engine.
 
 ## Completed
 - M0 Foundation — #1.
@@ -12,7 +12,13 @@
 - #11 — #17: claims, assumptions (AI-inferred labeled until human review), open questions, capture from notes.
 - #14, #15 — #18: evidence pipeline (candidate → human assessment → evidence), exact quotes copied from verified page spans, lineage-based independence, counter-evidence tracks, hypotheses with immutable versions / Hypothesis Gate / automatic downgrade on new evidence, mechanisms.
 
-- #12, #13 (this PR): foundational library with human-approved Qur'an dataset import (no bundled text), exact ayah retrieval, Hadith records with edition numbering, layered reference review, human judgments with blocking reservations → blocking decisions, risk-aware Reference Gate wired into design eligibility, operational constraints kept separate (Scenarios E and F).
+- #12, #13 — #19: foundational library with human-approved Qur'an dataset import (no bundled text), exact ayah retrieval, Hadith records with edition numbering, layered reference review, human judgments with blocking reservations → blocking decisions, risk-aware Reference Gate wired into design eligibility, operational constraints kept separate (Scenarios E and F).
+- #16 (this PR): Lab (claims, assumptions with human review, hypotheses, mechanisms), hypothesis workspace (evidence map with candidates and acceptance, searches, reference review and judgments, standing, versions, assessment, revision), Map; E2E flows 4 and 5.
+
+## M2 exit criteria (PRD §76 Phase 2)
+- [x] reference review trace is source → interpretation → system inference → judgment (layers, ADR-009)
+- [x] exact source quote is protected (server-side span copy, append-only excerpts)
+- [x] hypothesis can be supported/contradicted without losing history (Scenario D, E2E 4)
 
 ## M1 exit criteria (PRD §76 Phase 1)
 - [x] full create → frame → approve flow (E2E 1)
@@ -21,7 +27,7 @@
 - [x] audit state changes (integration tests assert audit/research events)
 
 ## Blocked (needs a human)
-- Tag `v0.2.0` on `5b7e7a2` (M1, green on `main`): this session can only push its working branch.
+- Tag `v0.2.0` on `5b7e7a2` (M1) and `v0.3.0` after this PR merges (M2): this session can only push its working branch.
 - Import and approve the Qur'an text dataset (Constitutional Authority) — see ADR-009.
 - P0-12 protect `main` with required checks (repository admin settings).
 

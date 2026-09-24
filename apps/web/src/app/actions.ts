@@ -159,3 +159,155 @@ export async function respondToAccess(_: ActionResult, form: FormData): Promise<
     ),
   );
 }
+
+// --- Lab: claims, assumptions, hypotheses, mechanisms, evidence, reference ---
+
+const P = (form: FormData) => `/api/v1/projects/${text(form, "project_id")}`;
+
+function listField(form: FormData, name: string): string[] {
+  return text(form, name)
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
+function hypothesisContent(form: FormData) {
+  return {
+    statement: text(form, "statement"),
+    context: text(form, "context"),
+    expected_outcome: text(form, "expected_outcome"),
+    proposed_mechanism: text(form, "proposed_mechanism"),
+    assumptions: listField(form, "assumptions"),
+    boundary_conditions: listField(form, "boundary_conditions"),
+    falsification_conditions: listField(form, "falsification_conditions"),
+  };
+}
+
+export async function createClaim(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/claims`, {
+      statement: text(form, "statement"),
+      claim_type: text(form, "claim_type"),
+      important: form.get("important") === "on",
+    }),
+  );
+}
+
+export async function createAssumption(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/assumptions`, { statement: text(form, "statement"), criticality: text(form, "criticality") }),
+  );
+}
+
+export async function reviewAssumption(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/assumptions/${text(form, "assumption_id")}/review`, { status: text(form, "status") }),
+  );
+}
+
+export async function createHypothesis(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() => apiSend("POST", `${P(form)}/hypotheses`, { content: { statement: text(form, "statement") } }));
+}
+
+export async function reviseHypothesis(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/hypotheses/${text(form, "hypothesis_id")}/revise`, {
+      content: hypothesisContent(form),
+      change_reason: text(form, "change_reason"),
+    }),
+  );
+}
+
+export async function transitionHypothesis(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/hypotheses/${text(form, "hypothesis_id")}/transition`, {
+      target: text(form, "target"),
+      reason: text(form, "reason"),
+    }),
+  );
+}
+
+export async function assessHypothesis(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/hypotheses/${text(form, "hypothesis_id")}/assess`, {
+      epistemic_state: text(form, "epistemic_state"),
+      reason: text(form, "reason"),
+    }),
+  );
+}
+
+export async function createMechanism(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/mechanisms`, { name: text(form, "name"), description: text(form, "description") }),
+  );
+}
+
+export async function proposeEvidence(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/evidence`, {
+      target_type: text(form, "target_type"),
+      target_id: text(form, "target_id"),
+      role: text(form, "role"),
+      finding: text(form, "finding"),
+      excerpt_id: text(form, "excerpt_id"),
+      track: optionalText(form, "track") ?? null,
+    }),
+  );
+}
+
+export async function assessEvidence(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const decision = text(form, "decision");
+  return run(() =>
+    apiSend("POST", `${P(form)}/evidence/${text(form, "evidence_id")}/assess`, {
+      decision,
+      strength: decision === "ACCEPT" ? text(form, "strength") : undefined,
+      limitations: optionalText(form, "limitations"),
+    }),
+  );
+}
+
+export async function recordTrack(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/research-tracks`, {
+      target_type: text(form, "target_type"),
+      target_id: text(form, "target_id"),
+      track: text(form, "track"),
+      outcome: text(form, "outcome"),
+      scope: text(form, "scope"),
+    }),
+  );
+}
+
+export async function createReview(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/reference-reviews`, {
+      target_type: text(form, "target_type"),
+      target_id: text(form, "target_id"),
+      question: text(form, "question"),
+      analytical_category: text(form, "analytical_category"),
+    }),
+  );
+}
+
+export async function addReviewEntry(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const layer = text(form, "layer");
+  return run(() =>
+    apiSend("POST", `${P(form)}/reference-reviews/${text(form, "review_id")}/entries`, {
+      layer,
+      content: optionalText(form, "content"),
+      quran_ref: optionalText(form, "quran_ref"),
+    }),
+  );
+}
+
+export async function judgeReview(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const state = text(form, "state");
+  return run(() =>
+    apiSend("POST", `${P(form)}/reference-reviews/${text(form, "review_id")}/judgments`, {
+      state,
+      directness: text(form, "directness"),
+      reservation_type: state === "RESERVED" ? text(form, "reservation_type") : null,
+      rationale: text(form, "rationale"),
+    }),
+  );
+}
