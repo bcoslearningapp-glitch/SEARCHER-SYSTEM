@@ -81,6 +81,11 @@
   - Reusable adapter contract checks (`tests/adapter_contracts.py`) for the SearchProvider interface (mock, Anthropic offline, OpenAI, outage) and the CloudWorkspaceAdapter. The live provider contract uses the same check.
   - A PRD §73 coverage map in `docs/evaluation/TEST_COVERAGE.md`.
   - Loading and error boundaries for every page. A missing record is a not-found page, and a service outage is an error state with a retry, never "not found".
+- #55: Security review (`docs/architecture/SECURITY.md`: threat model, a control for each PRD §68 requirement, residual risks):
+  - Finding: the API accepted cross-site "simple" requests (multipart uploads, body-less POSTs) and any Host header. That exposed CSRF, and DNS rebinding could read research data. Fixed:
+    - a Host allow-list on the API and the web app;
+    - refusal of cross-site writes, by foreign `Origin` or `Sec-Fetch-Site: cross-site`;
+    - security headers on every response.
 
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.

@@ -48,4 +48,12 @@ test.describe("platform foundation smoke", () => {
     await expect(page.getByTestId("page-not-found")).toBeVisible();
     await expect(page.getByTestId("page-error")).toHaveCount(0);
   });
+
+  test("pages and the API send security headers", async ({ page, request }) => {
+    const response = await page.goto("/en");
+    expect(response?.headers()["x-frame-options"]).toBe("DENY");
+    expect(response?.headers()["x-content-type-options"]).toBe("nosniff");
+    const api = await request.get(`${process.env.API_URL ?? "http://localhost:8000"}/health/live`);
+    expect(api.headers()["content-security-policy"]).toContain("default-src 'none'");
+  });
 });
