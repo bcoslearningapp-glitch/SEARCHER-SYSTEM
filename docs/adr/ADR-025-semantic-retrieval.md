@@ -38,8 +38,19 @@ Decision:
 
   It reports recall@3, MRR, cross-lingual@5 and throughput. The `embedding-benchmark` workflow runs it on GitHub runners, which can download the models. The default `EMBEDDING_MODEL` is set from its results (below).
 
-Benchmark results:
-See the `embedding-benchmark` run on the PR that introduced this ADR. The default model and its numbers are recorded here once that run completes.
+Benchmark results (the `embedding-benchmark` workflow on GitHub runners; 30 passages and 30 questions in en/fr/ar):
+
+| Model | Dims | recall@3 | MRR | cross-lingual@5 | Texts/s |
+|---|---|---|---|---|---|
+| Word-overlap baseline (what lexical search can do) | — | 0.222 | 0.605 | 0.1 | — |
+| `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` | 384 | 1.0 | 1.0 | 1.0 | 126.7 |
+| `sentence-transformers/paraphrase-multilingual-mpnet-base-v2` | 768 | 1.0 | 1.0 | 1.0 | 33.0 |
+| `minishlab/potion-multilingual-128M` | 256 | 0.611 | 0.967 | 0.7 | 6059.7 |
+| `intfloat/multilingual-e5-large` | — | did not load under fastembed ("External data path escapes model directory") | | | |
+
+- **Default: `paraphrase-multilingual-MiniLM-L12-v2`.** It ties the best retrieval scores, including full cross-lingual recall. It is about four times faster than mpnet-base and stores half as many dimensions.
+- potion-multilingual is very fast but misses 30% of cross-language matches. That matters for an Arabic/French/English library.
+- The fixtures are small and synthetic, so ties at 1.0 show that a model is adequate, not that the tied models are equal. Re-run the benchmark on a sample of the owner's real library before switching models.
 
 Consequences:
 - Exact search over pgvector needs no ANN index at personal-library scale (~16k chunks). An HNSW index per model can be added if libraries grow much larger.

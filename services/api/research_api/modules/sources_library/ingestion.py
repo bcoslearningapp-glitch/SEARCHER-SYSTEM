@@ -121,7 +121,10 @@ def ingest_asset(session: Session, asset_id: Any) -> dict[str, Any]:
     session.flush()
     embedded = semantic.index_after_ingestion(session, embeddings.configured(get_settings()), asset.id)
     logger.info("ingested asset %s: %d pages, %d chunks", asset.id, len(pages), chunk_count)
-    return {"pages": len(pages), "chunks": chunk_count, "pages_needing_ocr": needs_ocr, "embedded": embedded}
+    result: dict[str, int] = {"pages": len(pages), "chunks": chunk_count, "pages_needing_ocr": needs_ocr}
+    if embedded is not None:
+        result["embedded"] = embedded
+    return result
 
 
 def mark_failed(session: Session, asset_id: Any) -> None:
