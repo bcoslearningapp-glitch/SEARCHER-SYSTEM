@@ -99,6 +99,10 @@ export type UiStrings = {
   searchedScope: string;
   searchModes: Record<"lexical" | "semantic" | "hybrid", string>;
   page: string;
+  pagination: string;
+  previousPage: string;
+  nextPage: string;
+  pageLabel: string;
   discoveryOnly: string;
   sources: string;
   accessRequests: string;
@@ -230,6 +234,10 @@ export const en: UiStrings = {
   searchedScope: "Searched",
   searchModes: { lexical: "keyword search", semantic: "meaning search", hybrid: "keyword + meaning search" },
   page: "p.",
+  pagination: "Pages",
+  previousPage: "← Previous",
+  nextPage: "Next →",
+  pageLabel: "Page",
   discoveryOnly: "Search results are discovery aids, not quotations.",
   sources: "Sources",
   accessRequests: "Source access requests",
@@ -362,6 +370,10 @@ export const fr: UiStrings = {
   searchedScope: "Recherché dans",
   searchModes: { lexical: "recherche par mots-clés", semantic: "recherche par le sens", hybrid: "mots-clés + sens" },
   page: "p.",
+  pagination: "Pages",
+  previousPage: "← Précédent",
+  nextPage: "Suivant →",
+  pageLabel: "Page",
   discoveryOnly: "Les résultats aident à découvrir ; ce ne sont pas des citations.",
   sources: "Sources",
   accessRequests: "Demandes d'accès aux sources",
@@ -494,6 +506,10 @@ export const ar: UiStrings = {
   searchedScope: "نطاق البحث",
   searchModes: { lexical: "بحث بالكلمات المفتاحية", semantic: "بحث بالمعنى", hybrid: "الكلمات المفتاحية + المعنى" },
   page: "ص",
+  pagination: "الصفحات",
+  previousPage: "→ السابق",
+  nextPage: "التالي ←",
+  pageLabel: "صفحة",
   discoveryOnly: "نتائج البحث وسائل استكشاف وليست اقتباسات.",
   sources: "المصادر",
   accessRequests: "طلبات الوصول إلى المصادر",

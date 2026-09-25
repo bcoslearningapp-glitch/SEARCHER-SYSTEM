@@ -4,6 +4,7 @@ import { ActionForm } from "@/components/ActionForm";
 import { AppShell } from "@/components/AppShell";
 import { CatalogForm } from "@/components/CatalogForm";
 import { Badge, Card, Empty, Field, Select, TextArea, TextInput } from "@/components/fields";
+import { Pager, pageNumber, pageQuery, pageSlice } from "@/components/Pager";
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { SourceList } from "@/components/SourceList";
 import { AccessResponseFormValues, PriorityValues } from "@/lib/contracts/enums";
@@ -16,16 +17,20 @@ export const dynamic = "force-dynamic";
 
 const TEXT_FORMS = ["EXACT_TEXT", "RESEARCHER_SUMMARY", "RESEARCHER_ATTESTATION"];
 
-export default async function ProjectSourcesPage(props: ProjectParams) {
+type Props = ProjectParams & { searchParams: Promise<{ page?: string }> };
+
+export default async function ProjectSourcesPage(props: Props) {
   const { locale, projectId } = await resolveProjectParams(props);
+  const page = pageNumber((await props.searchParams).page);
   const dict = getDictionary(locale);
   const ui = dict.ui;
   const project = await loadEntity<Project>(`/api/v1/projects/${projectId}`);
-  const [works, library, requests] = await Promise.all([
-    load<Work[]>(`/api/v1/sources?project_id=${projectId}`),
+  const [listed, library, requests] = await Promise.all([
+    load<Work[]>(`/api/v1/sources?project_id=${projectId}&${pageQuery(page)}`),
     load<Work[]>("/api/v1/sources"),
     load<AccessRequest[]>(`/api/v1/projects/${projectId}/access-requests`),
   ]);
+  const works = pageSlice(listed ?? []);
   const editionIds = [...new Set((requests ?? []).map((r) => r.edition_id))];
   const excerptLists = await Promise.all(editionIds.map((id) => load<Excerpt[]>(`/api/v1/sources/editions/${id}/excerpts`)));
   const excerpts = excerptLists.flatMap((list) => list ?? []);
@@ -36,7 +41,8 @@ export default async function ProjectSourcesPage(props: ProjectParams) {
       <div className="space-y-6">
         <ProjectHeader project={project} dict={dict} locale={locale} active="sources" />
         <Card title={ui.sources}>
-          <SourceList works={works ?? []} dict={dict} />
+          <SourceList works={works.items} dict={dict} />
+          <Pager page={page} hasNext={works.hasNext} href={(n) => `/${locale}/projects/${projectId}/sources?page=${n}`} dict={dict} />
           <details className="text-sm">
             <summary className="cursor-pointer font-medium">{ui.catalogSource}</summary>
             <div className="pt-3">
