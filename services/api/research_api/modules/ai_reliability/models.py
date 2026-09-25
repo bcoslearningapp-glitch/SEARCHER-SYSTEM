@@ -24,7 +24,7 @@ class AIEvaluation(UUIDPrimaryKeyMixin, Base):
     comparator: Mapped[str] = mapped_column(String(2))
     passed: Mapped[bool] = mapped_column(Boolean)
     sample_size: Mapped[int] = mapped_column(Integer)
-    method: Mapped[str] = mapped_column(String(30))  # AUTOMATED_GOLDEN | HUMAN_GRADED
+    method: Mapped[str] = mapped_column(String(30))  # AUTOMATED_GOLDEN | AUTOMATED_AUDIT | HUMAN_GRADED
     fixture_set: Mapped[str | None] = mapped_column(String(80))
     notes: Mapped[str | None] = mapped_column(Text)
     details: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)

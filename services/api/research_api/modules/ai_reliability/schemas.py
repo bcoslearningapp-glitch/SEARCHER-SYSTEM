@@ -35,7 +35,7 @@ class EvaluationIn(BaseModel):
     dimension: str
     score: float
     sample_size: int = Field(ge=1)
-    method: Literal["AUTOMATED_GOLDEN", "HUMAN_GRADED"] = "HUMAN_GRADED"
+    method: Literal["AUTOMATED_GOLDEN", "AUTOMATED_AUDIT", "HUMAN_GRADED"] = "HUMAN_GRADED"
     fixture_set: str | None = Field(default=None, max_length=80)
     notes: str | None = None
     details: dict[str, Any] = Field(default_factory=dict)

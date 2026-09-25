@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from research_api.modules.ai_gateway import service as gateway
-from research_api.modules.ai_reliability.dimensions import DIMENSIONS
+from research_api.modules.ai_reliability.dimensions import DIMENSIONS, INSTALLATION, INSTALLATION_AUDITED
 from research_api.modules.ai_reliability.models import AIEvaluation
 from research_api.modules.ai_reliability.schemas import (
     DimensionOut,
@@ -88,13 +88,19 @@ def reliability(session: Session) -> ReliabilityOut:
             EvaluationOut.model_validate(evaluation)
         )
     blocking = [d.key for d in DIMENSIONS.values() if d.blocking]
+
+    def expected(provider: str) -> list[str]:
+        if provider == INSTALLATION:
+            return [k for k in blocking if k in INSTALLATION_AUDITED]
+        return [k for k in blocking if k not in INSTALLATION_AUDITED]
+
     models = [
         ModelStanding(
             provider=provider,
             model=model,
             latest=latest,
-            blocking_failures=[k for k in blocking if k in latest and not latest[k].passed],
-            blocking_unevaluated=[k for k in blocking if k not in latest],
+            blocking_failures=[k for k in expected(provider) if k in latest and not latest[k].passed],
+            blocking_unevaluated=[k for k in expected(provider) if k not in latest],
         )
         for (provider, model), latest in sorted(by_model.items())
     ]

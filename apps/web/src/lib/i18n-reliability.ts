@@ -28,6 +28,10 @@ export type ReliabilityStrings = {
   blockingGaps: string;
   thresholds: string;
   blocking: string;
+  audit: string;
+  auditExplainer: string;
+  runAudit: string;
+  running: string;
 };
 
 export const reliabilityEn: ReliabilityStrings = {
@@ -59,6 +63,11 @@ export const reliabilityEn: ReliabilityStrings = {
   blockingGaps: "Blocking dimensions failing or not evaluated",
   thresholds: "Dimensions and thresholds",
   blocking: "blocking",
+  audit: "Installation audit",
+  auditExplainer:
+    "Re-checks every quote in every output against its source, every layer label, and every tool call against its task allow-list. Recorded under provider “installation”.",
+  runAudit: "Run the audit",
+  running: "Checking…",
 };
 
 export const reliabilityFr: ReliabilityStrings = {
@@ -90,6 +99,11 @@ export const reliabilityFr: ReliabilityStrings = {
   blockingGaps: "Dimensions bloquantes en échec ou non évaluées",
   thresholds: "Dimensions et seuils",
   blocking: "bloquante",
+  audit: "Audit de l'installation",
+  auditExplainer:
+    "Revérifie chaque citation de chaque production par rapport à sa source, chaque étiquette de couche et chaque appel d'outil par rapport à la liste autorisée de sa tâche. Enregistré sous le fournisseur « installation ».",
+  runAudit: "Lancer l'audit",
+  running: "Vérification…",
 };
 
 export const reliabilityAr: ReliabilityStrings = {
@@ -121,4 +135,9 @@ export const reliabilityAr: ReliabilityStrings = {
   blockingGaps: "أبعاد حاجبة راسبة أو غير مقيَّمة",
   thresholds: "الأبعاد والعتبات",
   blocking: "حاجب",
+  audit: "تدقيق التثبيت",
+  auditExplainer:
+    "يعيد التحقق من كل اقتباس في كل مخرج مقابل مصدره، ومن كل تسمية طبقة، ومن كل استدعاء أداة مقابل قائمة المهام المسموح بها. يُسجَّل تحت المزوِّد «installation».",
+  runAudit: "تشغيل التدقيق",
+  running: "جارٍ التحقق…",
 };
