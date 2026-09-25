@@ -750,3 +750,20 @@ export async function approveOutputVersion(_: ActionResult, form: FormData): Pro
 export async function runOutputIntegrity(_: ActionResult, form: FormData): Promise<ActionResult> {
   return run(() => apiSend("POST", `${O(form)}/versions/${text(form, "version_id")}/integrity`, {}));
 }
+
+// --- Research Core Package import (PRD §45) ---
+
+export async function importPackage(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Choose the package file." };
+  const payload = new FormData();
+  payload.set("file", file, file.name);
+  try {
+    const report = await apiUpload<Record<string, unknown>>("/api/v1/packages/import", payload);
+    revalidatePath("/", "layout");
+    return { ok: true, details: report };
+  } catch (error) {
+    if (error instanceof ApiError) return { ok: false, message: error.message, details: error.details };
+    return { ok: false, message: "The research service is unreachable. Your data is unchanged." };
+  }
+}

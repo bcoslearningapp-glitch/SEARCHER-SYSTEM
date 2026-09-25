@@ -11,6 +11,7 @@ import { knowledgeAr, knowledgeEn, knowledgeFr, type KnowledgeStrings } from "@/
 import { terminologyAr, terminologyEn, terminologyFr, type TerminologyStrings } from "@/lib/i18n-terminology";
 import { closureAr, closureEn, closureFr, type ClosureStrings } from "@/lib/i18n-closure";
 import { outputsAr, outputsEn, outputsFr, type OutputStrings } from "@/lib/i18n-outputs";
+import { portabilityAr, portabilityEn, portabilityFr, type PortabilityStrings } from "@/lib/i18n-portability";
 import { foundationalAr, foundationalEn, foundationalFr, type FoundationalStrings } from "@/lib/i18n-foundational";
 import { labAr, labEn, labFr, type LabStrings } from "@/lib/i18n-lab";
 import { reliabilityAr, reliabilityEn, reliabilityFr, type ReliabilityStrings } from "@/lib/i18n-reliability";
@@ -44,6 +45,7 @@ export type Dictionary = {
   terminology: TerminologyStrings;
   closure: ClosureStrings;
   outputs: OutputStrings;
+  portability: PortabilityStrings;
   foundational: FoundationalStrings;
   reliability: ReliabilityStrings;
   spaces: Record<Space, string>;
@@ -67,6 +69,7 @@ const en: Dictionary = {
   terminology: terminologyEn,
   closure: closureEn,
   outputs: outputsEn,
+  portability: portabilityEn,
   foundational: foundationalEn,
   reliability: reliabilityEn,
   spaces: { desk: "Desk", map: "Map", library: "Library", lab: "Lab", outputs: "Outputs" },
@@ -96,6 +99,7 @@ const fr: Dictionary = {
   terminology: terminologyFr,
   closure: closureFr,
   outputs: outputsFr,
+  portability: portabilityFr,
   foundational: foundationalFr,
   reliability: reliabilityFr,
   spaces: { desk: "Bureau", map: "Carte", library: "Bibliothèque", lab: "Laboratoire", outputs: "Productions" },
@@ -130,6 +134,7 @@ const ar: Dictionary = {
   terminology: terminologyAr,
   closure: closureAr,
   outputs: outputsAr,
+  portability: portabilityAr,
   foundational: foundationalAr,
   reliability: reliabilityAr,
   spaces: { desk: "المكتب", map: "الخريطة", library: "المكتبة", lab: "المختبر", outputs: "المخرجات" },

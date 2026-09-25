@@ -52,6 +52,8 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("project.transition", A.REQUEST_APPROVAL, system=True),
         _p("project.set_mode", A.ACT_AND_NOTIFY, system=True),
         _p("project.fork", A.FORBIDDEN),
+        _p("project.export", A.FORBIDDEN),
+        _p("project.import", A.FORBIDDEN),
         _p("project.close", A.FORBIDDEN, frozenset({R.RESEARCHER, R.PROJECT_LEAD}), approval=True),
         _p("project.reopen", A.FORBIDDEN, frozenset({R.RESEARCHER, R.PROJECT_LEAD}), approval=True),
         _p("research_state.update", A.ACT_AND_NOTIFY, system=True),

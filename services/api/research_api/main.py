@@ -21,6 +21,7 @@ from research_api.modules.knowledge_memory.router import router as knowledge_rou
 from research_api.modules.knowledge_memory.terminology_router import router as terminology_router
 from research_api.modules.operational_constraints.router import router as constraints_router
 from research_api.modules.outputs_integrity.router import router as outputs_router
+from research_api.modules.portability.router import router as portability_router
 from research_api.modules.project_workflow.attention import router as attention_router
 from research_api.modules.project_workflow.router import router as projects_router
 from research_api.modules.reference_governance.router import library as reference_router
@@ -58,6 +59,7 @@ def create_app() -> FastAPI:
     app.include_router(knowledge_router)
     app.include_router(terminology_router)
     app.include_router(outputs_router)
+    app.include_router(portability_router)
     app.include_router(reference_router)
     app.include_router(reference_reviews_router)
     app.include_router(constraints_router)

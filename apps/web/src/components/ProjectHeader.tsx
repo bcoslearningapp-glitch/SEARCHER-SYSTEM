@@ -49,6 +49,9 @@ export function ProjectHeader({ project, dict, locale, active }: { project: Proj
             {label}
           </Link>
         ))}
+        <a href={`${base}/package`} className="ms-auto underline-offset-2 hover:underline" data-testid="export-package">
+          {dict.portability.export}
+        </a>
       </nav>
       <ActionForm action={transitionProject} submitLabel={ui.moveTo} pendingLabel={ui.saving} className="flex flex-wrap items-end gap-2">
         <input type="hidden" name="project_id" value={project.id} />
