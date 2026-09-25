@@ -1,6 +1,6 @@
 # Status
 
-**Current milestone:** M6 Hardening and v1.0, next. M5 (v0.6.0) is complete (#52). M4 (v0.5.0) is complete (#42). Tags for v0.2.0–v0.6.0 wait on the owner (#28).
+**Current milestone:** M6 Hardening and v1.0. All deliverables are in; v1.0 waits on the owner's evaluation items (see the v1.0 DoD below). M5 (v0.6.0) is complete (#52). M4 (v0.5.0) is complete (#42). Tags for v0.2.0–v0.6.0 wait on the owner (#28).
 
 ## Completed
 - M0 Foundation — #1.
@@ -104,6 +104,49 @@
   - `docs/user/USER_GUIDE.md` covers the whole researcher workflow. The README is updated.
   - A `clean-setup` CI job runs the README's commands verbatim on a clean runner.
   - Gap closed: project AI policy (cloud consent, allowed profiles, budgets) was API-only. It is now a Desk card, with an E2E test.
+- #60: Release artifacts:
+  - Tags build versioned backend and web images on GHCR, plus a source bundle.
+  - Release notes come from `CHANGELOG.md`.
+  - The v1.0 DoD checklist is above.
+
+## v1.0 Definition of Done (PRD §78)
+
+Evidence for each item. E2E flow numbers refer to PRD §73 (`docs/evaluation/TEST_COVERAGE.md`).
+
+- [x] A researcher can create and complete an end-to-end research project. E2E flows 1–10 cover framing through output, export, closure and reopening.
+- [x] Research State survives sessions and provider changes. It is canonical in the database; `test_m3_exit.py` runs one task on two provider profiles with the same stored schema.
+- [x] Two AI providers are supported through an abstraction. Anthropic and OpenAI adapters sit behind the gateway, with contract tests offline and live.
+- [x] Reference review is traceable and separates source, interpretation, inference and judgment. ADR-009, E2E flow 5, and the `claim_source_separation` audit.
+- [x] Physical, restricted and metadata-only sources are usable through Hybrid Source Access (E2E flow 3).
+- [x] Counter-evidence search is operational. "Challenge this" and the challenge tracks; E2E flows 4 and 9; the golden `counter_evidence_retrieval` fixture.
+- [x] Evidence lineage exists (lineage-based independence, #15).
+- [x] The hypothesis and mechanism lifecycle works. Immutable versions, downgrade with history; E2E flow 4.
+- [x] Design and experiment workflows work (E2E flow 6).
+- [x] Local knowledge can be promoted with human approval (Knowledge Promotion Gate, E2E flow 6).
+- [x] Multilingual output-integrity checks work. The eight-step pipeline; ar/fr/en export; the translation-semantic check.
+- [x] Qur'an and exact foundational quotations are protected. They come from the approved dataset only; the `exact_quote_fidelity` and `quran_hadith_integrity` audits.
+- [x] Project export and import preserve identity, provenance, trust and source metadata. Round trip into a second database; E2E flow 8.
+- [x] A provider outage does not make project data unavailable (E2E flow 9).
+- [x] Full GitHub CI passes: 15 required checks, plus `clean-setup` and the release workflow.
+- [ ] **AI evaluation thresholds are met.** The measurement exists for every blocking dimension (#56). Still needed:
+  - the Methodology Steward approves the thresholds, which are placeholders today;
+  - a live provider-contract run with API keys records per-model golden results;
+  - the citation-support grades (human-graded).
+  These are owner items (#28).
+- [x] A clean machine can run the product from the documented setup. The `clean-setup` CI job follows the README verbatim (#59).
+
+Deliverables for Phase 6:
+- full E2E suite (#54);
+- security review (#55);
+- AI evaluation suite (#56);
+- performance benchmark (#57);
+- backup and restore (#58);
+- user documentation (#59);
+- release artifacts (#60).
+
+The release workflow builds the source bundle, the images `product-b-backend` and `product-b-web` on GHCR, and notes taken from CHANGELOG.md.
+
+Open, not part of the DoD: semantic retrieval (#65, PRD §61 SHOULD).
 
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.
