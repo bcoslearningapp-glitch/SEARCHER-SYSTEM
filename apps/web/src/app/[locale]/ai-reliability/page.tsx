@@ -1,3 +1,5 @@
+import { runInstallationAudit } from "@/app/actions";
+import { ActionForm } from "@/components/ActionForm";
 import { AppShell } from "@/components/AppShell";
 import { Badge, Card, Empty } from "@/components/fields";
 import { LoadError } from "@/components/LoadError";
@@ -61,6 +63,13 @@ export default async function ReliabilityPage(props: LocaleParams) {
           )}
         </Card>
 
+        <Card title={r.audit} testId="installation-audit">
+          <p className="mb-3 text-sm text-[var(--color-muted)]">{r.auditExplainer}</p>
+          <ActionForm action={runInstallationAudit} submitLabel={r.runAudit} pendingLabel={r.running}>
+            <span />
+          </ActionForm>
+        </Card>
+
         <Card title={r.models} testId="models">
           {data?.models.length ? (
             <ul className="space-y-4 text-sm">
@@ -76,7 +85,10 @@ export default async function ReliabilityPage(props: LocaleParams) {
                     </p>
                   ) : null}
                   <ul className="grid gap-1 sm:grid-cols-2">
-                    {data.dimensions.map((d) => {
+                    {data.dimensions
+                      // The installation row carries only the dimensions audited on the installation's records.
+                      .filter((d) => m.provider !== "installation" || d.key in m.latest)
+                      .map((d) => {
                       const latest = m.latest[d.key];
                       return (
                         <li key={d.key} className="flex flex-wrap items-center gap-2">

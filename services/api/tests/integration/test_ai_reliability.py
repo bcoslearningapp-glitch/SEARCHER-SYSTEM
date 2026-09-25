@@ -48,7 +48,9 @@ def test_steward_records_results_against_thresholds(client: TestClient) -> None:
     assert unknown.status_code == 422
     standing = next(m for m in client.get("/api/v1/ai/reliability").json()["models"] if m["model"] == model)
     assert standing["blocking_failures"] == ["citation_accuracy"]
-    assert "exact_quote_fidelity" in standing["blocking_unevaluated"]
+    assert "counter_evidence_retrieval" in standing["blocking_unevaluated"]
+    # Installation-audited dimensions are measured once for the installation, not per model (#56).
+    assert "exact_quote_fidelity" not in standing["blocking_unevaluated"]
 
 
 def test_ai_cannot_grade_itself(session: Session) -> None:

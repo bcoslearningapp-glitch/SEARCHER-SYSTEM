@@ -91,6 +91,11 @@
   - Restore verifies everything first, and refuses to overwrite existing data without `--replace`.
   - Tested: restoring into an empty database returns identical ids, audit history and files.
   - The API image ships PostgreSQL 16 client tools, and backups go to a `backups` volume.
+- #56: AI evaluation suite. Every blocking QUALITY_GATES dimension now has a measurement:
+  - **Golden suite:** counter-evidence, prompt injection, structured output.
+  - **New installation audit:** exact quotes, Qur'an/Hadith integrity, layer separation, tool authorization. It runs from the reliability page or the API, and tampered records fail it.
+  - **Human-graded:** citation support.
+  - The Methodology Steward still has to approve the thresholds (#28).
 
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.

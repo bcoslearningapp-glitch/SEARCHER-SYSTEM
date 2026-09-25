@@ -47,3 +47,10 @@ DIMENSIONS: dict[str, Dimension] = {
         ),
     ]
 }
+
+# Dimensions measured on the installation's records rather than per model (#56). They are recorded under
+# provider INSTALLATION, and a model's standing does not list them as unevaluated.
+INSTALLATION = "installation"
+INSTALLATION_AUDITED = frozenset(
+    {"exact_quote_fidelity", "quran_hadith_integrity", "claim_source_separation", "tool_use_correctness"}
+)

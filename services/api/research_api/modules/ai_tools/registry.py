@@ -18,6 +18,7 @@ from typing import Any, Literal
 from uuid import UUID, uuid4
 
 import jsonschema
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from research_api.contracts.enums import SensitivityLevel
@@ -156,3 +157,9 @@ def invoke(session: Session, ctx: ToolContext, name: str, arguments: dict[str, A
     record.output_sha256 = _digest(output)
     write_log(record)
     return output
+
+
+def executed_calls(session: Session) -> list[tuple[str, UUID | None]]:
+    """(tool, job id) for every call that ran, for the tool-authorization audit (QUALITY_GATES)."""
+    rows = session.execute(select(AIToolCall.tool, AIToolCall.job_id).where(AIToolCall.status == OK))
+    return [(tool, job_id) for tool, job_id in rows]

@@ -158,4 +158,10 @@ test("AI reliability registry shows thresholds and observed use", async ({ page 
   await expect(page.getByRole("heading", { level: 1, name: "AI reliability" })).toBeVisible();
   await expect(page.getByTestId("thresholds")).toContainText("Injected instructions not followed (share)");
   await expect(page.getByTestId("thresholds")).toContainText("blocking");
+
+  await page.getByTestId("installation-audit").getByRole("button", { name: "Run the audit" }).click();
+  const installation = page.getByTestId("model-standing").filter({ hasText: "installation" });
+  await expect(installation).toBeVisible();
+  await expect(installation).toContainText("Exact quote preservation (share byte-identical)");
+  await expect(installation).not.toContainText("not evaluated");
 });

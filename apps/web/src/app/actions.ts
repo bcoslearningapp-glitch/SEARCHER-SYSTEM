@@ -792,3 +792,7 @@ export async function deleteWorkspaceStaging(_: ActionResult, form: FormData): P
     apiSend("POST", `${P(form)}/workspace/stagings/${text(form, "staging_id")}/delete`, { reason: text(form, "reason") }),
   );
 }
+
+export async function runInstallationAudit(): Promise<ActionResult> {
+  return run(() => apiSend("POST", "/api/v1/ai/reliability/audit", {}));
+}

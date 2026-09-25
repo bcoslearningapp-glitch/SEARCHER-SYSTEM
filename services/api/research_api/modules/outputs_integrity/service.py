@@ -8,6 +8,7 @@ written. Approval is human-only.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
@@ -25,6 +26,8 @@ from research_api.contracts.enums import (
     OutputType,
     OutputVersionStatus,
     ProvenanceKind,
+    QuoteSourceKind,
+    ReferenceReasoningLayer,
 )
 from research_api.modules.governance_audit import service as governance
 from research_api.modules.governance_audit.context import Authorized, authorized
@@ -459,3 +462,52 @@ def version_markdown(session: Session, project_id: UUID, version_id: UUID) -> st
         raise NotFoundError("output version not found")
     _, doc = _document(session, project_id, version.output_id, version_id)
     return render.markdown(session, project_id, doc)
+
+
+@dataclass(frozen=True)
+class QuoteAudit:
+    """Installation-wide measures for the evaluation registry (QUALITY_GATES blocking dimensions)."""
+
+    quotes: int
+    exact: int
+    sacred: int
+    sacred_not_matching: int
+    layered_blocks: int
+    layered_correct: int
+    failures: list[dict[str, str]]
+
+
+def audit_quotes(session: Session) -> QuoteAudit:
+    """Re-check every quote in every output version against its source, and every layer label."""
+    layers = {layer.value for layer in ReferenceReasoningLayer}
+    source_text = ReferenceReasoningLayer.SOURCE_TEXT.value
+    counts = {"quotes": 0, "exact": 0, "sacred": 0, "sacred_bad": 0, "layered": 0, "layered_ok": 0}
+    failures: list[dict[str, str]] = []
+    rows = session.execute(select(OutputVersion, Output.project_id).join(Output, Output.id == OutputVersion.output_id))
+    for version, project_id in rows:
+        for raw in version.blocks:
+            block = Block.model_validate(raw)
+            if block.label in layers:
+                counts["layered"] += 1
+                is_quote = block.kind is OutputBlockKind.QUOTE
+                counts["layered_ok"] += int(is_quote == (block.label == source_text))
+            if block.quote is None:
+                continue
+            counts["quotes"] += 1
+            sacred = block.quote.source_kind in (QuoteSourceKind.QURAN, QuoteSourceKind.HADITH)
+            counts["sacred"] += int(sacred)
+            reason = quotes.mismatch(session, project_id, block.quote)
+            if reason is None and block.text == block.quote.text:
+                counts["exact"] += 1
+                continue
+            counts["sacred_bad"] += int(sacred)
+            failures.append({"output_version": str(version.id), "reason": reason or "block text differs"})
+    return QuoteAudit(
+        counts["quotes"],
+        counts["exact"],
+        counts["sacred"],
+        counts["sacred_bad"],
+        counts["layered"],
+        counts["layered_ok"],
+        failures[:50],
+    )
