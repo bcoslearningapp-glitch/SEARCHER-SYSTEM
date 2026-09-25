@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 
 import { changeKnowledgeStanding, createKnowledge, promoteKnowledge, reuseKnowledge } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
@@ -12,7 +11,7 @@ import {
   TransferabilityStateValues,
 } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveProjectParams, type ProjectParams } from "@/lib/locale-params";
 import type { Experiment, ExperimentRecord, KnowledgeItem, KnowledgeReuse, Project } from "@/lib/types";
 
@@ -26,8 +25,7 @@ export default async function KnowledgePage(props: ProjectParams) {
   const dict = getDictionary(locale);
   const k = dict.knowledge;
   const base = `/api/v1/projects/${projectId}`;
-  const project = await load<Project>(base);
-  if (project === null) notFound();
+  const project = await loadEntity<Project>(base);
   const [items, reused, experiments, projects] = await Promise.all([
     load<KnowledgeItem[]>(`${base}/knowledge`),
     load<KnowledgeReuse[]>(`${base}/reused-knowledge`),

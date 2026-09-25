@@ -8,7 +8,7 @@ import { Badge, Card, Empty, Field, Select, TextArea } from "@/components/fields
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { ResearchTrackValues, SufficiencyResultValues } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveLocale } from "@/lib/locale-params";
 import type { AIProfile, Job, PlanOverview, Project, SourceLead } from "@/lib/types";
 
@@ -37,8 +37,7 @@ export default async function PlanPage(props: Props) {
   const dict = getDictionary(locale);
   const r = dict.research;
   const base = `/api/v1/projects/${projectId}`;
-  const [project, overview] = await Promise.all([load<Project>(base), load<PlanOverview>(`${base}/research-plans/${planId}`)]);
-  if (project === null || overview === null) notFound();
+  const [project, overview] = await Promise.all([loadEntity<Project>(base), loadEntity<PlanOverview>(`${base}/research-plans/${planId}`)]);
   const [profiles, aiJobs, leads] = await Promise.all([
     load<AIProfile[]>("/api/v1/ai/profiles"),
     load<Job[]>(`${base}/ai-tasks`),

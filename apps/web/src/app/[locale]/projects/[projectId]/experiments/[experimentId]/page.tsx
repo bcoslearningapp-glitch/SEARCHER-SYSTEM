@@ -20,7 +20,7 @@ import {
   type ExperimentState,
 } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveLocale } from "@/lib/locale-params";
 import type { DesignHypothesis, Experiment, ExperimentRecord, Project } from "@/lib/types";
 
@@ -59,11 +59,10 @@ export default async function ExperimentPage(props: Props) {
   const x = dict.experiments;
   const base = `/api/v1/projects/${projectId}`;
   const [project, experiment, record] = await Promise.all([
-    load<Project>(base),
-    load<Experiment>(`${base}/experiments/${experimentId}`),
+    loadEntity<Project>(base),
+    loadEntity<Experiment>(`${base}/experiments/${experimentId}`),
     load<ExperimentRecord>(`${base}/experiments/${experimentId}/record`),
   ]);
-  if (project === null || experiment === null) notFound();
   const dh = await load<DesignHypothesis>(`${base}/design-hypotheses/${experiment.design_hypothesis_id}`);
   const data = record ?? { human_impact: [], observations: [], results: [], interpretations: [], learning_reviews: [] };
   const hidden = (

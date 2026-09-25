@@ -8,7 +8,7 @@ import { OutputBlocks } from "@/components/OutputBlocks";
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { OutputModeValues } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveLocale } from "@/lib/locale-params";
 import type { IntegrityRun, Output, OutputVersion, Project } from "@/lib/types";
 
@@ -26,11 +26,10 @@ export default async function OutputPage(props: Props) {
   const t = dict.outputs;
   const base = `/api/v1/projects/${projectId}`;
   const [project, output, versions] = await Promise.all([
-    load<Project>(base),
-    load<Output>(`${base}/outputs/${outputId}`),
+    loadEntity<Project>(base),
+    loadEntity<Output>(`${base}/outputs/${outputId}`),
     load<OutputVersion[]>(`${base}/outputs/${outputId}/versions`),
   ]);
-  if (project === null || output === null) notFound();
   const runs = await load<IntegrityRun[]>(`${base}/outputs/${outputId}/versions/${output.latest.id}/integrity`);
   const run = runs?.at(-1) ?? null;
   const exportUrl = (format: (typeof EXPORT_FORMATS)[number]) =>

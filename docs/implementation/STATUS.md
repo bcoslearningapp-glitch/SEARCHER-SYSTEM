@@ -76,6 +76,12 @@
   - Amiri fonts (OFL) are bundled. Amiri Quran is used for Qur'an quotes, and an optional owner-supplied publisher font can replace it.
   - Downloads on the output page, and E2E flow 7 covers all four formats.
 
+## Phase 6 progress
+- #54: Test-suite completeness:
+  - Reusable adapter contract checks (`tests/adapter_contracts.py`) for the SearchProvider interface (mock, Anthropic offline, OpenAI, outage) and the CloudWorkspaceAdapter. The live provider contract uses the same check.
+  - A PRD §73 coverage map in `docs/evaluation/TEST_COVERAGE.md`.
+  - Loading and error boundaries for every page. A missing record is a not-found page, and a service outage is an error state with a retry, never "not found".
+
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.
 - [x] An untransferable asset becomes metadata-only on import (`test_portability.py`).
