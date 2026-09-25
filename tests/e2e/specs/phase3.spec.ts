@@ -165,3 +165,22 @@ test("AI reliability registry shows thresholds and observed use", async ({ page 
   await expect(installation).toContainText("Exact quote preservation (share byte-identical)");
   await expect(installation).not.toContainText("not evaluated");
 });
+
+test("project AI policy: a person sets cloud consent and a budget from the desk", async ({ page, request }) => {
+  const created = await request.post(`${API_URL}/api/v1/projects`, {
+    data: { title: `Policy ${unique()}`, initial_input: "x", input_type: "IDEA", sensitivity: "CONFIDENTIAL" },
+  });
+  const project = (await created.json()) as { id: string };
+  await page.goto(`/en/projects/${project.id}`);
+  const card = page.getByTestId("ai-policy");
+  await card.getByLabel("Allow cloud AI for this confidential project (explicit consent)").check();
+  await card.getByLabel("Project budget (USD)").fill("5");
+  await card.getByRole("button", { name: "Save policy" }).click();
+  await expect(card.getByRole("status")).toHaveText("Saved.");
+  const policy = (await (await request.get(`${API_URL}/api/v1/projects/${project.id}/ai-policy`)).json()) as {
+    cloud_consent: boolean;
+    project_budget_usd: string;
+  };
+  expect(policy.cloud_consent).toBe(true);
+  expect(Number(policy.project_budget_usd)).toBe(5);
+});

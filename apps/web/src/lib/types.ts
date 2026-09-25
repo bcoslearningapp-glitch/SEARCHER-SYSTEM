@@ -642,3 +642,12 @@ export type Staging = {
   delete_reason: string | null;
   items: StagedItem[];
 };
+
+export type AIPolicy = {
+  cloud_consent: boolean;
+  allowed_profiles: string[];
+  preferred_profile: string | null;
+  project_budget_usd: string | null;
+  task_budget_usd: string | null;
+  spent_usd: string;
+};

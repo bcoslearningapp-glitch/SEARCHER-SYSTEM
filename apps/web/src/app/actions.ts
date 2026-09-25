@@ -796,3 +796,16 @@ export async function deleteWorkspaceStaging(_: ActionResult, form: FormData): P
 export async function runInstallationAudit(): Promise<ActionResult> {
   return run(() => apiSend("POST", "/api/v1/ai/reliability/audit", {}));
 }
+
+export async function updateAIPolicy(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const budget = (name: string) => optionalText(form, name) ?? null;
+  return run(() =>
+    apiSend("PUT", `${P(form)}/ai-policy`, {
+      cloud_consent: form.get("cloud_consent") === "on",
+      allowed_profiles: form.getAll("allowed_profiles").filter((v): v is string => typeof v === "string"),
+      preferred_profile: optionalText(form, "preferred_profile") ?? null,
+      project_budget_usd: budget("project_budget_usd"),
+      task_budget_usd: budget("task_budget_usd"),
+    }),
+  );
+}

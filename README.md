@@ -9,7 +9,7 @@ A local-first research operating system that integrates cloud AI through provide
 - Plan and status: [`docs/implementation/MASTER_PLAN.md`](docs/implementation/MASTER_PLAN.md), [`docs/implementation/STATUS.md`](docs/implementation/STATUS.md)
 - Architecture: [`docs/architecture/OVERVIEW.md`](docs/architecture/OVERVIEW.md) and [`docs/adr/`](docs/adr/)
 
-**Current state:** Phase 1 (M1): projects, Research State, Problem Frames with explicit approval, decisions, source library with Hybrid Source Access, PDF ingestion and search, in English, French and Arabic. See [`STATUS.md`](docs/implementation/STATUS.md).
+**Current state:** Phases 1–5 are complete and Phase 6 (hardening for v1.0) is under way. See [`STATUS.md`](docs/implementation/STATUS.md). How to use the product: [`docs/user/USER_GUIDE.md`](docs/user/USER_GUIDE.md).
 
 ## Prerequisites
 
@@ -28,7 +28,13 @@ docker compose up --build --detach --wait
 
 Migrations run automatically (`migrate` service) before the API and worker start. Cloud AI keys are optional: the product stays usable without them.
 
-Stop with `docker compose down` (data volumes are kept; add `--volumes` to erase local data).
+Stop with `docker compose down`. Data volumes are kept; add `--volumes` to erase local data.
+
+These commands are verified on a clean runner by the `clean-setup` CI job. Everything else is optional configuration:
+- `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` enable cloud AI.
+- `CLOUD_WORKSPACE_ADAPTER` enables the selective cloud workspace (ADR-023).
+- `EXPORT_QURAN_FONT_PATH` sets a publisher Qur'an font for PDF export (ADR-024).
+- `ALLOWED_HOSTS` and `WEB_ALLOWED_HOSTS` are needed when the app is served under another host name (SECURITY.md).
 
 ## Adopt the Qur'an text (Constitutional Authority)
 
