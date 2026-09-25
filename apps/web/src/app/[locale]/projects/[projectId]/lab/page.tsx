@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
 import { createAssumption, createClaim, createHypothesis, createMechanism, reviewAssumption } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
@@ -8,7 +7,7 @@ import { Badge, Card, Empty, Field, Select, TextArea, TextInput } from "@/compon
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { ClaimTypeValues, CriticalityValues } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveProjectParams, type ProjectParams } from "@/lib/locale-params";
 import type { Assumption, Claim, Hypothesis, Mechanism, Project } from "@/lib/types";
 
@@ -19,8 +18,7 @@ export default async function LabPage(props: ProjectParams) {
   const dict = getDictionary(locale);
   const lab = dict.lab;
   const base = `/api/v1/projects/${projectId}`;
-  const project = await load<Project>(base);
-  if (project === null) notFound();
+  const project = await loadEntity<Project>(base);
   const [claims, assumptions, hypotheses, mechanisms] = await Promise.all([
     load<Claim[]>(`${base}/claims`),
     load<Assumption[]>(`${base}/assumptions`),

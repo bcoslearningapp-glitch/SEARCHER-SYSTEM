@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 
 import { requestAccess, respondToAccess } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
@@ -9,7 +8,7 @@ import { ProjectHeader } from "@/components/ProjectHeader";
 import { SourceList } from "@/components/SourceList";
 import { AccessResponseFormValues, PriorityValues } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveProjectParams, type ProjectParams } from "@/lib/locale-params";
 import type { AccessRequest, Excerpt, Project, Work } from "@/lib/types";
 
@@ -21,8 +20,7 @@ export default async function ProjectSourcesPage(props: ProjectParams) {
   const { locale, projectId } = await resolveProjectParams(props);
   const dict = getDictionary(locale);
   const ui = dict.ui;
-  const project = await load<Project>(`/api/v1/projects/${projectId}`);
-  if (project === null) notFound();
+  const project = await loadEntity<Project>(`/api/v1/projects/${projectId}`);
   const [works, library, requests] = await Promise.all([
     load<Work[]>(`/api/v1/sources?project_id=${projectId}`),
     load<Work[]>("/api/v1/sources"),

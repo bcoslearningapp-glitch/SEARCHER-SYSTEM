@@ -15,6 +15,7 @@ from research_api.config import Settings
 from research_api.modules.ai_gateway import profiles as registry
 from research_api.modules.ai_gateway.base import ModelProfile, Section, StructuredRequest
 from research_api.modules.ai_gateway.service import validate_output
+from tests.adapter_contracts import check_search_provider
 
 pytestmark = pytest.mark.provider_contract
 
@@ -81,7 +82,7 @@ def test_anthropic_web_search_returns_attributed_results() -> None:
     _calls["n"] += 1
     settings, profile = _profile("anthropic-default")
     request = WebSearchRequest(queries=["apprenticeship retention mentoring study"], max_searches=1)
-    result = registry.provider_for(settings, profile).web_search(request, profile)
+    result = check_search_provider(registry.provider_for(settings, profile), profile, request)
     assert result.queries_run, "the model ran the search it was given"
     assert result.usage.web_search_requests >= 1
     assert all(r.url.startswith("http") for r in result.results)

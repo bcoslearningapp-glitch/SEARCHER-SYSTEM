@@ -29,7 +29,7 @@ import {
   ResearchTrackValues,
 } from "@/lib/contracts/enums";
 import { getDictionary } from "@/lib/i18n";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveLocale } from "@/lib/locale-params";
 import { projectExcerpts } from "@/lib/project-data";
 import type {
@@ -57,10 +57,9 @@ export default async function HypothesisPage(props: Props) {
   const lab = dict.lab;
   const base = `/api/v1/projects/${projectId}`;
   const [project, hypothesis] = await Promise.all([
-    load<Project>(base),
-    load<Hypothesis>(`${base}/hypotheses/${hypothesisId}`),
+    loadEntity<Project>(base),
+    loadEntity<Hypothesis>(`${base}/hypotheses/${hypothesisId}`),
   ]);
-  if (project === null || hypothesis === null) notFound();
   const [versions, map, reviews, standing, excerpts, profiles, aiJobs] = await Promise.all([
     load<HypothesisVersion[]>(`${base}/hypotheses/${hypothesisId}/versions`),
     load<EvidenceMap>(`${base}/evidence-map/HYPOTHESIS/${hypothesisId}`),

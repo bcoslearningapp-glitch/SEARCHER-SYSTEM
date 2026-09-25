@@ -41,4 +41,11 @@ test.describe("platform foundation smoke", () => {
     const response = await page.goto("/de");
     expect(response?.status()).toBe(404);
   });
+
+  test("an unknown project is a not-found page, not an error", async ({ page }) => {
+    // Pages stream behind a loading state, so the not-found view arrives in the stream rather than as a 404 status.
+    await page.goto("/en/projects/00000000-0000-4000-8000-000000000000/lab");
+    await expect(page.getByTestId("page-not-found")).toBeVisible();
+    await expect(page.getByTestId("page-error")).toHaveCount(0);
+  });
 });

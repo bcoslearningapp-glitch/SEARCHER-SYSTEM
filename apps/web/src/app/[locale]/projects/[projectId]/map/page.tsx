@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/AppShell";
 import { Badge, Card, Empty } from "@/components/fields";
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { getDictionary } from "@/lib/i18n";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveProjectParams, type ProjectParams } from "@/lib/locale-params";
 import type { AttentionItem, Decision, Hypothesis, OpenQuestion, ProblemFrame, Project } from "@/lib/types";
 
@@ -17,8 +16,7 @@ export default async function MapPage(props: ProjectParams) {
   const dict = getDictionary(locale);
   const lab = dict.lab;
   const base = `/api/v1/projects/${projectId}`;
-  const project = await load<Project>(base);
-  if (project === null) notFound();
+  const project = await loadEntity<Project>(base);
   const [frames, hypotheses, questions, decisions, attention] = await Promise.all([
     load<ProblemFrame[]>(`${base}/problem-frames`),
     load<Hypothesis[]>(`${base}/hypotheses`),

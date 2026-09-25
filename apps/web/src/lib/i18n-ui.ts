@@ -121,6 +121,10 @@ export type UiStrings = {
   moveTo: string;
   back: string;
   loadError: string;
+  retry: string;
+  loading: string;
+  pageNotFound: string;
+  backToDesk: string;
 };
 
 export const en: UiStrings = {
@@ -247,6 +251,10 @@ export const en: UiStrings = {
   moveTo: "Move project to",
   back: "Back",
   loadError: "The research service could not be reached. Your data is safe; try again shortly.",
+  retry: "Try again",
+  loading: "Loading…",
+  pageNotFound: "This page does not exist, or the record was not found.",
+  backToDesk: "Back to the desk",
 };
 
 export const fr: UiStrings = {
@@ -374,6 +382,10 @@ export const fr: UiStrings = {
   moveTo: "Passer le projet à",
   back: "Retour",
   loadError: "Le service de recherche est injoignable. Vos données sont intactes ; réessayez bientôt.",
+  retry: "Réessayer",
+  loading: "Chargement…",
+  pageNotFound: "Cette page n'existe pas, ou l'élément est introuvable.",
+  backToDesk: "Retour au bureau",
 };
 
 export const ar: UiStrings = {
@@ -501,4 +513,8 @@ export const ar: UiStrings = {
   moveTo: "نقل المشروع إلى",
   back: "رجوع",
   loadError: "تعذّر الوصول إلى خدمة البحث. بياناتك سليمة؛ حاول مجددًا بعد قليل.",
+  retry: "إعادة المحاولة",
+  loading: "جارٍ التحميل…",
+  pageNotFound: "هذه الصفحة غير موجودة، أو لم يُعثر على السجل.",
+  backToDesk: "العودة إلى المكتب",
 };

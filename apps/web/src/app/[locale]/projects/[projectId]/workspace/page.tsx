@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 
 import { deleteWorkspaceStaging, stageInWorkspace } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
@@ -7,7 +6,7 @@ import { Badge, Card, Empty, Field, TextInput } from "@/components/fields";
 import { ProjectHeader } from "@/components/ProjectHeader";
 import { getDictionary } from "@/lib/i18n";
 import type { WorkspaceStrings } from "@/lib/i18n-workspace";
-import { load } from "@/lib/load";
+import { load, loadEntity } from "@/lib/load";
 import { resolveProjectParams, type ProjectParams } from "@/lib/locale-params";
 import type { Claim, EvidenceMap, Hypothesis, Output, Project, Staging, WorkspaceInfo } from "@/lib/types";
 
@@ -23,8 +22,7 @@ export default async function WorkspacePage(props: ProjectParams) {
   const dict = getDictionary(locale);
   const t = dict.workspace;
   const base = `/api/v1/projects/${projectId}`;
-  const project = await load<Project>(base);
-  if (project === null) notFound();
+  const project = await loadEntity<Project>(base);
   const [info, stagings, claims, hypotheses, outputs] = await Promise.all([
     load<WorkspaceInfo>("/api/v1/workspace"),
     load<Staging[]>(`${base}/workspace/stagings`),
