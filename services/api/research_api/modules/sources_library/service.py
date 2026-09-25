@@ -8,6 +8,7 @@ access method (FR-HYBRID-004).
 
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Any
 from uuid import UUID
 
@@ -178,7 +179,49 @@ def list_works(session: Session, *, project_id: UUID | None = None) -> list[Work
         query = query.join(ProjectSource, ProjectSource.work_id == SourceWork.id).where(
             ProjectSource.project_id == project_id
         )
-    return [_work_out(session, w) for w in session.scalars(query)]
+    return _works_out(session, list(session.scalars(query)))
+
+
+def _works_out(session: Session, works: list[SourceWork]) -> list[WorkOut]:
+    """Editions and assets for many works in two queries, not two per work (#57 benchmark)."""
+    editions: dict[UUID, list[SourceEdition]] = defaultdict(list)
+    assets: dict[UUID, list[SourceAsset]] = defaultdict(list)
+    if works:
+        for edition in session.scalars(
+            select(SourceEdition)
+            .where(SourceEdition.work_id.in_([w.id for w in works]))
+            .order_by(SourceEdition.created_at)
+        ):
+            editions[edition.work_id].append(edition)
+        edition_ids = [e.id for group in editions.values() for e in group]
+        for asset in session.scalars(
+            select(SourceAsset).where(SourceAsset.edition_id.in_(edition_ids)).order_by(SourceAsset.created_at)
+        ):
+            assets[asset.edition_id].append(asset)
+
+    def edition_out(edition: SourceEdition) -> EditionOut:
+        held = assets[edition.id]
+        return EditionOut.model_validate(
+            {
+                **{c: getattr(edition, c) for c in EditionOut.model_fields if c not in {"assets", "available"}},
+                "assets": [_asset_out(a) for a in held],
+                "available": any(a.available_in_environment for a in held),
+            }
+        )
+
+    return [
+        WorkOut(
+            id=work.id,
+            title=work.title,
+            authors=work.authors,
+            original_language=work.original_language,
+            authority_layer=work.authority_layer,
+            identifiers=work.identifiers,
+            editions=[edition_out(e) for e in editions[work.id]],
+            created_at=work.created_at,
+        )
+        for work in works
+    ]
 
 
 def _edition(session: Session, edition_id: UUID, *, lock: bool = False) -> SourceEdition:

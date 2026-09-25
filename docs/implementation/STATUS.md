@@ -96,6 +96,10 @@
   - **New installation audit:** exact quotes, Qur'an/Hadith integrity, layer separation, tool authorization. It runs from the reliability page or the API, and tampered records fail it.
   - **Human-graded:** citation support.
   - The Methodology Steward still has to approve the thresholds (#28).
+- #57: Performance benchmark (`scripts/bench/benchmark.py`, `docs/evaluation/PERFORMANCE.md`):
+  - At 1,000 works (~15,800 chunks), every PRD §70 target passes. Search p95 is 128 ms; pages are under 0.9 s; state changes are under 15 ms.
+  - Found and fixed N+1 queries in the library listing. The Library page went from 2.06 s to 0.69 s at p95, with a regression test.
+  - Vector search is not measured: there is no vector index yet. That gap is tracked as #65.
 
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.
