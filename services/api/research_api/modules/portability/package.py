@@ -48,7 +48,16 @@ MANIFEST = "manifest.json"
 # Operational records that describe this installation rather than the research.
 EXCLUDED = frozenset({"background_jobs", "knowledge_reuses"})
 AUDIT = frozenset(
-    {"audit_events", "research_events", "approvals", "quality_gate_evaluations", "ai_requests", "ai_tool_calls"}
+    {
+        "audit_events",
+        "research_events",
+        "approvals",
+        "quality_gate_evaluations",
+        "ai_requests",
+        "ai_tool_calls",
+        "workspace_stagings",
+        "workspace_staged_items",
+    }
 )
 # Library and foundational rows can be shared with other projects; an existing row here always wins.
 SHARED = frozenset(

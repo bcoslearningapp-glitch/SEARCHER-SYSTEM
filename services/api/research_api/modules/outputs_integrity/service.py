@@ -433,3 +433,12 @@ def export(session: Session, project_id: UUID, output_id: UUID, version_id: UUID
         render.markdown(session, project_id, doc) if fmt == "md" else render.html_document(session, project_id, doc)
     )
     return content, EXPORT_TYPES[fmt], f"output-{output.id}-v{version.version_number}.{fmt}"
+
+
+def version_markdown(session: Session, project_id: UUID, version_id: UUID) -> str:
+    """A version rendered as Markdown with its integrity status; the output is found through the version."""
+    version = session.get(OutputVersion, version_id)
+    if version is None:
+        raise NotFoundError("output version not found")
+    content, _, _ = export(session, project_id, version.output_id, version_id, "md")
+    return content

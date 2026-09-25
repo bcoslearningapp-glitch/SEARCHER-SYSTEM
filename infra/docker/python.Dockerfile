@@ -24,7 +24,7 @@ COPY services/worker services/worker
 RUN uv sync --frozen --no-dev --all-packages
 
 RUN useradd --system --uid 10001 --home /app app \
-    && mkdir -p /data/storage \
+    && mkdir -p /data/storage /data/cloud-workspace \
     && chown -R app /data
 USER app
 

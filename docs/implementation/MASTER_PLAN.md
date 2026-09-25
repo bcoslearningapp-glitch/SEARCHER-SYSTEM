@@ -97,5 +97,5 @@ Full E2E suite, security review, AI evaluation suite (`docs/evaluation/QUALITY_G
 | ~~Policy Engine implementation approach~~ — ADR-006 | P1-02 |
 | Default multilingual embedding model (benchmarked) | Phase 3 retrieval |
 | ~~Web search provider order~~ — ADR-012 (local library first, then provider-native web search) | Phase 3 |
-| Concrete cloud workspace provider | Phase 5 |
+| ~~Cloud workspace adapter~~ — ADR-023 (reference `local-directory` adapter; the concrete remote provider waits on the owner, #28) | Phase 5 |
 | PDF/DOCX renderer | Phase 5 |

@@ -73,6 +73,13 @@ class Settings(BaseSettings):
     # Simulated behaviour of the mock provider (E2E provider-outage flow, PRD §73 flow 9).
     ai_mock_mode: Literal["ok", "unavailable", "invalid"] = "ok"
 
+    # Selective cloud workspace (PRD §56, ADR-023). Off unless configured; the local database stays canonical.
+    # "local-directory" is the reference adapter: a sandboxed directory standing in for a remote workspace.
+    cloud_workspace_adapter: Literal["none", "local-directory"] = "none"
+    cloud_workspace_root: Path = Path("./data/cloud-workspace")
+    cloud_workspace_default_ttl_hours: int = Field(default=72, ge=1)
+    cloud_workspace_max_ttl_hours: int = Field(default=720, ge=1)
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

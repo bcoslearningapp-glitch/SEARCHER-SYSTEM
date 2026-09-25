@@ -64,6 +64,22 @@
   - Validated import that never overwrites a project and never raises trust. Withheld files become metadata-only sources; foundational texts arrive staged.
   - Export link and import card in the UI, and E2E flow 8.
   - The full round trip is tested against a second, freshly migrated database.
+- #47: Selective cloud workspace and disclosure manifest (ADR-023):
+  - A pluggable `CloudWorkspaceAdapter`, off by default. The `local-directory` reference adapter is sandboxed and treated as remote for disclosure.
+  - A person explicitly selects excerpts, claims, hypotheses and output versions. The PRD §54 disclosure policy and the project's cloud consent are checked, and payloads carrying installation credentials are refused.
+  - The disclosure manifest records every attempt, including blocked ones, with a SHA-256 and size for each item. Database triggers keep it immutable and prevent it from being deleted.
+  - Each staging has a TTL with purge, and a person can delete it; the manifest entry stays.
+  - A Workspace tab and an E2E flow.
+
+## M5 exit criteria (PRD §76 Phase 5)
+- [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.
+- [x] An untransferable asset becomes metadata-only on import (`test_portability.py`).
+- [x] A referenced output can trace claims to source. Claim blocks carry traces, the integrity pipeline verifies claims, citations and quotes, and references are built from records (#43, #44, E2E flow 7).
+- Deliverables done:
+  - output composer, multilingual integrity, citation verifier, Markdown/HTML export (#43–#45);
+  - the Research Core Package (#46);
+  - the cloud workspace adapter and disclosure manifest (#47).
+- Remaining: DOCX/PDF export.
 
 ## M4 exit criteria (PRD §76 Phase 4)
 - [x] Complete hypothesis → design → experiment → learning workflow. E2E flow 6 runs through the UI: requirement → concept → design hypothesis → experiment (protocol, approval, run, observation, result, interpretation) → learning review → close → local knowledge → promotion → labelled reuse.

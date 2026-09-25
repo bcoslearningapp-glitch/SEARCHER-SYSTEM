@@ -623,3 +623,22 @@ export type IntegrityRun = {
   steps: { step: string; status: "PASS" | "WARN" | "FAIL" | "SKIPPED"; findings: { code: string; message: string; block?: number | null }[] }[];
   created_at: string;
 };
+
+export type WorkspaceInfo = { adapter: string; enabled: boolean; remote: boolean; default_ttl_hours: number; max_ttl_hours: number; kinds: string[] };
+
+export type StagedItem = { entity_type: string; entity_id: string; sha256: string; byte_size: number; remote_ref: string | null };
+
+export type Staging = {
+  id: string;
+  adapter: string;
+  purpose: string;
+  status: "ACTIVE" | "BLOCKED" | "DELETED" | "EXPIRED";
+  sensitivity: string;
+  policy_decision: { allowed: boolean; reason: string };
+  expires_at: string | null;
+  staged_by: Actor;
+  created_at: string;
+  deleted_at: string | null;
+  delete_reason: string | null;
+  items: StagedItem[];
+};

@@ -16,6 +16,9 @@ x-backend: &backend
     AI_MOCK_ENABLED: ${AI_MOCK_ENABLED:-false}
     AI_MOCK_MODE: ${AI_MOCK_MODE:-ok}
     AI_DEFAULT_PROFILE: ${AI_DEFAULT_PROFILE:-anthropic-default}
+    # Selective cloud workspace (ADR-023): off unless explicitly configured.
+    CLOUD_WORKSPACE_ADAPTER: ${CLOUD_WORKSPACE_ADAPTER:-none}
+    CLOUD_WORKSPACE_ROOT: /data/cloud-workspace
 
 services:
   postgres:
@@ -62,6 +65,7 @@ services:
         condition: service_healthy
     volumes:
       - source-storage:/data/storage
+      - cloud-workspace:/data/cloud-workspace
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     healthcheck:
@@ -97,3 +101,4 @@ volumes:
   postgres-data:
   redis-data:
   source-storage:
+  cloud-workspace:

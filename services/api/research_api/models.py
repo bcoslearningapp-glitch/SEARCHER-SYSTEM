@@ -11,6 +11,7 @@ from research_api.modules.claims_evidence.models import (
     ResearchTrackRun,
     SourceLineage,
 )
+from research_api.modules.cloud_workspace.models import WorkspaceStagedItem, WorkspaceStaging
 from research_api.modules.design_experiments.models import (
     ConceptCoverage,
     DesignConcept,
@@ -139,4 +140,6 @@ __all__ = [
     "SourceWork",
     "SufficiencyAssessment",
     "Term",
+    "WorkspaceStagedItem",
+    "WorkspaceStaging",
 ]
