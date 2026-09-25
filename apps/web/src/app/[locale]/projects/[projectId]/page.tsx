@@ -9,6 +9,7 @@ import {
   reopenProject,
   resolveDecision,
   saveFrameDraft,
+  updateAIPolicy,
 } from "@/app/actions";
 import { ActionForm } from "@/components/ActionForm";
 import { AITasks } from "@/components/AITasks";
@@ -23,6 +24,7 @@ import { resolveProjectParams, type ProjectParams } from "@/lib/locale-params";
 import {
   FRAME_LIST_FIELDS,
   FRAME_TEXT_FIELDS,
+  type AIPolicy,
   type AIProfile,
   type AttentionItem,
   type Closure,
@@ -65,7 +67,7 @@ export default async function ProjectPage(props: ProjectParams) {
     );
   }
   const closures = await load<Closure[]>(`${base}/closures`);
-  const [state, frames, notes, decisions, attention, profiles, aiJobs] = await Promise.all([
+  const [state, frames, notes, decisions, attention, profiles, aiJobs, aiPolicy] = await Promise.all([
     load<ResearchState>(`${base}/research-state`),
     load<ProblemFrame[]>(`${base}/problem-frames`),
     load<Note[]>(`${base}/notes`),
@@ -73,6 +75,7 @@ export default async function ProjectPage(props: ProjectParams) {
     load<AttentionItem[]>(`${base}/attention`),
     load<AIProfile[]>("/api/v1/ai/profiles"),
     load<Job[]>(`${base}/ai-tasks`),
+    load<AIPolicy>(`${base}/ai-policy`),
   ]);
   const draft = frames?.find((f) => f.status === "DRAFT");
   const approved = frames?.find((f) => f.status === "APPROVED");
@@ -96,6 +99,51 @@ export default async function ProjectPage(props: ProjectParams) {
                 ]}
               />
             </Card>
+
+            {aiPolicy ? (
+              <Card title={dict.ai.policy} testId="ai-policy">
+                <p className="mb-3 text-sm text-[var(--color-muted)]">{dict.ai.policyExplainer}</p>
+                <ActionForm action={updateAIPolicy} submitLabel={dict.ai.savePolicy} pendingLabel={dict.ai.saving} successMessage={ui.saved}>
+                  <input type="hidden" name="project_id" value={project.id} />
+                  <label className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="cloud_consent" defaultChecked={aiPolicy.cloud_consent} />
+                    {dict.ai.cloudConsent}
+                  </label>
+                  <fieldset className="space-y-1 text-sm">
+                    <legend className="font-medium">{dict.ai.allowedProfiles}</legend>
+                    <p className="text-[var(--color-muted)]">{dict.ai.anyProfile}</p>
+                    {(profiles ?? []).map((p) => (
+                      <label key={p.name} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          name="allowed_profiles"
+                          value={p.name}
+                          defaultChecked={aiPolicy.allowed_profiles.includes(p.name)}
+                        />
+                        <span dir="ltr">{p.name}</span>
+                      </label>
+                    ))}
+                  </fieldset>
+                  <Field label={dict.ai.preferredProfile}>
+                    <Select name="preferred_profile" defaultValue={aiPolicy.preferred_profile ?? ""}>
+                      <option value="">—</option>
+                      {(profiles ?? []).map((p) => (
+                        <option key={p.name}>{p.name}</option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label={dict.ai.projectBudget}>
+                    <TextInput name="project_budget_usd" type="number" min={0} step="0.01" defaultValue={aiPolicy.project_budget_usd ?? ""} />
+                  </Field>
+                  <Field label={dict.ai.taskBudget}>
+                    <TextInput name="task_budget_usd" type="number" min={0} step="0.01" defaultValue={aiPolicy.task_budget_usd ?? ""} />
+                  </Field>
+                  <p className="text-sm">
+                    {dict.ai.spent}: <span dir="ltr">${Number(aiPolicy.spent_usd).toFixed(4)}</span>
+                  </p>
+                </ActionForm>
+              </Card>
+            ) : null}
 
             <Card title={ui.problemFrame} testId="problem-frame">
               <ActionForm action={saveFrameDraft} submitLabel={ui.saveDraft} pendingLabel={ui.saving} successMessage={ui.saved} testId="frame-form">

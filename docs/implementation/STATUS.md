@@ -100,6 +100,10 @@
   - At 1,000 works (~15,800 chunks), every PRD §70 target passes. Search p95 is 128 ms; pages are under 0.9 s; state changes are under 15 ms.
   - Found and fixed N+1 queries in the library listing. The Library page went from 2.06 s to 0.69 s at p95, with a regression test.
   - Vector search is not measured: there is no vector index yet. That gap is tracked as #65.
+- #59: User documentation and clean-machine setup:
+  - `docs/user/USER_GUIDE.md` covers the whole researcher workflow. The README is updated.
+  - A `clean-setup` CI job runs the README's commands verbatim on a clean runner.
+  - Gap closed: project AI policy (cloud consent, allowed profiles, budgets) was API-only. It is now a Desk card, with an E2E test.
 
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.

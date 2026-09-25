@@ -15,6 +15,17 @@ export type AIStrings = {
   working: string;
   providerFailure: string;
   budgetStop: string;
+  policy: string;
+  policyExplainer: string;
+  cloudConsent: string;
+  allowedProfiles: string;
+  anyProfile: string;
+  preferredProfile: string;
+  projectBudget: string;
+  taskBudget: string;
+  spent: string;
+  savePolicy: string;
+  saving: string;
   taskNames: Record<string, string>;
 };
 
@@ -35,6 +46,17 @@ export const aiEn: AIStrings = {
   working: "Working…",
   providerFailure: "The AI provider failed. Nothing was changed, and the failure is recorded; it does not mean no evidence exists.",
   budgetStop: "Stopped: the AI budget for this project or task is exhausted.",
+  policy: "Project AI policy",
+  policyExplainer: "Controls what may reach cloud AI for this project. Confidential projects need consent; restricted and critical projects never send content to cloud AI.",
+  cloudConsent: "Allow cloud AI for this confidential project (explicit consent)",
+  allowedProfiles: "Allowed model profiles",
+  anyProfile: "Leave all unticked to allow any configured profile.",
+  preferredProfile: "Preferred profile",
+  projectBudget: "Project budget (USD)",
+  taskBudget: "Per-task budget (USD)",
+  spent: "Spent so far",
+  savePolicy: "Save policy",
+  saving: "Saving…",
   taskNames: {
     "orchestrator.draft_problem_frame": "Draft Problem Frame",
     "orchestrator.detect_assumptions": "Detect assumptions",
@@ -61,6 +83,17 @@ export const aiFr: AIStrings = {
   providerFailure:
     "Le fournisseur d'IA a échoué. Rien n'a été modifié et l'échec est enregistré ; cela ne signifie pas l'absence de preuves.",
   budgetStop: "Arrêté : le budget IA du projet ou de la tâche est épuisé.",
+  policy: "Politique IA du projet",
+  policyExplainer: "Détermine ce qui peut être envoyé à l'IA en nuage pour ce projet. Les projets confidentiels exigent un consentement ; les projets restreints et critiques n'envoient jamais de contenu à l'IA en nuage.",
+  cloudConsent: "Autoriser l'IA en nuage pour ce projet confidentiel (consentement explicite)",
+  allowedProfiles: "Profils de modèle autorisés",
+  anyProfile: "Ne cochez rien pour autoriser tout profil configuré.",
+  preferredProfile: "Profil préféré",
+  projectBudget: "Budget du projet (USD)",
+  taskBudget: "Budget par tâche (USD)",
+  spent: "Dépensé à ce jour",
+  savePolicy: "Enregistrer la politique",
+  saving: "Enregistrement…",
   taskNames: {
     "orchestrator.draft_problem_frame": "Rédiger le cadrage",
     "orchestrator.detect_assumptions": "Détecter les hypothèses implicites",
@@ -83,6 +116,17 @@ export const aiAr: AIStrings = {
   working: "قيد العمل…",
   providerFailure: "تعذّر على مزوّد الذكاء الاصطناعي الإكمال. لم يتغيّر شيء، وسُجّل الإخفاق؛ وهذا لا يعني عدم وجود أدلة.",
   budgetStop: "توقّف: نفدت ميزانية الذكاء الاصطناعي للمشروع أو المهمة.",
+  policy: "سياسة الذكاء الاصطناعي للمشروع",
+  policyExplainer: "تحدد ما يجوز إرساله إلى الذكاء الاصطناعي السحابي في هذا المشروع. المشاريع السرية تتطلب موافقة صريحة؛ والمشاريع المقيّدة والحرجة لا ترسل أي محتوى إلى الذكاء الاصطناعي السحابي أبدًا.",
+  cloudConsent: "السماح بالذكاء الاصطناعي السحابي لهذا المشروع السري (موافقة صريحة)",
+  allowedProfiles: "ملفات النماذج المسموح بها",
+  anyProfile: "اترك الكل دون تحديد للسماح بأي ملف مُهيّأ.",
+  preferredProfile: "الملف المفضّل",
+  projectBudget: "ميزانية المشروع (دولار)",
+  taskBudget: "ميزانية كل مهمة (دولار)",
+  spent: "المصروف حتى الآن",
+  savePolicy: "حفظ السياسة",
+  saving: "جارٍ الحفظ…",
   taskNames: {
     "orchestrator.draft_problem_frame": "صياغة إطار المشكلة",
     "orchestrator.detect_assumptions": "كشف الافتراضات",
