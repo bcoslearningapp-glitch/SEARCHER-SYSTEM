@@ -71,8 +71,14 @@ def catalog(data: CatalogIn, db: DB, who: Who) -> WorkOut:
 
 
 @library.get("", response_model=list[WorkOut])
-def list_works(db: DB, project_id: UUID | None = None) -> list[WorkOut]:
-    return service.list_works(db, project_id=project_id)
+def list_works(
+    db: DB,
+    project_id: UUID | None = None,
+    limit: Annotated[int | None, Query(ge=1, le=200)] = None,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> list[WorkOut]:
+    """Newest first. Without `limit` the whole list is returned, for pickers that need every work."""
+    return service.list_works(db, project_id=project_id, limit=limit, offset=offset)
 
 
 @library.get("/search", response_model=SearchResponse)

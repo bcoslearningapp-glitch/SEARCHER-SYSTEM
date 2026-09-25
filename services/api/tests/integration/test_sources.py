@@ -250,3 +250,18 @@ def test_project_library_listing(client: TestClient) -> None:
     _catalog(client, project_id=pid)
     _catalog(client)
     assert len(client.get("/api/v1/sources", params={"project_id": pid}).json()) == 1
+
+
+def test_library_listing_pages_are_stable_and_complete(client: TestClient) -> None:
+    pid = _project(client)
+    created = [_catalog(client, project_id=pid)["id"] for _ in range(5)]
+    everything = [w["id"] for w in client.get("/api/v1/sources", params={"project_id": pid}).json()]
+    assert everything == created[::-1], "newest first, and no limit returns every work"
+    pages = [
+        [w["id"] for w in client.get("/api/v1/sources", params={"project_id": pid, "limit": 2, "offset": o}).json()]
+        for o in (0, 2, 4)
+    ]
+    assert [len(p) for p in pages] == [2, 2, 1]
+    assert [i for p in pages for i in p] == everything, "pages neither skip nor repeat a work"
+    assert client.get("/api/v1/sources", params={"limit": 0}).status_code == 422
+    assert client.get("/api/v1/sources", params={"limit": 201}).status_code == 422

@@ -109,6 +109,10 @@
   - A pgvector `source_chunk_embeddings` table, indexing after ingestion, and a backfill command.
   - Lexical, semantic and hybrid (reciprocal rank fusion) search; `auto` is hybrid when a provider is available.
   - A multilingual en/fr/ar retrieval benchmark and a workflow to choose the default model.
+  - Benchmark result: `paraphrase-multilingual-MiniLM-L12-v2` is the default. It scores 1.0 cross-lingual@5, against 0.1 for word overlap. Numbers are in ADR-025. Enabling it is the owner's call (#28).
+- Long-context consistency golden fixtures (en/fr/ar). Settled Research State is buried in a long history, and a drafted Problem Frame must not contradict it. This fills the last "fixtures pending" dimension in QUALITY_GATES. The live provider-contract request cap goes from 20 to 30 to fit the extra cases.
+- Library and project Sources lists are paged (25 per page). The listing API takes optional `limit`/`offset` with a stable order, and pickers that need every work still get the full list.
+- The user guide is translated into French (`docs/user/USER_GUIDE.fr.md`) and Arabic (`docs/user/USER_GUIDE.ar.md`). The English text is authoritative.
 - #60: Release artifacts:
   - Tags build versioned backend and web images on GHCR, plus a source bundle.
   - Release notes come from `CHANGELOG.md`.

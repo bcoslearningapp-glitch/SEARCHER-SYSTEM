@@ -174,13 +174,16 @@ def get_work(session: Session, work_id: UUID) -> WorkOut:
     return _work_out(session, work)
 
 
-def list_works(session: Session, *, project_id: UUID | None = None) -> list[WorkOut]:
-    query = select(SourceWork).order_by(SourceWork.created_at.desc())
+def list_works(
+    session: Session, *, project_id: UUID | None = None, limit: int | None = None, offset: int = 0
+) -> list[WorkOut]:
+    # The id tie-break keeps pages stable when works share a creation time.
+    query = select(SourceWork).order_by(SourceWork.created_at.desc(), SourceWork.id.desc())
     if project_id is not None:
         query = query.join(ProjectSource, ProjectSource.work_id == SourceWork.id).where(
             ProjectSource.project_id == project_id
         )
-    return _works_out(session, list(session.scalars(query)))
+    return _works_out(session, list(session.scalars(query.offset(offset).limit(limit))))
 
 
 def _works_out(session: Session, works: list[SourceWork]) -> list[WorkOut]:

@@ -18,7 +18,7 @@ jobs:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       # Hard budget for the bounded live suite; the test harness must enforce it.
-      PROVIDER_CONTRACT_MAX_REQUESTS: "20"
+      PROVIDER_CONTRACT_MAX_REQUESTS: "30"
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6

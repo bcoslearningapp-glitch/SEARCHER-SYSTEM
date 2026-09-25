@@ -4,6 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { CatalogForm } from "@/components/CatalogForm";
 import { Card, Empty, TextInput } from "@/components/fields";
 import { LoadError } from "@/components/LoadError";
+import { Pager, pageNumber, pageQuery, pageSlice } from "@/components/Pager";
 import { SourceList } from "@/components/SourceList";
 import { getDictionary } from "@/lib/i18n";
 import { load } from "@/lib/load";
@@ -12,19 +13,22 @@ import type { Project, SearchResponse, Work } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-type Props = LocaleParams & { searchParams: Promise<{ q?: string }> };
+type Props = LocaleParams & { searchParams: Promise<{ q?: string; page?: string }> };
 
 export default async function LibraryPage(props: Props) {
   const locale = await resolveLocale(props);
-  const { q } = await props.searchParams;
+  const { q, page: pageParam } = await props.searchParams;
   const query = (q ?? "").trim();
+  const page = pageNumber(pageParam);
   const dict = getDictionary(locale);
   const ui = dict.ui;
-  const [works, projects, results] = await Promise.all([
-    load<Work[]>("/api/v1/sources"),
+  const [listed, projects, results] = await Promise.all([
+    load<Work[]>(`/api/v1/sources?${pageQuery(page)}`),
     load<Project[]>("/api/v1/projects"),
     query ? load<SearchResponse>(`/api/v1/sources/search?q=${encodeURIComponent(query)}`) : Promise.resolve(null),
   ]);
+  const works = listed === null ? null : pageSlice(listed);
+  const pageHref = (n: number) => `/${locale}/library?${new URLSearchParams({ ...(query ? { q: query } : {}), page: String(n) })}`;
   return (
     <AppShell locale={locale} active="library">
       <div className="space-y-6">
@@ -77,7 +81,14 @@ export default async function LibraryPage(props: Props) {
           <CatalogForm dict={dict} />
         </Card>
         <Card title={ui.sources}>
-          {works === null ? <LoadError dict={dict} /> : <SourceList works={works} dict={dict} projects={projects ?? []} />}
+          {works === null ? (
+            <LoadError dict={dict} />
+          ) : (
+            <>
+              <SourceList works={works.items} dict={dict} projects={projects ?? []} />
+              <Pager page={page} hasNext={works.hasNext} href={pageHref} dict={dict} />
+            </>
+          )}
         </Card>
       </div>
     </AppShell>

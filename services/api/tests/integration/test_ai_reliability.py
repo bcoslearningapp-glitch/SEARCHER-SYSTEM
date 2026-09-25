@@ -62,6 +62,7 @@ def test_ai_cannot_grade_itself(session: Session) -> None:
 def test_golden_run_through_the_gateway_is_logged_and_recorded(client: TestClient, session: Session) -> None:
     mock_adapter.register("assess_passages", ideal)
     mock_adapter.register("detect_assumptions", ideal)
+    mock_adapter.register("draft_problem_frame", ideal)
     results = golden.run(FIXTURES, golden.gateway_caller(session, "mock"))
     model = _model()
     run_id = uuid4()
@@ -71,6 +72,7 @@ def test_golden_run_through_the_gateway_is_logged_and_recorded(client: TestClien
     assert standing["latest"]["prompt_injection_resistance"]["passed"] is True
     assert standing["latest"]["counter_evidence_retrieval"]["method"] == "AUTOMATED_GOLDEN"
     assert standing["latest"]["structured_output_reliability"]["score"] == 1.0
+    assert standing["latest"]["long_context_consistency"]["passed"] is True
     rows = [r for r in body["operational"] if r["provider"] == "mock" and r["task"] == "assess_passages"]
     assert rows and rows[0]["succeeded"] >= 5 and rows[0]["structured_output_reliability"] == 1.0
 

@@ -43,6 +43,10 @@ class Result:
     details: dict[str, Any] = field(default_factory=dict)
 
 
+# Fixture files scored by this harness. Others in the directory (e.g. the retrieval benchmark) are not golden runs.
+SCORED = frozenset({"counter_evidence", "assumptions", "prompt_injection", "long_context"})
+
+
 def load(directory: Path) -> dict[str, dict[str, Any]]:
     return {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted(directory.glob("*.json"))}
 
@@ -129,6 +133,37 @@ def score_injection(fixture: dict[str, Any], call: Tracked) -> Result:
     )
 
 
+def _history(fixture: dict[str, Any], case: dict[str, Any]) -> str:
+    """Neutral notes repeated into a long history, with the settled Research State buried in the middle."""
+    notes = case["padding"] * fixture.get("repeat_padding", 1)
+    middle = len(notes) // 2
+    return "\n".join(f"- {line}" for line in notes[:middle] + case["state"] + notes[middle:])
+
+
+def score_long_context(fixture: dict[str, Any], call: Tracked) -> Result:
+    """Contradictions of settled Research State when drafting from a long history (count; passes at zero)."""
+    contradictions = 0
+    per_case = {}
+    for case in fixture["cases"]:
+        sections = [
+            Section("user_input", "Project input", case["input"]),
+            Section("context", "Project history and Research State", _history(fixture, case)),
+        ]
+        data = call(_request(templates.DRAFT_PROBLEM_FRAME, sections)) or {}
+        found = []
+        for rule in case["contradictions"]:
+            text = " ".join(
+                " ".join(v) if isinstance(v, list) else str(v) for f in rule["fields"] if (v := data.get(f))
+            )
+            if _mentions(text, rule["keywords"]):
+                found.append(rule["id"])
+        contradictions += len(found)
+        per_case[case["id"]] = {"contradictions": found}
+    return Result(
+        "long_context_consistency", float(contradictions), len(fixture["cases"]), fixture["fixture_set"], per_case
+    )
+
+
 def run(fixtures: dict[str, dict[str, Any]], call: Caller) -> list[Result]:
     counter = _Counter(call)
     results = []
@@ -138,7 +173,9 @@ def run(fixtures: dict[str, dict[str, Any]], call: Caller) -> list[Result]:
         results.append(score_assumptions(fixtures["assumptions"], counter))
     if "prompt_injection" in fixtures:
         results.append(score_injection(fixtures["prompt_injection"], counter))
-    sets = ",".join(sorted(f["fixture_set"] for f in fixtures.values()))
+    if "long_context" in fixtures:
+        results.append(score_long_context(fixtures["long_context"], counter))
+    sets = ",".join(sorted(f["fixture_set"] for k, f in fixtures.items() if k in SCORED))
     results.append(
         Result(
             "structured_output_reliability",
