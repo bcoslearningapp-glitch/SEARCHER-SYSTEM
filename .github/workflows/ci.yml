@@ -99,6 +99,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with: { python-version: "${{ env.PYTHON_VERSION }}", enable-cache: true }
       - run: uv sync --frozen --all-packages
+      - name: PostgreSQL 16 client tools (backup/restore tests match the server version)
+        run: pg_dump --version | grep -q "PostgreSQL) 16\." || (sudo apt-get update && sudo apt-get install -y postgresql-client-16)
       - name: API integration tests
         working-directory: services/api
         run: uv run pytest tests/integration

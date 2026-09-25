@@ -67,12 +67,7 @@ Research Core contracts live in `packages/research-core-contracts` (JSON Schema)
 
 ## Backup and restore (local)
 
-```bash
-docker compose exec -T postgres pg_dump -U research -Fc research > backup.dump
-docker compose exec -T postgres pg_restore -U research -d research --clean < backup.dump
-```
-
-Source assets are stored in the `source-storage` Docker volume.
+`docker compose exec api python -m research_api.ops.backup create --out /data/backups` writes one checksummed archive holding the database and every stored source file. Restoring, verifying and the guarantees are covered in [`docs/operations/BACKUP_RESTORE.md`](docs/operations/BACKUP_RESTORE.md).
 
 ## Contributing
 
