@@ -1,6 +1,6 @@
 # Status
 
-**Current milestone:** M5 Outputs, portability, cloud workspace (v0.6.0), in progress. M4 (v0.5.0) is complete (#42). Tags for v0.2.0–v0.5.0 wait on the owner (#28).
+**Current milestone:** M6 Hardening and v1.0, next. M5 (v0.6.0) is complete (#52). M4 (v0.5.0) is complete (#42). Tags for v0.2.0–v0.6.0 wait on the owner (#28).
 
 ## Completed
 - M0 Foundation — #1.
@@ -70,16 +70,21 @@
   - The disclosure manifest records every attempt, including blocked ones, with a SHA-256 and size for each item. Database triggers keep it immutable and prevent it from being deleted.
   - Each staging has a TTL with purge, and a person can delete it; the manifest entry stays.
   - A Workspace tab and an E2E flow.
+- #52: DOCX and PDF export (ADR-024):
+  - DOCX uses python-docx, with bidi paragraphs and RTL runs. Every quote is read back from the finished file before it is returned.
+  - PDF uses fpdf2 with HarfBuzz shaping and per-paragraph direction. It embeds `quotes.json` with the exact quote texts and their SHA-256.
+  - Amiri fonts (OFL) are bundled. Amiri Quran is used for Qur'an quotes, and an optional owner-supplied publisher font can replace it.
+  - Downloads on the output page, and E2E flow 7 covers all four formats.
 
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.
 - [x] An untransferable asset becomes metadata-only on import (`test_portability.py`).
 - [x] A referenced output can trace claims to source. Claim blocks carry traces, the integrity pipeline verifies claims, citations and quotes, and references are built from records (#43, #44, E2E flow 7).
-- Deliverables done:
+- Deliverables:
   - output composer, multilingual integrity, citation verifier, Markdown/HTML export (#43–#45);
+  - DOCX/PDF export (#52);
   - the Research Core Package (#46);
   - the cloud workspace adapter and disclosure manifest (#47).
-- Remaining: DOCX/PDF export.
 
 ## M4 exit criteria (PRD §76 Phase 4)
 - [x] Complete hypothesis → design → experiment → learning workflow. E2E flow 6 runs through the UI: requirement → concept → design hypothesis → experiment (protocol, approval, run, observation, result, interpretation) → learning review → close → local knowledge → promotion → labelled reuse.

@@ -14,6 +14,8 @@ import type { IntegrityRun, Output, OutputVersion, Project } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+const EXPORT_FORMATS = ["md", "html", "docx", "pdf"] as const;
+
 type Props = { params: Promise<{ locale: string; projectId: string; outputId: string }> };
 
 export default async function OutputPage(props: Props) {
@@ -31,7 +33,7 @@ export default async function OutputPage(props: Props) {
   if (project === null || output === null) notFound();
   const runs = await load<IntegrityRun[]>(`${base}/outputs/${outputId}/versions/${output.latest.id}/integrity`);
   const run = runs?.at(-1) ?? null;
-  const exportUrl = (format: "md" | "html") =>
+  const exportUrl = (format: (typeof EXPORT_FORMATS)[number]) =>
     `/${locale}/projects/${projectId}/outputs/${outputId}/export?version=${output.latest.id}&format=${format}`;
   const hidden = (
     <>
@@ -84,13 +86,12 @@ export default async function OutputPage(props: Props) {
                 {hidden}
                 <input type="hidden" name="version_id" value={output.latest.id} />
               </ActionForm>
-              <p className="flex gap-3 text-sm">
-                <a href={exportUrl("md")} className="underline" data-testid="export-md">
-                  {t.export} .md
-                </a>
-                <a href={exportUrl("html")} className="underline" data-testid="export-html">
-                  {t.export} .html
-                </a>
+              <p className="flex flex-wrap gap-3 text-sm">
+                {EXPORT_FORMATS.map((format) => (
+                  <a key={format} href={exportUrl(format)} className="underline" data-testid={`export-${format}`}>
+                    {t.export} .{format}
+                  </a>
+                ))}
               </p>
             </Card>
             <Card title={t.approve} testId="approve-output">
