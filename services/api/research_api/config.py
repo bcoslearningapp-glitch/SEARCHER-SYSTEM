@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     evaluation_fixtures_dir: Path = _REPO_ROOT / "docs" / "evaluation" / "fixtures"
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    # Host names the API answers to (DNS-rebinding protection, #55). "api" is the compose service name.
+    allowed_hosts: list[str] = Field(default_factory=lambda: ["localhost", "127.0.0.1", "::1", "api"])
 
     # Versions stamped onto every audit/research event (FR-PROJ-003, PRD §67).
     methodology_version: str = "1.0.0"

@@ -34,6 +34,7 @@ from research_api.modules.sources_library.router import project_sources as proje
 from research_api.platform import health, system_router
 from research_api.platform.errors import install_error_handlers
 from research_api.platform.logging import configure_logging
+from research_api.platform.security import BoundaryMiddleware
 
 
 def create_app() -> FastAPI:
@@ -46,6 +47,7 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Content-Type"],
     )
+    app.add_middleware(BoundaryMiddleware, allowed_hosts=settings.allowed_hosts, allowed_origins=settings.cors_origins)
     app.include_router(health.router)
     app.include_router(system_router.router)
     app.include_router(audit_router)

@@ -10,4 +10,6 @@ import os
 import tempfile
 
 os.environ.setdefault("ENVIRONMENT", "test")
+# The test client sends Host: testserver.
+os.environ.setdefault("ALLOWED_HOSTS", '["localhost", "127.0.0.1", "testserver"]')
 os.environ.setdefault("STORAGE_ROOT", tempfile.mkdtemp(prefix="product-b-storage-"))
