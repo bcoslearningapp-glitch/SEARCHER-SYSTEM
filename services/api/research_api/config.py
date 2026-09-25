@@ -80,6 +80,10 @@ class Settings(BaseSettings):
     cloud_workspace_default_ttl_hours: int = Field(default=72, ge=1)
     cloud_workspace_max_ttl_hours: int = Field(default=720, ge=1)
 
+    # Optional Qur'an font for PDF export, e.g. a publisher font whose licence the owner has checked (ADR-024).
+    # Without it the bundled Amiri Quran font (SIL OFL) is used.
+    export_quran_font_path: Path | None = None
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

@@ -87,6 +87,15 @@ test("7. referenced output passes the integrity pipeline, is approved, and expor
   const markdown = await download.text();
   expect(markdown).toContain(`> ${PASSAGE}`);
   expect(markdown).toContain("Cohort study");
+
+  const docx = await page.request.get((await page.getByTestId("export-docx").getAttribute("href"))!);
+  expect(docx.headers()["content-type"]).toBe("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+  expect((await docx.body()).subarray(0, 2).toString()).toBe("PK");
+  const pdf = await page.request.get((await page.getByTestId("export-pdf").getAttribute("href"))!);
+  expect(pdf.headers()["content-type"]).toBe("application/pdf");
+  const pdfBytes = await pdf.body();
+  expect(pdfBytes.subarray(0, 4).toString()).toBe("%PDF");
+  expect(pdfBytes.includes("quotes.json")).toBeTruthy();
 });
 
 test("8. export a Research Core Package; importing it where the project exists never overwrites it", async ({ page, request }) => {

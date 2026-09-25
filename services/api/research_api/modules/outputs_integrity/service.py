@@ -30,7 +30,7 @@ from research_api.modules.governance_audit import service as governance
 from research_api.modules.governance_audit.context import Authorized, authorized
 from research_api.modules.governance_audit.principal import Principal
 from research_api.modules.governance_audit.schemas import Actor, AIActionRecord, AuditEntry, ResearchEventEntry
-from research_api.modules.outputs_integrity import composer, pipeline, quotes, render
+from research_api.modules.outputs_integrity import composer, office, pipeline, quotes, render
 from research_api.modules.outputs_integrity.models import IntegrityRun, Output, OutputVersion
 from research_api.modules.outputs_integrity.schemas import (
     SUBJECT_TYPES,
@@ -408,17 +408,19 @@ def integrity_runs(session: Session, project_id: UUID, output_id: UUID, version_
     return [_run_out(r) for r in rows]
 
 
-EXPORT_TYPES = {"md": "text/markdown; charset=utf-8", "html": "text/html; charset=utf-8"}
+EXPORT_TYPES = {
+    "md": "text/markdown; charset=utf-8",
+    "html": "text/html; charset=utf-8",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "pdf": "application/pdf",
+}
 
 
-def export(session: Session, project_id: UUID, output_id: UUID, version_id: UUID, fmt: str) -> tuple[str, str, str]:
-    """(content, media type, filename) for a version (FR-OUT-006). The integrity status travels with it."""
+def _document(session: Session, project_id: UUID, output_id: UUID, version_id: UUID) -> tuple[Output, render.Document]:
     output = _load(session, project_id, output_id)
     version = session.get(OutputVersion, version_id)
     if version is None or version.output_id != output.id:
         raise NotFoundError("output version not found")
-    if fmt not in EXPORT_TYPES:
-        raise RuleViolationError("export formats are md and html")
     run = _latest_run(session, version.id)
     doc = render.Document(
         title=output.title,
@@ -429,10 +431,25 @@ def export(session: Session, project_id: UUID, output_id: UUID, version_id: UUID
         status=version.status,
         integrity=run.status if run else "NOT_CHECKED",
     )
-    content = (
-        render.markdown(session, project_id, doc) if fmt == "md" else render.html_document(session, project_id, doc)
-    )
-    return content, EXPORT_TYPES[fmt], f"output-{output.id}-v{version.version_number}.{fmt}"
+    return output, doc
+
+
+def export(session: Session, project_id: UUID, output_id: UUID, version_id: UUID, fmt: str) -> tuple[bytes, str, str]:
+    """(content, media type, filename) for a version (FR-OUT-006). The integrity status travels with it."""
+    if fmt not in EXPORT_TYPES:
+        raise RuleViolationError("export formats are md, html, docx and pdf")
+    output, doc = _document(session, project_id, output_id, version_id)
+    renderers = {
+        "md": lambda: render.markdown(session, project_id, doc).encode(),
+        "html": lambda: render.html_document(session, project_id, doc).encode(),
+        "docx": lambda: office.docx_bytes(session, project_id, doc),
+        "pdf": lambda: office.pdf_bytes(session, project_id, doc),
+    }
+    try:
+        content = renderers[fmt]()
+    except office.RenderingError as exc:
+        raise RuleViolationError(str(exc)) from exc
+    return content, EXPORT_TYPES[fmt], f"output-{output.id}-v{doc.version}.{fmt}"
 
 
 def version_markdown(session: Session, project_id: UUID, version_id: UUID) -> str:
@@ -440,5 +457,5 @@ def version_markdown(session: Session, project_id: UUID, version_id: UUID) -> st
     version = session.get(OutputVersion, version_id)
     if version is None:
         raise NotFoundError("output version not found")
-    content, _, _ = export(session, project_id, version.output_id, version_id, "md")
-    return content
+    _, doc = _document(session, project_id, version.output_id, version_id)
+    return render.markdown(session, project_id, doc)
