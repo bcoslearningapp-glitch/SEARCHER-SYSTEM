@@ -97,6 +97,7 @@ export type UiStrings = {
   searching: string;
   noResults: string;
   searchedScope: string;
+  searchModes: Record<"lexical" | "semantic" | "hybrid", string>;
   page: string;
   discoveryOnly: string;
   sources: string;
@@ -227,6 +228,7 @@ export const en: UiStrings = {
   searching: "Searching…",
   noResults: "No relevant passages found",
   searchedScope: "Searched",
+  searchModes: { lexical: "keyword search", semantic: "meaning search", hybrid: "keyword + meaning search" },
   page: "p.",
   discoveryOnly: "Search results are discovery aids, not quotations.",
   sources: "Sources",
@@ -358,6 +360,7 @@ export const fr: UiStrings = {
   searching: "Recherche…",
   noResults: "Aucun passage pertinent trouvé",
   searchedScope: "Recherché dans",
+  searchModes: { lexical: "recherche par mots-clés", semantic: "recherche par le sens", hybrid: "mots-clés + sens" },
   page: "p.",
   discoveryOnly: "Les résultats aident à découvrir ; ce ne sont pas des citations.",
   sources: "Sources",
@@ -489,6 +492,7 @@ export const ar: UiStrings = {
   searching: "جارٍ البحث…",
   noResults: "لم يُعثر على مقاطع ذات صلة",
   searchedScope: "نطاق البحث",
+  searchModes: { lexical: "بحث بالكلمات المفتاحية", semantic: "بحث بالمعنى", hybrid: "الكلمات المفتاحية + المعنى" },
   page: "ص",
   discoveryOnly: "نتائج البحث وسائل استكشاف وليست اقتباسات.",
   sources: "المصادر",

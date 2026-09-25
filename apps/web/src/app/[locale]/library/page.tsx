@@ -52,7 +52,8 @@ export default async function LibraryPage(props: Props) {
           {results ? (
             <div className="space-y-2" data-testid="search-results">
               <p className="text-xs text-[var(--color-muted)]">
-                {ui.searchedScope}: {results.scope} ({results.searched_assets}). {ui.discoveryOnly}
+                {ui.searchedScope}: {results.scope} ({results.searched_assets}) ·{" "}
+                <span data-testid="search-mode">{ui.searchModes[results.mode] ?? results.mode}</span>. {ui.discoveryOnly}
               </p>
               {results.hits.length === 0 ? (
                 <Empty>{ui.noResults}</Empty>

@@ -95,7 +95,7 @@ Full E2E suite, security review, AI evaluation suite (`docs/evaluation/QUALITY_G
 | ~~Storage abstraction~~ — ADR-007 | P1-08 |
 | ~~PDF text extraction / OCR stack~~ — ADR-008 (OCR itself still open) | P1-10 |
 | ~~Policy Engine implementation approach~~ — ADR-006 | P1-02 |
-| Default multilingual embedding model (benchmarked) | Phase 3 retrieval |
+| ~~Default multilingual embedding model (benchmarked)~~ — ADR-025 (local fastembed; model from the retrieval benchmark) | Phase 3 retrieval |
 | ~~Web search provider order~~ — ADR-012 (local library first, then provider-native web search) | Phase 3 |
 | ~~Cloud workspace adapter~~ — ADR-023 (reference `local-directory` adapter; the concrete remote provider waits on the owner, #28) | Phase 5 |
 | ~~PDF/DOCX renderer~~ — ADR-024 (python-docx; fpdf2 with HarfBuzz shaping; bundled Amiri fonts) | Phase 5 |

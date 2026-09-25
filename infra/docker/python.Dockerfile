@@ -24,15 +24,17 @@ WORKDIR /app
 COPY pyproject.toml uv.lock .python-version ./
 COPY services/api/pyproject.toml services/api/pyproject.toml
 COPY services/worker/pyproject.toml services/worker/pyproject.toml
-RUN uv sync --frozen --no-dev --all-packages --no-install-workspace
+# Local semantic retrieval is opt-in (ADR-025): build with --build-arg WITH_EMBEDDINGS=1 to add the extra.
+ARG WITH_EMBEDDINGS=0
+RUN uv sync --frozen --no-dev --all-packages --no-install-workspace $([ "$WITH_EMBEDDINGS" = 1 ] && echo --all-extras)
 
 COPY packages/research-core-contracts packages/research-core-contracts
 COPY services/api services/api
 COPY services/worker services/worker
-RUN uv sync --frozen --no-dev --all-packages
+RUN uv sync --frozen --no-dev --all-packages $([ "$WITH_EMBEDDINGS" = 1 ] && echo --all-extras)
 
 RUN useradd --system --uid 10001 --home /app app \
-    && mkdir -p /data/storage /data/cloud-workspace /data/backups \
+    && mkdir -p /data/storage /data/cloud-workspace /data/backups /data/models \
     && chown -R app /data
 USER app
 

@@ -47,5 +47,5 @@ plugins = ["pydantic.mypy"]
 mypy_path = "scripts/contracts"
 
 [[tool.mypy.overrides]]
-module = ["celery", "celery.*", "kombu", "kombu.*", "jsonschema", "jsonschema.*"]
+module = ["celery", "celery.*", "kombu", "kombu.*", "jsonschema", "jsonschema.*", "fastembed", "fastembed.*"]
 ignore_missing_imports = true

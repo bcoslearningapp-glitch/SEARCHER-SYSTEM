@@ -33,6 +33,7 @@ Stop with `docker compose down`. Data volumes are kept; add `--volumes` to erase
 These commands are verified on a clean runner by the `clean-setup` CI job. Everything else is optional configuration:
 - `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` enable cloud AI.
 - `CLOUD_WORKSPACE_ADAPTER` enables the selective cloud workspace (ADR-023).
+- `WITH_EMBEDDINGS=1` (image build) with `EMBEDDING_PROVIDER=fastembed` enables local semantic search. Run `docker compose exec api python -m research_api.ops.embeddings backfill` afterwards (ADR-025).
 - `EXPORT_QURAN_FONT_PATH` sets a publisher Qur'an font for PDF export (ADR-024).
 - `ALLOWED_HOSTS` and `WEB_ALLOWED_HOSTS` are needed when the app is served under another host name (SECURITY.md).
 

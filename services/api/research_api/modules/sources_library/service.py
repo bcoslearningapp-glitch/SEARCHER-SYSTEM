@@ -9,12 +9,13 @@ access method (FR-HYBRID-004).
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from research_api.config import get_settings
 from research_api.contracts.enums import (
     AccessResponseForm,
     IngestionStatus,
@@ -34,7 +35,7 @@ from research_api.modules.governance_audit.principal import Principal
 from research_api.modules.governance_audit.schemas import AIActionRecord, AuditEntry, ResearchEventEntry
 from research_api.modules.project_workflow import lifecycle
 from research_api.modules.project_workflow import service as projects
-from research_api.modules.sources_library import rules
+from research_api.modules.sources_library import rules, semantic
 from research_api.modules.sources_library.models import (
     ProjectSource,
     SourceAccessRequest,
@@ -63,7 +64,7 @@ from research_api.modules.sources_library.schemas import (
     TextResponseIn,
     WorkOut,
 )
-from research_api.platform import jobs
+from research_api.platform import embeddings, jobs
 from research_api.platform.errors import ConflictError, NotFoundError, RuleViolationError
 from research_api.platform.storage import get_store, safe_filename, validate_upload
 
@@ -769,8 +770,11 @@ def discard_lead(session: Session, principal: Principal, project_id: UUID, lead_
 # --- lexical search over ingested chunks (Core §38-39) ---
 
 
-def search(session: Session, query: str, *, project_id: UUID | None = None, limit: int = 20) -> SearchResponse:
-    tsquery = func.websearch_to_tsquery("simple", query)
+SearchMode = Literal["auto", "lexical", "semantic", "hybrid"]
+_CANDIDATES = 50  # per ranking, before fusion
+
+
+def _scope(session: Session, project_id: UUID | None) -> tuple[Any, int]:
     assets = (
         select(SourceAsset.id, SourceEdition.id.label("edition_id"), SourceWork.id.label("work_id"), SourceWork.title)
         .join(SourceEdition, SourceEdition.id == SourceAsset.edition_id)
@@ -783,39 +787,78 @@ def search(session: Session, query: str, *, project_id: UUID | None = None, limi
             ProjectSource.project_id == project_id
         )
     scoped = assets.subquery()
-    searched = session.scalar(select(func.count()).select_from(scoped)) or 0
+    return scoped, session.scalar(select(func.count()).select_from(scoped)) or 0
+
+
+def _lexical(session: Session, query: str, scoped: Any, limit: int) -> list[Any]:
+    tsquery = func.websearch_to_tsquery("simple", query)
     rank = func.ts_rank_cd(SourceChunk.tsv, tsquery)
-    rows = session.execute(
-        select(
-            SourceChunk,
-            scoped.c.edition_id,
-            scoped.c.work_id,
-            scoped.c.title,
-            rank.label("rank"),
-            func.ts_headline("simple", SourceChunk.text, tsquery, "MaxWords=35, MinWords=15").label("snippet"),
-        )
-        .join(scoped, scoped.c.id == SourceChunk.asset_id)
-        .where(SourceChunk.tsv.op("@@")(tsquery))
-        .order_by(rank.desc(), SourceChunk.page_number)
-        .limit(limit)
-    ).all()
-    hits = [
-        SearchHit(
-            chunk_id=chunk.id,
-            asset_id=chunk.asset_id,
-            edition_id=edition_id,
-            work_id=work_id,
-            work_title=title,
-            page_number=chunk.page_number,
-            char_start=chunk.char_start,
-            char_end=chunk.char_end,
-            snippet=snippet,
-            rank=float(score),
-        )
-        for chunk, edition_id, work_id, title, score, snippet in rows
-    ]
+    return list(
+        session.execute(
+            select(
+                SourceChunk,
+                scoped.c.edition_id,
+                scoped.c.work_id,
+                scoped.c.title,
+                rank.label("rank"),
+                func.ts_headline("simple", SourceChunk.text, tsquery, "MaxWords=35, MinWords=15").label("snippet"),
+            )
+            .join(scoped, scoped.c.id == SourceChunk.asset_id)
+            .where(SourceChunk.tsv.op("@@")(tsquery))
+            .order_by(rank.desc(), SourceChunk.page_number)
+            .limit(limit)
+        ).all()
+    )
+
+
+def _hit(chunk: SourceChunk, edition_id: UUID, work_id: UUID, title: str, snippet: str, rank: float) -> SearchHit:
+    return SearchHit(
+        chunk_id=chunk.id,
+        asset_id=chunk.asset_id,
+        edition_id=edition_id,
+        work_id=work_id,
+        work_title=title,
+        page_number=chunk.page_number,
+        char_start=chunk.char_start,
+        char_end=chunk.char_end,
+        snippet=snippet,
+        rank=rank,
+    )
+
+
+def _excerpt(text: str, size: int = 240) -> str:
+    return text if len(text) <= size else text[:size].rsplit(" ", 1)[0] + " …"
+
+
+def search(
+    session: Session, query: str, *, project_id: UUID | None = None, limit: int = 20, mode: SearchMode = "auto"
+) -> SearchResponse:
+    """Lexical, semantic or hybrid retrieval (ADR-008, ADR-025). `auto` is hybrid when embeddings are on."""
+    provider = embeddings.configured(get_settings())
+    if mode == "auto":
+        mode = "hybrid" if provider is not None else "lexical"
+    if mode != "lexical" and provider is None:
+        raise RuleViolationError("semantic retrieval is not configured on this installation", mode=mode)
+    scoped, searched = _scope(session, project_id)
+    hits: list[SearchHit] = []
+    if mode == "lexical":
+        hits = [_hit(c, e, w, t, snip, float(r)) for c, e, w, t, r, snip in _lexical(session, query, scoped, limit)]
+    else:
+        assert provider is not None  # noqa: S101 - narrowed above
+        near = semantic.nearest(session, provider, query, scoped, limit if mode == "semantic" else _CANDIDATES)
+        if mode == "semantic":
+            hits = [_hit(c, e, w, t, _excerpt(c.text), 1.0 - float(d)) for c, e, w, t, d in near]
+        else:
+            lexical = _lexical(session, query, scoped, _CANDIDATES)
+            rows = {row[0].id: row for row in lexical} | {row[0].id: row for row in near}
+            snippets = {row[0].id: row[5] for row in lexical}
+            for fused in semantic.fuse([r[0].id for r in lexical], [r[0].id for r in near], limit):
+                chunk, edition_id, work_id, title = rows[fused.chunk_id][:4]
+                snippet = snippets.get(fused.chunk_id) or _excerpt(chunk.text)
+                hits.append(_hit(chunk, edition_id, work_id, title, snippet, fused.score))
     return SearchResponse(
         query=query,
+        mode=mode,
         outcome="RESULTS_FOUND" if hits else "NO_RELEVANT_EVIDENCE_FOUND",
         scope=f"project {project_id} library" if project_id else "entire local library",
         searched_assets=searched,

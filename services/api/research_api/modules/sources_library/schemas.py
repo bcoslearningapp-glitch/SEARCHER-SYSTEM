@@ -244,6 +244,7 @@ class SearchResponse(BaseModel):
     """
 
     query: str
+    mode: Literal["lexical", "semantic", "hybrid"] = "lexical"
     outcome: Literal["RESULTS_FOUND", "NO_RELEVANT_EVIDENCE_FOUND"]
     scope: str
     searched_assets: int

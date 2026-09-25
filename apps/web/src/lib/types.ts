@@ -155,6 +155,7 @@ export type SearchHit = {
 
 export type SearchResponse = {
   query: string;
+  mode: "lexical" | "semantic" | "hybrid";
   outcome: "RESULTS_FOUND" | "NO_RELEVANT_EVIDENCE_FOUND";
   scope: string;
   searched_assets: number;

@@ -104,6 +104,11 @@
   - `docs/user/USER_GUIDE.md` covers the whole researcher workflow. The README is updated.
   - A `clean-setup` CI job runs the README's commands verbatim on a clean runner.
   - Gap closed: project AI policy (cloud consent, allowed profiles, budgets) was API-only. It is now a Desk card, with an E2E test.
+- #65: Semantic retrieval (ADR-025):
+  - An `EmbeddingProvider` abstraction with a local-only fastembed/ONNX provider (optional `embeddings` extra). Off by default.
+  - A pgvector `source_chunk_embeddings` table, indexing after ingestion, and a backfill command.
+  - Lexical, semantic and hybrid (reciprocal rank fusion) search; `auto` is hybrid when a provider is available.
+  - A multilingual en/fr/ar retrieval benchmark and a workflow to choose the default model.
 - #60: Release artifacts:
   - Tags build versioned backend and web images on GHCR, plus a source bundle.
   - Release notes come from `CHANGELOG.md`.
@@ -146,7 +151,7 @@ Deliverables for Phase 6:
 
 The release workflow builds the source bundle, the images `product-b-backend` and `product-b-web` on GHCR, and notes taken from CHANGELOG.md.
 
-Open, not part of the DoD: semantic retrieval (#65, PRD §61 SHOULD).
+Semantic retrieval (#65, PRD §61 SHOULD) is implemented behind a local provider, off by default (ADR-025).
 
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.
