@@ -25,7 +25,7 @@ Capture notes freely. A note becomes a claim, an assumption or a question only w
 
 - **Catalog** a work and its edition, then upload a file (PDF, text, EPUB or image). Uploads are checked by content, not by file name. Text is extracted page by page in the background.
 - **Physical, restricted or metadata-only sources:** catalog them anyway and open a **Hybrid Source Access** request. Record the exact excerpt, a summary or a photo when you consult the source.
-- **Search** covers the whole local library, with page anchors.
+- **Search** covers the whole local library, with page anchors. When semantic search is enabled (ADR-025), it also finds passages by meaning, across Arabic, French and English. The results say which kind of search ran.
 - **Foundational library.** Qur'an text is never bundled or generated. A Constitutional Authority imports and approves a published dataset (see the README).
 
 ## 3. Claims, evidence and hypotheses (Lab and Map)

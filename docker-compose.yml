@@ -5,6 +5,8 @@ x-backend: &backend
   build:
     context: .
     dockerfile: infra/docker/python.Dockerfile
+    args:
+      WITH_EMBEDDINGS: ${WITH_EMBEDDINGS:-0}
   env_file:
     - path: .env
       required: false
@@ -19,6 +21,9 @@ x-backend: &backend
     # Selective cloud workspace (ADR-023): off unless explicitly configured.
     CLOUD_WORKSPACE_ADAPTER: ${CLOUD_WORKSPACE_ADAPTER:-none}
     CLOUD_WORKSPACE_ROOT: /data/cloud-workspace
+    # Semantic retrieval (ADR-025): off unless configured; needs an image built with WITH_EMBEDDINGS=1.
+    EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-none}
+    EMBEDDING_CACHE_DIR: /data/models
 
 services:
   postgres:
@@ -66,6 +71,7 @@ services:
     volumes:
       - source-storage:/data/storage
       - cloud-workspace:/data/cloud-workspace
+      - models:/data/models
       - backups:/data/backups
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
@@ -85,6 +91,7 @@ services:
         condition: service_healthy
     volumes:
       - source-storage:/data/storage
+      - models:/data/models
 
   web:
     build:
@@ -104,3 +111,4 @@ volumes:
   source-storage:
   cloud-workspace:
   backups:
+  models:

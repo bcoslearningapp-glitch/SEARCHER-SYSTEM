@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     BigInteger,
     CheckConstraint,
@@ -175,3 +176,15 @@ class SourceChunk(UUIDPrimaryKeyMixin, Base):
     char_end: Mapped[int]
     text: Mapped[str] = mapped_column(Text)
     tsv: Mapped[Any] = mapped_column(TSVECTOR, Computed("to_tsvector('simple', text)", persisted=True))
+
+
+class SourceChunkEmbedding(Base):
+    """A chunk's vector for one embedding model (ADR-025). Derived data: rebuilt, never exported."""
+
+    __tablename__ = "source_chunk_embeddings"
+
+    chunk_id: Mapped[UUID] = mapped_column(ForeignKey("source_chunks.id", ondelete="CASCADE"), primary_key=True)
+    model: Mapped[str] = mapped_column(String(200), primary_key=True, index=True)
+    dimensions: Mapped[int]
+    embedding: Mapped[Any] = mapped_column(Vector())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

@@ -77,9 +77,13 @@ def list_works(db: DB, project_id: UUID | None = None) -> list[WorkOut]:
 
 @library.get("/search", response_model=SearchResponse)
 def search(
-    db: DB, q: Annotated[str, Query(min_length=1, max_length=500)], project_id: UUID | None = None, limit: int = 20
+    db: DB,
+    q: Annotated[str, Query(min_length=1, max_length=500)],
+    project_id: UUID | None = None,
+    limit: int = 20,
+    mode: service.SearchMode = "auto",
 ) -> SearchResponse:
-    return service.search(db, q, project_id=project_id, limit=min(max(limit, 1), 100))
+    return service.search(db, q, project_id=project_id, limit=min(max(limit, 1), 100), mode=mode)
 
 
 @library.get("/works/{work_id}", response_model=WorkOut)

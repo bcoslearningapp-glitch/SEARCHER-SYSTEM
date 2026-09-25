@@ -1,0 +1,46 @@
+name: embedding-benchmark
+
+# Multilingual retrieval benchmark for choosing the default embedding model (ADR-025, #65).
+# Downloads candidate models from Hugging Face, so it runs only when the benchmark changes or on demand.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/bench/retrieval_benchmark.py
+      - docs/evaluation/fixtures/retrieval.json
+      - services/api/research_api/platform/embeddings.py
+      - .github/workflows/embedding-benchmark.yml
+  workflow_dispatch:
+    inputs:
+      models:
+        description: Comma-separated fastembed model names
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  CANDIDATES: >-
+    sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2,sentence-transformers/paraphrase-multilingual-mpnet-base-v2,intfloat/multilingual-e5-large,minishlab/potion-multilingual-128M
+
+jobs:
+  retrieval-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with: { python-version: "3.12", enable-cache: true }
+      - uses: actions/cache@v4
+        with:
+          path: data/models
+          key: fastembed-models-${{ hashFiles('.github/workflows/embedding-benchmark.yml') }}
+      - name: Benchmark candidate models
+        run: |
+          models="${{ inputs.models }}"
+          uv run --package research-api --extra embeddings python scripts/bench/retrieval_benchmark.py \
+            --models "${models:-$CANDIDATES}" --cache data/models --json retrieval-benchmark.json | tee summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with: { name: retrieval-benchmark, path: retrieval-benchmark.json, retention-days: 30 }

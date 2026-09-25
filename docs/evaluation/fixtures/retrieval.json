@@ -1,0 +1,136 @@
+{
+  "fixture_set": "retrieval-multilingual-v1",
+  "note": "Synthetic. Synthetic passages on ten neighbouring topics, each written in English, French and Arabic, with paraphrased questions in all three languages. A question's relevant passages are its topic's three language versions. Used to choose the default embedding model (ADR-025); never product data.",
+  "topics": [
+    {
+      "id": "mentoring",
+      "passages": {
+        "en": "Apprentices who met a workplace mentor every week were far less likely to leave their training programme before the end of the second year.",
+        "fr": "Les apprentis qui rencontraient chaque semaine un tuteur en entreprise étaient beaucoup moins nombreux à quitter leur formation avant la fin de la deuxième année.",
+        "ar": "كان المتدربون الذين يلتقون أسبوعيًا بمرشد في مكان العمل أقل احتمالًا بكثير لترك برنامج تدريبهم قبل نهاية السنة الثانية."
+      },
+      "queries": {
+        "en": "Does regular one-to-one guidance at work keep trainees from dropping out?",
+        "fr": "Un accompagnement individuel régulier au travail évite-t-il l'abandon des stagiaires ?",
+        "ar": "هل يمنع الإرشاد الفردي المنتظم في العمل انقطاع المتدربين عن التدريب؟"
+      }
+    },
+    {
+      "id": "wages",
+      "passages": {
+        "en": "Trainees whose pay rose at each stage of the programme stayed longer than those paid a flat rate throughout.",
+        "fr": "Les stagiaires dont la rémunération augmentait à chaque étape du programme restaient plus longtemps que ceux payés au même taux du début à la fin.",
+        "ar": "بقي المتدربون الذين ارتفع أجرهم في كل مرحلة من البرنامج مدة أطول من الذين تقاضوا أجرًا ثابتًا طوال المدة."
+      },
+      "queries": {
+        "en": "Is salary progression linked to how long apprentices remain?",
+        "fr": "La progression du salaire influence-t-elle la durée pendant laquelle les apprentis restent ?",
+        "ar": "هل لتدرج الراتب علاقة بمدة بقاء المتدربين؟"
+      }
+    },
+    {
+      "id": "safety",
+      "passages": {
+        "en": "After a short hands-on safety course, the number of injuries on the construction sites fell by a third within one year.",
+        "fr": "Après une courte formation pratique à la sécurité, le nombre de blessures sur les chantiers a baissé d'un tiers en un an.",
+        "ar": "بعد دورة عملية قصيرة في السلامة، انخفض عدد الإصابات في مواقع البناء بمقدار الثلث خلال عام واحد."
+      },
+      "queries": {
+        "en": "Can practical training reduce accidents among building workers?",
+        "fr": "Une formation pratique peut-elle réduire les accidents chez les ouvriers du bâtiment ?",
+        "ar": "هل يمكن للتدريب العملي أن يقلل الحوادث بين عمال البناء؟"
+      }
+    },
+    {
+      "id": "irrigation",
+      "passages": {
+        "en": "Switching from flood watering to drip lines cut the water used per hectare by almost half while keeping harvests steady.",
+        "fr": "Le passage de l'irrigation par submersion au goutte-à-goutte a réduit de près de moitié l'eau utilisée par hectare, sans baisse des récoltes.",
+        "ar": "أدى التحول من الري بالغمر إلى الري بالتنقيط إلى خفض المياه المستخدمة لكل هكتار بنحو النصف مع ثبات المحاصيل."
+      },
+      "queries": {
+        "en": "Which watering method saves the most water on farms?",
+        "fr": "Quelle méthode d'arrosage économise le plus d'eau dans les exploitations agricoles ?",
+        "ar": "ما طريقة السقي التي توفر أكبر قدر من الماء في المزارع؟"
+      }
+    },
+    {
+      "id": "salinity",
+      "passages": {
+        "en": "Fields with rising salt levels in the soil produced markedly smaller wheat yields over three growing seasons.",
+        "fr": "Les parcelles dont le sol devenait plus salé ont donné des rendements de blé nettement plus faibles sur trois saisons.",
+        "ar": "أنتجت الحقول التي ارتفعت فيها ملوحة التربة محاصيل قمح أقل بشكل ملحوظ على مدى ثلاثة مواسم زراعية."
+      },
+      "queries": {
+        "en": "How does salty soil affect grain harvests?",
+        "fr": "Quel est l'effet d'un sol salin sur la récolte de céréales ?",
+        "ar": "كيف تؤثر التربة المالحة في حصاد الحبوب؟"
+      }
+    },
+    {
+      "id": "handwashing",
+      "passages": {
+        "en": "Wards that placed hand sanitiser at every bed recorded fewer infections acquired during a hospital stay.",
+        "fr": "Les services qui ont installé une solution hydroalcoolique à chaque lit ont enregistré moins d'infections contractées à l'hôpital.",
+        "ar": "سجلت الأجنحة التي وضعت معقم اليدين عند كل سرير عددًا أقل من العدوى المكتسبة أثناء الإقامة في المستشفى."
+      },
+      "queries": {
+        "en": "Does better hand hygiene lower hospital-acquired infections?",
+        "fr": "Une meilleure hygiène des mains diminue-t-elle les infections nosocomiales ?",
+        "ar": "هل تقلل نظافة اليدين الأفضل من العدوى المكتسبة في المستشفيات؟"
+      }
+    },
+    {
+      "id": "vaccination",
+      "passages": {
+        "en": "Mobile clinics visiting remote villages raised the share of children fully immunised from under half to four in five.",
+        "fr": "Des cliniques mobiles se rendant dans les villages isolés ont fait passer la part d'enfants entièrement vaccinés de moins de la moitié à quatre sur cinq.",
+        "ar": "رفعت العيادات المتنقلة التي تزور القرى النائية نسبة الأطفال المطعمين تطعيمًا كاملًا من أقل من النصف إلى أربعة من كل خمسة."
+      },
+      "queries": {
+        "en": "How can immunisation coverage improve in isolated rural areas?",
+        "fr": "Comment améliorer la couverture vaccinale dans les zones rurales isolées ?",
+        "ar": "كيف يمكن تحسين تغطية التطعيم في المناطق الريفية المعزولة؟"
+      }
+    },
+    {
+      "id": "microfinance",
+      "passages": {
+        "en": "Small loans given to women running home businesses were mostly repaid on time and often financed new equipment.",
+        "fr": "Les petits prêts accordés à des femmes gérant une activité à domicile ont été majoritairement remboursés à temps et ont souvent financé du matériel.",
+        "ar": "سُددت معظم القروض الصغيرة الممنوحة لنساء يدرن أعمالًا منزلية في موعدها، وكثيرًا ما موّلت شراء معدات جديدة."
+      },
+      "queries": {
+        "en": "Do female entrepreneurs repay microcredit?",
+        "fr": "Les femmes entrepreneures remboursent-elles le microcrédit ?",
+        "ar": "هل تسدد رائدات الأعمال القروض متناهية الصغر؟"
+      }
+    },
+    {
+      "id": "mobile_money",
+      "passages": {
+        "en": "Paying suppliers by phone instead of travelling to a bank saved small shops several hours and fees each month.",
+        "fr": "Payer les fournisseurs par téléphone plutôt que de se rendre à la banque a fait gagner aux petits commerces plusieurs heures et des frais chaque mois.",
+        "ar": "وفّر الدفع للموردين عبر الهاتف بدلًا من الذهاب إلى المصرف على المحلات الصغيرة ساعات عدة ورسومًا كل شهر."
+      },
+      "queries": {
+        "en": "What do shopkeepers gain from mobile payments?",
+        "fr": "Que gagnent les commerçants avec les paiements mobiles ?",
+        "ar": "ماذا يستفيد أصحاب المتاجر من الدفع عبر الهاتف المحمول؟"
+      }
+    },
+    {
+      "id": "savings_groups",
+      "passages": {
+        "en": "Neighbourhood savings circles, where members pool a fixed sum each week, helped households cope with sudden expenses.",
+        "fr": "Les tontines de quartier, où chaque membre verse une somme fixe chaque semaine, ont aidé les ménages à faire face aux dépenses imprévues.",
+        "ar": "ساعدت جمعيات الادخار في الأحياء، حيث يساهم كل عضو بمبلغ ثابت أسبوعيًا، الأسر على مواجهة النفقات المفاجئة."
+      },
+      "queries": {
+        "en": "How do rotating community savings help families in emergencies?",
+        "fr": "Comment l'épargne collective aide-t-elle les familles en cas d'urgence ?",
+        "ar": "كيف يساعد الادخار الجماعي الأسر في حالات الطوارئ؟"
+      }
+    }
+  ]
+}

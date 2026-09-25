@@ -15,8 +15,11 @@ from pypdf import PdfReader
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
+from research_api.config import get_settings
 from research_api.contracts.enums import IngestionStatus, TextOrigin
+from research_api.modules.sources_library import semantic
 from research_api.modules.sources_library.models import SourceAsset, SourceChunk, SourcePage
+from research_api.platform import embeddings
 from research_api.platform.storage import get_store
 
 logger = logging.getLogger(__name__)
@@ -116,8 +119,12 @@ def ingest_asset(session: Session, asset_id: Any) -> dict[str, Any]:
     asset.ingestion_status = IngestionStatus.COMPLETE.value
     asset.text_origin = TextOrigin.NATIVE_DIGITAL.value
     session.flush()
+    embedded = semantic.index_after_ingestion(session, embeddings.configured(get_settings()), asset.id)
     logger.info("ingested asset %s: %d pages, %d chunks", asset.id, len(pages), chunk_count)
-    return {"pages": len(pages), "chunks": chunk_count, "pages_needing_ocr": needs_ocr}
+    result: dict[str, int] = {"pages": len(pages), "chunks": chunk_count, "pages_needing_ocr": needs_ocr}
+    if embedded is not None:
+        result["embedded"] = embedded
+    return result
 
 
 def mark_failed(session: Session, asset_id: Any) -> None:

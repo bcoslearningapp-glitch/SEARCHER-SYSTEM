@@ -82,6 +82,12 @@ class Settings(BaseSettings):
     cloud_workspace_default_ttl_hours: int = Field(default=72, ge=1)
     cloud_workspace_max_ttl_hours: int = Field(default=720, ge=1)
 
+    # Semantic retrieval (PRD §23, §61, ADR-025). Off until a local model is chosen from the retrieval benchmark.
+    # "fastembed" runs a local ONNX model: nothing leaves the machine. It needs the `embeddings` extra.
+    embedding_provider: Literal["none", "fastembed"] = "none"
+    embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    embedding_cache_dir: Path = Path("./data/models")
+
     # Optional Qur'an font for PDF export, e.g. a publisher font whose licence the owner has checked (ADR-024).
     # Without it the bundled Amiri Quran font (SIL OFL) is used.
     export_quran_font_path: Path | None = None

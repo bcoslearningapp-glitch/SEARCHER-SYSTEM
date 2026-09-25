@@ -25,6 +25,10 @@ dependencies = [
     "uharfbuzz>=0.56.2",
 ]
 
+[project.optional-dependencies]
+# Local semantic retrieval (ADR-025). Kept out of the base install: onnxruntime and tokenizers are large.
+embeddings = ["fastembed>=0.8"]
+
 [build-system]
 requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
