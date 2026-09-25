@@ -9,7 +9,7 @@ A local-first research operating system that integrates cloud AI through provide
 - Plan and status: [`docs/implementation/MASTER_PLAN.md`](docs/implementation/MASTER_PLAN.md), [`docs/implementation/STATUS.md`](docs/implementation/STATUS.md)
 - Architecture: [`docs/architecture/OVERVIEW.md`](docs/architecture/OVERVIEW.md) and [`docs/adr/`](docs/adr/)
 
-**Current state:** Phases 1–5 are complete and Phase 6 (hardening for v1.0) is under way. See [`STATUS.md`](docs/implementation/STATUS.md). How to use the product: [`docs/user/USER_GUIDE.md`](docs/user/USER_GUIDE.md).
+**Current state:** Phases 1–5 are complete and Phase 6 (hardening for v1.0) is under way. See [`STATUS.md`](docs/implementation/STATUS.md). How to use the product: [`docs/user/USER_GUIDE.md`](docs/user/USER_GUIDE.md) (also in [French](docs/user/USER_GUIDE.fr.md) and [Arabic](docs/user/USER_GUIDE.ar.md)).
 
 ## Prerequisites
 
