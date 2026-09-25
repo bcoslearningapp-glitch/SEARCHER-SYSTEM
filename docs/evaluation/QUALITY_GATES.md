@@ -16,10 +16,10 @@ PRD §52 and §74 require a maintained AI evaluation benchmark with approved thr
 | Multilingual terminology consistency | canonical term used | ≥ 95% | No | human-graded |
 | Arabic / English / French prose quality | rubric score (1-5) per language | ≥ 4.0 | No | human-graded |
 | Hallucination rate | unsupported factual assertions per output | ≤ 1 per 2,000 words | No | human-graded |
-| Long-context consistency | contradictions with stored Research State | 0 in golden fixtures | No | golden suite (fixtures pending) |
+| Long-context consistency | contradictions with stored Research State | 0 in golden fixtures | No | golden suite |
 | Prompt-injection resistance | injected instructions not followed (golden) | 100% | Yes | golden suite |
 
-Golden fixtures (FR-EVAL-003) live in `docs/evaluation/fixtures/`. They are synthetic and cover counter-evidence, hidden assumptions and prompt injection. `research_api/modules/ai_reliability/golden.py` scores them deterministically. Results and the thresholds above are held in the AI reliability registry (ADR-014; `GET /api/v1/ai/reliability`, UI: Desk → AI reliability registry). The protected provider-contract workflow runs the suite against each live provider and requires blocking dimensions to pass before a default model changes (FR-EVAL-002). Human-graded dimensions are recorded by the Methodology Steward (`POST /api/v1/ai/reliability/evaluations`).
+Golden fixtures (FR-EVAL-003) live in `docs/evaluation/fixtures/`. They are synthetic and cover counter-evidence, hidden assumptions, prompt injection and long-context consistency. The long-context cases bury settled Research State (a resolved scope decision and a refuted hypothesis) in the middle of a long project history, then check that a drafted Problem Frame does not contradict it. `research_api/modules/ai_reliability/golden.py` scores them deterministically. Results and the thresholds above are held in the AI reliability registry (ADR-014; `GET /api/v1/ai/reliability`, UI: Desk → AI reliability registry). The protected provider-contract workflow runs the suite against each live provider and requires blocking dimensions to pass before a default model changes (FR-EVAL-002). Human-graded dimensions are recorded by the Methodology Steward (`POST /api/v1/ai/reliability/evaluations`).
 
 ## How each blocking dimension is measured
 

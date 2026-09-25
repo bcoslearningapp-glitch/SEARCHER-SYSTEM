@@ -1,0 +1,73 @@
+{
+  "fixture_set": "golden-long-context@1",
+  "note": "Synthetic cases. A long project history hides settled Research State (a resolved scope decision and a refuted hypothesis) among neutral notes. Drafting a Problem Frame must not contradict it: a refuted hypothesis must not return as a hypothesis, explanation or known fact, and an out-of-scope population must not appear in research questions. Each case counts contradictions; the dimension passes at zero.",
+  "repeat_padding": 6,
+  "cases": [
+    {
+      "id": "lc-en",
+      "input": "Why do so many apprentices leave during their second year, and what could keep them in training?",
+      "padding": [
+        "Meeting notes: the steering group reviewed the timetable for the next data collection round.",
+        "The regional office sent the list of training centres that agreed to take part.",
+        "A volunteer offered to translate the questionnaire; the offer was noted for later.",
+        "Travel costs for field visits were approved within the existing budget.",
+        "The ethics committee asked for the consent form to use plainer language.",
+        "Two centres changed their contact person; the address book was updated.",
+        "A pilot interview took forty minutes, longer than planned.",
+        "The shared folder was reorganised by month."
+      ],
+      "state": [
+        "DECISION (resolved, approved): the study covers apprentices aged 16 to 18 only. Adult learners are out of scope.",
+        "HYPOTHESIS (refuted by cohort data): pay freezes cause second-year dropout. Pay was frozen in only two of eleven centres and dropout was the same everywhere."
+      ],
+      "contradictions": [
+        {"id": "refuted-returns", "fields": ["initial_hypotheses", "current_explanations"], "keywords": ["pay freeze", "pay freezes", "frozen pay", "wage freeze"]},
+        {"id": "out-of-scope-population", "fields": ["research_questions"], "keywords": ["adult", "adults", "mature learner", "mature learners"]}
+      ]
+    },
+    {
+      "id": "lc-fr",
+      "input": "Pourquoi tant d'apprentis quittent-ils leur formation en deuxième année, et qu'est-ce qui pourrait les retenir ?",
+      "padding": [
+        "Compte rendu : le comité de pilotage a revu le calendrier de la prochaine collecte.",
+        "Le rectorat a transmis la liste des centres de formation participants.",
+        "Une bénévole a proposé de relire le questionnaire ; la proposition est notée.",
+        "Les frais de déplacement ont été validés dans le budget existant.",
+        "Le comité d'éthique demande un formulaire de consentement plus simple.",
+        "Deux centres ont changé d'interlocuteur ; l'annuaire est à jour.",
+        "Un entretien pilote a duré quarante minutes, plus que prévu.",
+        "Le dossier partagé est désormais classé par mois."
+      ],
+      "state": [
+        "DÉCISION (résolue, approuvée) : l'étude porte uniquement sur les apprentis de 16 à 18 ans. Les adultes en formation sont hors du périmètre.",
+        "HYPOTHÈSE (réfutée par les données de cohorte) : le gel des salaires provoque l'abandon en deuxième année. Le salaire n'a été gelé que dans deux centres sur onze et l'abandon est identique partout."
+      ],
+      "contradictions": [
+        {"id": "refuted-returns", "fields": ["initial_hypotheses", "current_explanations"], "keywords": ["gel des salaires", "gel du salaire", "salaires gelés", "salaire gelé"]},
+        {"id": "out-of-scope-population", "fields": ["research_questions"], "keywords": ["adulte", "adultes"]}
+      ]
+    },
+    {
+      "id": "lc-ar",
+      "input": "لماذا يترك كثير من المتدربين تدريبهم في السنة الثانية، وما الذي قد يبقيهم فيه؟",
+      "padding": [
+        "محضر اجتماع: راجعت اللجنة التوجيهية جدول جولة جمع البيانات القادمة.",
+        "أرسل المكتب الإقليمي قائمة مراكز التدريب المشاركة.",
+        "عرض متطوع ترجمة الاستبيان، وسُجّل العرض لوقت لاحق.",
+        "اعتُمدت تكاليف السفر للزيارات الميدانية ضمن الميزانية الحالية.",
+        "طلبت لجنة الأخلاقيات صياغة أبسط لنموذج الموافقة.",
+        "غيّر مركزان جهة الاتصال لديهما، وحُدّث دليل العناوين.",
+        "استغرقت مقابلة تجريبية أربعين دقيقة، أطول من المخطط.",
+        "أعيد ترتيب المجلد المشترك حسب الشهر."
+      ],
+      "state": [
+        "قرار (محسوم ومعتمد): تقتصر الدراسة على المتدربين من سن 16 إلى 18 عامًا. المتعلمون البالغون خارج نطاق الدراسة.",
+        "فرضية (دحضتها بيانات الفوج): تجميد الأجور يسبب الانقطاع في السنة الثانية. جُمّدت الأجور في مركزين فقط من أحد عشر مركزًا وكان الانقطاع متساويًا في كل مكان."
+      ],
+      "contradictions": [
+        {"id": "refuted-returns", "fields": ["initial_hypotheses", "current_explanations"], "keywords": ["تجميد الأجور", "تجميد الأجر", "الأجور المجمدة"]},
+        {"id": "out-of-scope-population", "fields": ["research_questions"], "keywords": ["البالغين", "البالغون", "الكبار"]}
+      ]
+    }
+  ]
+}
