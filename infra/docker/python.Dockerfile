@@ -3,6 +3,14 @@ FROM python:3.12-slim AS base
 
 RUN pip install --no-cache-dir uv==0.12.18
 
+# PostgreSQL 16 client tools for backup/restore (#58). They must match the server's major version, so they come
+# from the PostgreSQL project's apt repository rather than the distribution default.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates postgresql-common \
+    && /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y \
+    && apt-get install -y --no-install-recommends postgresql-client-16 \
+    && rm -rf /var/lib/apt/lists/*
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
@@ -24,7 +32,7 @@ COPY services/worker services/worker
 RUN uv sync --frozen --no-dev --all-packages
 
 RUN useradd --system --uid 10001 --home /app app \
-    && mkdir -p /data/storage /data/cloud-workspace \
+    && mkdir -p /data/storage /data/cloud-workspace /data/backups \
     && chown -R app /data
 USER app
 

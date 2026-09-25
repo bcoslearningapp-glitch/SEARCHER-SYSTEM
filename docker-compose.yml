@@ -66,6 +66,7 @@ services:
     volumes:
       - source-storage:/data/storage
       - cloud-workspace:/data/cloud-workspace
+      - backups:/data/backups
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     healthcheck:
@@ -102,3 +103,4 @@ volumes:
   redis-data:
   source-storage:
   cloud-workspace:
+  backups:

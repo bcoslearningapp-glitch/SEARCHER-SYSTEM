@@ -86,6 +86,11 @@
     - a Host allow-list on the API and the web app;
     - refusal of cross-site writes, by foreign `Origin` or `Sec-Fetch-Site: cross-site`;
     - security headers on every response.
+- #58: Backup and restore (`research_api.ops.backup`, `docs/operations/BACKUP_RESTORE.md`):
+  - One tar archive: a `pg_dump` custom dump, every storage file, and a manifest with SHA-256 checksums.
+  - Restore verifies everything first, and refuses to overwrite existing data without `--replace`.
+  - Tested: restoring into an empty database returns identical ids, audit history and files.
+  - The API image ships PostgreSQL 16 client tools, and backups go to a `backups` volume.
 
 ## M5 exit criteria (PRD §76 Phase 5)
 - [x] The export/import round trip preserves source identity and trust. `test_portability.py` imports into a second, freshly migrated database: the same ids arrive, foundational texts arrive staged, and existing library rows win.

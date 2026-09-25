@@ -40,6 +40,10 @@ jobs:
         env:
           # The CI stack is thrown away afterwards, so flows that change global reference state may run.
           E2E_DISPOSABLE_STACK: "1"
+      - name: Backup and verify the populated stack (#58)
+        run: |
+          archive=$(docker compose exec -T api python -m research_api.ops.backup create --out /data/backups | tail -1)
+          docker compose exec -T api python -m research_api.ops.backup verify "$archive"
       - name: Stack logs
         if: failure()
         run: docker compose logs --no-color
