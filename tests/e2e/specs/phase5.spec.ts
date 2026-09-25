@@ -105,3 +105,25 @@ test("8. export a Research Core Package; importing it where the project exists n
   await form.getByRole("button", { name: "Import" }).click();
   await expect(page.getByTestId("import-card").getByRole("alert")).toContainText("already exists");
 });
+
+test("workspace: an explicit selection is staged, recorded in the disclosure manifest, and deleted", async ({ page, request }) => {
+  const info = (await (await request.get(`${API_URL}/api/v1/workspace`)).json()) as { enabled: boolean };
+  test.skip(!info.enabled, "no cloud workspace adapter is configured for this stack");
+  const { projectId, claim } = await projectWithEvidence(request);
+  await page.goto(`/en/projects/${projectId}/workspace`);
+  await expect(page.getByTestId("disclosure-manifest")).toContainText("Nothing has been staged.");
+  const form = page.getByTestId("stage-selection");
+  await form.getByLabel("Purpose").fill("Remote review of the year-two claim");
+  await form.getByRole("checkbox", { name: claim }).check();
+  await form.getByRole("button", { name: "Stage", exact: true }).click();
+
+  const row = page.getByTestId("staging-row");
+  await expect(row.getByTestId("staging-status")).toHaveText("ACTIVE");
+  await expect(row.getByTestId("staged-item")).toHaveCount(1);
+  await expect(row).toContainText("Claim");
+
+  await row.getByLabel("Reason").fill("Review finished");
+  await row.getByRole("button", { name: "Delete from workspace" }).click();
+  await expect(row.getByTestId("staging-status")).toHaveText("DELETED");
+  await expect(row).toContainText("Review finished");
+});

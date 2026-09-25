@@ -27,6 +27,8 @@ jobs:
           AI_MOCK_ENABLED: "true"
           AI_MOCK_MODE: unavailable
           AI_DEFAULT_PROFILE: mock
+          # The reference workspace adapter stands in for a remote workspace (ADR-023).
+          CLOUD_WORKSPACE_ADAPTER: local-directory
         run: docker compose up --build --detach --wait --wait-timeout 300
       - uses: actions/setup-node@v5
         with: { node-version: "22", cache: npm, cache-dependency-path: tests/e2e/package-lock.json }

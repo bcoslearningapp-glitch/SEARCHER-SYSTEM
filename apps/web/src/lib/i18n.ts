@@ -17,6 +17,7 @@ import { labAr, labEn, labFr, type LabStrings } from "@/lib/i18n-lab";
 import { reliabilityAr, reliabilityEn, reliabilityFr, type ReliabilityStrings } from "@/lib/i18n-reliability";
 import { researchAr, researchEn, researchFr, type ResearchStrings } from "@/lib/i18n-research";
 import { ar as uiAr, en as uiEn, fr as uiFr, type UiStrings } from "@/lib/i18n-ui";
+import { workspaceAr, workspaceEn, workspaceFr, type WorkspaceStrings } from "@/lib/i18n-workspace";
 
 export const LOCALES = ["en", "fr", "ar"] as const;
 export type Locale = (typeof LOCALES)[number];
@@ -46,6 +47,7 @@ export type Dictionary = {
   closure: ClosureStrings;
   outputs: OutputStrings;
   portability: PortabilityStrings;
+  workspace: WorkspaceStrings;
   foundational: FoundationalStrings;
   reliability: ReliabilityStrings;
   spaces: Record<Space, string>;
@@ -70,6 +72,7 @@ const en: Dictionary = {
   closure: closureEn,
   outputs: outputsEn,
   portability: portabilityEn,
+  workspace: workspaceEn,
   foundational: foundationalEn,
   reliability: reliabilityEn,
   spaces: { desk: "Desk", map: "Map", library: "Library", lab: "Lab", outputs: "Outputs" },
@@ -100,6 +103,7 @@ const fr: Dictionary = {
   closure: closureFr,
   outputs: outputsFr,
   portability: portabilityFr,
+  workspace: workspaceFr,
   foundational: foundationalFr,
   reliability: reliabilityFr,
   spaces: { desk: "Bureau", map: "Carte", library: "Bibliothèque", lab: "Laboratoire", outputs: "Productions" },
@@ -135,6 +139,7 @@ const ar: Dictionary = {
   closure: closureAr,
   outputs: outputsAr,
   portability: portabilityAr,
+  workspace: workspaceAr,
   foundational: foundationalAr,
   reliability: reliabilityAr,
   spaces: { desk: "المكتب", map: "الخريطة", library: "المكتبة", lab: "المختبر", outputs: "المخرجات" },

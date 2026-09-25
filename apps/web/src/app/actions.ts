@@ -767,3 +767,28 @@ export async function importPackage(_: ActionResult, form: FormData): Promise<Ac
     return { ok: false, message: "The research service is unreachable. Your data is unchanged." };
   }
 }
+
+export async function stageInWorkspace(_: ActionResult, form: FormData): Promise<ActionResult> {
+  const items = form
+    .getAll("items")
+    .filter((v): v is string => typeof v === "string" && v.includes(":"))
+    .map((v) => {
+      const [entity_type, entity_id] = v.split(":");
+      return { entity_type, entity_id };
+    });
+  if (items.length === 0) return { ok: false, message: "Select at least one record." };
+  const ttl = optionalText(form, "ttl_hours");
+  return run(() =>
+    apiSend("POST", `${P(form)}/workspace/stagings`, {
+      purpose: text(form, "purpose"),
+      items,
+      ttl_hours: ttl ? Number(ttl) : null,
+    }),
+  );
+}
+
+export async function deleteWorkspaceStaging(_: ActionResult, form: FormData): Promise<ActionResult> {
+  return run(() =>
+    apiSend("POST", `${P(form)}/workspace/stagings/${text(form, "staging_id")}/delete`, { reason: text(form, "reason") }),
+  );
+}

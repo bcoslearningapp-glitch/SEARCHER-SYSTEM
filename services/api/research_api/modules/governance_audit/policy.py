@@ -54,6 +54,10 @@ POLICIES: dict[str, ActionPolicy] = {
         _p("project.fork", A.FORBIDDEN),
         _p("project.export", A.FORBIDDEN),
         _p("project.import", A.FORBIDDEN),
+        # Selective cloud workspace (PRD §56): disclosure is a human decision; expiry is system housekeeping.
+        _p("workspace.stage", A.FORBIDDEN),
+        _p("workspace.delete", A.FORBIDDEN),
+        _p("workspace.purge_expired", A.FORBIDDEN, system=True),
         _p("project.close", A.FORBIDDEN, frozenset({R.RESEARCHER, R.PROJECT_LEAD}), approval=True),
         _p("project.reopen", A.FORBIDDEN, frozenset({R.RESEARCHER, R.PROJECT_LEAD}), approval=True),
         _p("research_state.update", A.ACT_AND_NOTIFY, system=True),
